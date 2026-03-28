@@ -11,7 +11,7 @@ export default defineConfig({
       reporter: ["text", "lcov"],
       include: ["app/**"],
       all: true,
-      exclude: ["node_modules/**", ".next/**", "coverage/**"],
+      exclude: ["node_modules/**", ".next/**", "coverage/**", "**/coverage/**"],
       thresholds: {
         statements: 100,
         branches: 100,

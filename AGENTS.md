@@ -16,6 +16,7 @@
 - Prefira componentes, utilitarios e funcoes simples antes de introduzir camadas extras
 - Preserve a estrutura existente e organize novas features por pasta, sem espalhar arquivos desnecessariamente
 - Se criar texto de interface e o pedido nao disser o contrario, prefira conteudo em `pt-BR`
+- Testes unitarios (Vitest) devem focar em logica e funcoes, sem cobrir UI e dom; UI deve ser E2E (Cypress, Playwright, etc.)
 
 ## Dados, mutacoes e cache
 - Para mutacoes e formularios, prefira Server Actions quando isso simplificar o fluxo
