@@ -9,9 +9,18 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
-      include: ["app/**", "components/ui/button/button.tsx"],
+      include: ["app/**", "components/ui/**/*.{ts,tsx}"],
       all: true,
-      exclude: ["node_modules/**", ".next/**", "coverage/**", "**/coverage/**"],
+      exclude: [
+        "node_modules/**",
+        ".next/**",
+        "coverage/**",
+        "**/coverage/**",
+        "**/*.test.{ts,tsx}",
+        "**/*.stories.{ts,tsx}",
+        "**/index.ts",
+        "**/*.interfaces.ts"
+      ],
       thresholds: {
         statements: 100,
         branches: 100,
