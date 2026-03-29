@@ -1,12 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import HomePage from "./page";
+import { HeroSection } from "./hero-section";
 
-describe("HomePage", () => {
-  it("renderiza a estrutura base da pagina home", () => {
-    render(<HomePage />);
+describe("HeroSection", () => {
+  it("renderiza titulo principal e ilustracao", () => {
+    render(<HeroSection />);
 
-    expect(screen.getByRole("main")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: /Experimente mais liberdade no controle da sua vida financeira/i,
@@ -14,7 +13,7 @@ describe("HomePage", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Vantagens do nosso banco:", level: 2 })
+      screen.getByRole("img", { name: "Ilustracao de crescimento financeiro" })
     ).toBeInTheDocument();
   });
 });
