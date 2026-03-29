@@ -27,6 +27,18 @@
 - No Next 16, prefira `proxy.ts` em novos fluxos de proxy
 - Se existir necessidade real de Edge Runtime, releia os docs antes de trocar `proxy` por `middleware`, porque o comportamento mudou
 
+## Estrutura
+- Nao use pasta `src`
+- Use App Router diretamente em `app/`
+- Prefira estrutura por feature e por rota, com colocation: componentes locais, hooks, utils e estilos devem ficar perto da rota que usa aquilo
+- Mantenha em pastas globais apenas o que for realmente compartilhado: `components/ui`, `lib` e `styles`
+
+## Design e estilos
+- Respeite os tokens visuais centralizados em `styles/tokens.css`
+- Importe os tokens apenas via `app/globals.css`
+- O foco atual e configurar a base visual; nao sair gerando componentes de UI sem necessidade explicita
+- Nao hardcode cores, raios ou superficies se ja existir token para isso
+
 ## Estilo de codigo
 - TypeScript estrito e obrigatorio; nao contorne tipos sem necessidade
 - Prefira APIs nativas do Next e React antes de adicionar dependencias
