@@ -3,9 +3,10 @@ import { describe, expect, it } from "vitest";
 import HomePage from "./page";
 
 describe("HomePage", () => {
-  it("renderiza o titulo inicial da rota home", () => {
+  it("renderiza os dois botoes principais da home", () => {
     render(<HomePage />);
 
-    expect(screen.getByText("Home em construcao")).toBeInTheDocument();
+    expect(screen.getByText("Abrir minha conta")).toBeInTheDocument();
+    expect(screen.getByText("Já tenho conta")).toBeInTheDocument();
   });
 });

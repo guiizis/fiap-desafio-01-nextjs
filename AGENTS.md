@@ -33,6 +33,31 @@
 - Prefira estrutura por feature e por rota, com colocation: componentes locais, hooks, utils e estilos devem ficar perto da rota que usa aquilo
 - Mantenha em pastas globais apenas o que for realmente compartilhado: `components/ui`, `lib` e `styles`
 
+## Processo para componente global de UI
+- Crie componente global apenas quando houver reuso real em mais de uma rota/feature
+- Estrutura padrao em `components/ui/<nome-do-componente>/`
+- Padrao de arquivos:
+  - `<nome-do-componente>.tsx`
+  - `index.ts`
+  - `interfaces/<nome-do-componente>.interfaces.ts`
+  - `<nome-do-componente>.test.tsx`
+  - `<nome-do-componente>.stories.tsx`
+- Centralize `types` e `interfaces` no arquivo `interfaces/*.interfaces.ts`
+- API publica do componente deve ser simples e previsivel, com defaults consistentes com a semantica do design system
+- Quando houver variacao visual, prefira separar conceito de estrutura (`variant`) de tema (`tone`)
+- Padrao atual do `Button` global:
+  - `variant`: `solid | outline | ghost`
+  - `tone`: `primary | secondary | accent | error`
+  - defaults: `variant="solid"` e `tone="primary"`
+- Nao criar tamanhos, espacamentos, raios ou cores fora da escala de tokens; use classes baseadas em `styles/tokens.css`
+- Evite hardcode de valores numericos de UI quando ja existir token equivalente
+- Adicione teste unitario do componente focando na logica (ex: classes geradas e defaults), sem depender de teste de UI complexo em DOM
+- Se o componente estiver fora de `app/**`, garantir que ele entra em `coverage.include` do Vitest quando necessario
+- Adicione Storybook do componente com:
+  - `Playground` com controles
+  - casos canonicos usados no produto (ex: combinacoes principais de variant/tone)
+- Se criar stories em `components/**`, garantir que `.storybook/main.ts` inclui esse path
+
 ## Design e estilos
 - Respeite os tokens visuais centralizados em `styles/tokens.css`
 - Importe os tokens apenas via `app/globals.css`
