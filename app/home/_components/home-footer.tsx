@@ -4,7 +4,7 @@ import { Logo } from "../../../components/ui/logo";
 
 export function HomeFooter() {
   return (
-    <footer className="mt-auto w-full bg-black text-surface">
+    <footer className="w-full bg-black text-surface">
       <div className="mx-auto grid w-full max-w-[1600px] gap-6 px-6 py-6 md:grid-cols-3 md:gap-10 lg:px-12">
         <section className="space-y-2">
           <h2 className="text-body-md font-semibold text-surface">Servicos</h2>
