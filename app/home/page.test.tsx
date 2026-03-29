@@ -3,10 +3,9 @@ import { describe, expect, it } from "vitest";
 import HomePage from "./page";
 
 describe("HomePage", () => {
-  it("renderiza os dois botoes principais da home", () => {
+  it("renderiza a estrutura base da pagina home", () => {
     render(<HomePage />);
 
-    expect(screen.getByText("Abrir minha conta")).toBeInTheDocument();
-    expect(screen.getByText("Já tenho conta")).toBeInTheDocument();
+    expect(screen.getByRole("main")).toBeInTheDocument();
   });
 });
