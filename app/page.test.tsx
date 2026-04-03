@@ -1,11 +1,15 @@
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
-import Home from "./page";
+import { describe, expect, it, vi } from "vitest";
+import { redirect } from "next/navigation";
+import Page from "./page";
 
-describe("Home page component", () => {
-  it("renders the starting hint text", () => {
-    render(<Home />);
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(),
+}));
 
-    expect(screen.getByText(/To get started, edit the page.tsx file/i)).toBeInTheDocument();
+describe("Root page", () => {
+  it("redireciona / para /home", () => {
+    Page();
+
+    expect(redirect).toHaveBeenCalledWith("/home");
   });
 });
