@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import { APP_SCREENS } from "./styles/breakpoints";
 
 const config = {
   content: [
@@ -11,7 +10,6 @@ const config = {
   ],
   theme: {
     extend: {
-      screens: APP_SCREENS,
       colors: {
         background: "var(--color-background)",
         surface: "var(--color-surface)",
