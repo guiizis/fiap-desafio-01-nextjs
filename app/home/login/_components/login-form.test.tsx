@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LoginForm } from "./login-form";
 
@@ -19,5 +19,31 @@ describe("LoginForm", () => {
     const senha = screen.getByLabelText("Senha");
     expect(senha.className).toContain("w-full");
     expect(senha.className).not.toContain("max-w-[165px]");
+  });
+
+  it("aplica constraints de validacao nos campos", () => {
+    render(<LoginForm layout="modal" />);
+
+    const email = screen.getByLabelText("Email");
+    const senha = screen.getByLabelText("Senha");
+
+    expect(email).toHaveAttribute("required");
+    expect(senha).toHaveAttribute("required");
+    expect(senha).toHaveAttribute("minLength", "6");
+  });
+
+  it("habilita o botao apenas quando form estiver valido", () => {
+    render(<LoginForm layout="modal" />);
+
+    const submitButton = screen.getByRole("button", { name: /acessar/i });
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.input(screen.getByLabelText("Email"), { target: { value: "user@mail.com" } });
+    fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123456" } });
+
+    expect(submitButton).toBeEnabled();
+
+    fireEvent.input(screen.getByLabelText("Email"), { target: { value: "email-invalido" } });
+    expect(submitButton).toBeDisabled();
   });
 });

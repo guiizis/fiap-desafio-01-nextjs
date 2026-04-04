@@ -38,4 +38,26 @@ describe("ModalShell", () => {
     fireEvent.click(screen.getByRole("button", { name: /fechar cadastro/i }));
     expect(backMock).toHaveBeenCalledTimes(1);
   });
+
+  it("fecha modal ao clicar no backdrop", () => {
+    render(
+      <ModalShell>
+        <div>Conteudo do modal</div>
+      </ModalShell>
+    );
+
+    fireEvent.click(screen.getByRole("dialog"));
+    expect(backMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("nao fecha modal ao clicar dentro do conteudo", () => {
+    render(
+      <ModalShell>
+        <div>Conteudo interno</div>
+      </ModalShell>
+    );
+
+    fireEvent.click(screen.getByText("Conteudo interno"));
+    expect(backMock).not.toHaveBeenCalled();
+  });
 });

@@ -11,8 +11,20 @@ export function ModalShell({ children }: ModalShellProps) {
   const router = useRouter();
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 px-4 py-6" role="dialog" aria-modal="true">
-      <div className="mx-auto h-full w-full max-w-[470px] overflow-y-auto bg-[#f3f3f3] shadow-xl">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          router.back();
+        }
+      }}
+    >
+      <div
+        className="mx-auto h-full w-full max-w-[470px] overflow-y-auto bg-[#f3f3f3] shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="relative px-6 pb-8 pt-4 md:px-10 md:pt-6">
           <button
             type="button"
