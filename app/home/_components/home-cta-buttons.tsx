@@ -44,7 +44,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
   return (
     <div className={config.containerClassName}>
       <Link
-        href="/abrir-conta"
+        href="/home/cadastro"
         className={buttonVariants({
           variant: "solid",
           tone: config.tone,
