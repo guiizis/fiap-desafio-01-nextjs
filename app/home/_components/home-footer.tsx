@@ -24,11 +24,17 @@ export function HomeFooter() {
           </ul>
         </section>
 
-        <section className="space-y-2 md:justify-self-end">
+        <section className="space-y-2 md:justify-self-end md:pl-6">
           <h2 className="text-body-md font-semibold text-surface">
             Desenvolvido por Mcintosh Bank
           </h2>
-          <Logo size="md" variant="full" tone="light" alt="Mcintosh Bank" />
+          <Logo
+            size="md"
+            variant="full"
+            tone="light"
+            alt="Mcintosh Bank"
+            className="mt-1"
+          />
 
           <div className="flex items-center gap-4 pt-0.5">
             <Link href="#" aria-label="Instagram da Mcintosh Bank">

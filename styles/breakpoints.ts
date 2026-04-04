@@ -6,7 +6,9 @@ export const BREAKPOINTS = {
 } as const;
 
 export const APP_SCREENS = {
-  mobile: `(max-width: ${BREAKPOINTS.md - 1}px)`,
-  tablet: `(min-width: ${BREAKPOINTS.md}px) and (max-width: ${BREAKPOINTS.lg - 1}px)`,
-  desktop: `(min-width: ${BREAKPOINTS.lg}px)`,
+  mobile: { raw: `(max-width: ${BREAKPOINTS.md - 1}px)` },
+  tablet: {
+    raw: `(min-width: ${BREAKPOINTS.md}px) and (max-width: ${BREAKPOINTS.lg - 1}px)`,
+  },
+  desktop: { raw: `(min-width: ${BREAKPOINTS.lg}px)` },
 } as const;
