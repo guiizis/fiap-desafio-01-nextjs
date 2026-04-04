@@ -40,9 +40,7 @@ describe("Input", () => {
       containerClassName: "pt-2",
     });
 
-    const [_, inputElement] = element.props.children;
-    
-    console.log(_);
+    const [, inputElement] = element.props.children;
 
     expect(inputElement.props.id).toBe("nome-completo");
     expect(inputElement.props.className).toContain("max-w-[280px]");
