@@ -15,5 +15,7 @@ describe("HeroSection", () => {
     expect(
       screen.getByRole("img", { name: "Ilustracao de crescimento financeiro" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Abrir conta" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /tenho conta/i })).toBeInTheDocument();
   });
 });
