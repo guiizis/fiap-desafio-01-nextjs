@@ -54,7 +54,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
         {config.primaryLabel}
       </Link>
       <Link
-        href="/login"
+        href="/home/login"
         className={buttonVariants({
           variant: "outline",
           tone: config.tone,

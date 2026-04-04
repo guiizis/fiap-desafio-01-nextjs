@@ -10,7 +10,7 @@ describe("HomeCtaButtons", () => {
     const secondary = screen.getByRole("link", { name: /tenho conta/i });
 
     expect(primary.getAttribute("href")).toBe("/home/cadastro");
-    expect(secondary.getAttribute("href")).toBe("/login");
+    expect(secondary.getAttribute("href")).toBe("/home/login");
     expect(primary.className).toContain("border-secondary");
     expect(primary.className).toContain("bg-secondary");
     expect(secondary.className).toContain("border-secondary");
@@ -24,6 +24,7 @@ describe("HomeCtaButtons", () => {
     const secondary = screen.getByRole("link", { name: /tenho conta/i });
 
     expect(primary.getAttribute("href")).toBe("/home/cadastro");
+    expect(secondary.getAttribute("href")).toBe("/home/login");
     expect(primary.className).toContain("h-12");
     expect(primary.className).toContain("bg-black");
     expect(secondary.className).toContain("border-black");
