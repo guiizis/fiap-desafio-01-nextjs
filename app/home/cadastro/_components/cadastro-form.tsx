@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
+import { registerMockAccount } from "../../_services/auth-service";
 
 type CadastroFormLayout = "page" | "modal";
 
@@ -15,6 +16,11 @@ type CadastroFormProps = {
 export function CadastroForm({ layout = "page" }: CadastroFormProps) {
   const isModal = layout === "modal";
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const isFormElementValid = (formElement: HTMLFormElement) => {
     return Array.from(formElement.elements).every((element) => {
@@ -32,6 +38,33 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
 
   const updateFormValidity = (event: FormEvent<HTMLFormElement>) => {
     setIsFormValid(isFormElementValid(event.currentTarget));
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    setIsSubmitting(true);
+    setFeedback(null);
+
+    const formData = new FormData(formElement);
+    const payload = {
+      name: String(formData.get("nome") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("senha") ?? ""),
+    };
+
+    const result = await registerMockAccount(payload);
+
+    if (result.ok) {
+      formElement.reset();
+      setIsFormValid(false);
+    }
+
+    setFeedback({
+      tone: result.ok ? "success" : "error",
+      message: result.message,
+    });
+    setIsSubmitting(false);
   };
 
   return (
@@ -53,9 +86,10 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
 
       <form
         className="space-y-4"
-        action="#"
+        noValidate
         onInput={updateFormValidity}
         onChange={updateFormValidity}
+        onSubmit={handleSubmit}
       >
         <Input
           label="Nome"
@@ -102,11 +136,24 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
             variant="solid"
             tone="accent"
             className="h-11 min-w-[124px] justify-center"
-            disabled={!isFormValid}
+            disabled={!isFormValid || isSubmitting}
           >
-            Criar conta
+            {isSubmitting ? "Criando..." : "Criar conta"}
           </Button>
         </div>
+
+        {feedback ? (
+          <p
+            role={feedback.tone === "error" ? "alert" : "status"}
+            className={
+              feedback.tone === "error"
+                ? "text-body-sm font-semibold text-error"
+                : "text-body-sm font-semibold text-success"
+            }
+          >
+            {feedback.message}
+          </p>
+        ) : null}
       </form>
     </div>
   );

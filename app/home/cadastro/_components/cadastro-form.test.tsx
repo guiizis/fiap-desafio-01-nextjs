@@ -1,8 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CadastroForm } from "./cadastro-form";
 
 describe("CadastroForm", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const fillValidForm = () => {
+    fireEvent.input(screen.getByLabelText("Nome"), { target: { value: "Maria Silva" } });
+    fireEvent.input(screen.getByLabelText("Email"), { target: { value: "maria@mail.com" } });
+    fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123456" } });
+  };
+
   it("renderiza campos e botao no layout padrao", () => {
     render(<CadastroForm />);
 
@@ -70,5 +80,81 @@ describe("CadastroForm", () => {
 
     fireEvent.input(screen.getByLabelText("Email"), { target: { value: "email-invalido" } });
     expect(submitButton).toBeDisabled();
+  });
+
+  it("envia cadastro e mostra feedback de sucesso da API", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ message: "Usuario criado com sucesso." }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<CadastroForm layout="modal" />);
+    fillValidForm();
+
+    const submitButton = screen.getByRole("button", { name: /criar conta/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/api/mock/users", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Maria Silva",
+          email: "maria@mail.com",
+          password: "123456",
+        }),
+      });
+    });
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Usuario criado com sucesso.");
+  });
+
+  it("mostra feedback de erro quando API retorna falha", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: vi.fn().mockResolvedValue({ message: "Ja existe usuario cadastrado com este email." }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<CadastroForm layout="modal" />);
+    fillValidForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ja existe usuario cadastrado com este email."
+    );
+  });
+
+  it("usa fallback de sucesso quando resposta nao tem JSON valido", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockRejectedValue(new Error("sem json")),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<CadastroForm layout="modal" />);
+    fillValidForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Usuario criado com sucesso.");
+  });
+
+  it("mostra erro de conexao quando fetch falha", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error("network error"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<CadastroForm layout="modal" />);
+    fillValidForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Erro de conexao. Tente novamente em instantes."
+    );
   });
 });

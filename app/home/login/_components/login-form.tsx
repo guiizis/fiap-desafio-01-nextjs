@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
+import { loginMockAccount } from "../../_services/auth-service";
 
 type LoginFormLayout = "page" | "modal";
 
@@ -15,6 +16,11 @@ type LoginFormProps = {
 export function LoginForm({ layout = "page" }: LoginFormProps) {
   const isModal = layout === "modal";
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const isFormElementValid = (formElement: HTMLFormElement) => {
     return Array.from(formElement.elements).every((element) => {
@@ -34,6 +40,26 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
     setIsFormValid(isFormElementValid(event.currentTarget));
   };
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setFeedback(null);
+
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("senha") ?? ""),
+    };
+
+    const result = await loginMockAccount(payload);
+
+    setFeedback({
+      tone: result.ok ? "success" : "error",
+      message: result.message,
+    });
+    setIsSubmitting(false);
+  };
+
   return (
     <div className={isModal ? "w-full" : "w-full rounded-lg bg-surface p-6 shadow-sm md:p-8"}>
       <div className="mb-6 flex justify-center">
@@ -51,9 +77,10 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
 
       <form
         className="space-y-4"
-        action="#"
+        noValidate
         onInput={updateFormValidity}
         onChange={updateFormValidity}
+        onSubmit={handleSubmit}
       >
         <Input
           label="Email"
@@ -86,11 +113,24 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
             variant="solid"
             tone="accent"
             className="h-11 min-w-[124px] justify-center"
-            disabled={!isFormValid}
+            disabled={!isFormValid || isSubmitting}
           >
-            Acessar
+            {isSubmitting ? "Entrando..." : "Acessar"}
           </Button>
         </div>
+
+        {feedback ? (
+          <p
+            role={feedback.tone === "error" ? "alert" : "status"}
+            className={
+              feedback.tone === "error"
+                ? "text-body-sm font-semibold text-error"
+                : "text-body-sm font-semibold text-success"
+            }
+          >
+            {feedback.message}
+          </p>
+        ) : null}
       </form>
     </div>
   );
