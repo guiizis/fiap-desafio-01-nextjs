@@ -1,4 +1,8 @@
+﻿"use client";
+
 import Image from "next/image";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 
@@ -10,6 +14,25 @@ type CadastroFormProps = {
 
 export function CadastroForm({ layout = "page" }: CadastroFormProps) {
   const isModal = layout === "modal";
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const isFormElementValid = (formElement: HTMLFormElement) => {
+    return Array.from(formElement.elements).every((element) => {
+      if (
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLSelectElement ||
+        element instanceof HTMLTextAreaElement
+      ) {
+        return !element.willValidate || element.validity.valid;
+      }
+
+      return true;
+    });
+  };
+
+  const updateFormValidity = (event: FormEvent<HTMLFormElement>) => {
+    setIsFormValid(isFormElementValid(event.currentTarget));
+  };
 
   return (
     <div className={isModal ? "w-full" : "w-full rounded-lg bg-surface p-6 shadow-sm md:p-8"}>
@@ -28,12 +51,18 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
         Preencha os campos abaixo para criar sua conta corrente!
       </h1>
 
-      <form className="space-y-4" action="#">
+      <form
+        className="space-y-4"
+        action="#"
+        onInput={updateFormValidity}
+        onChange={updateFormValidity}
+      >
         <Input
           label="Nome"
           id="nome"
           name="nome"
           type="text"
+          validationKind="name"
           placeholder="Digite seu nome completo"
         />
 
@@ -42,6 +71,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
           id="email"
           name="email"
           type="email"
+          validationKind="email"
           placeholder="Digite seu email"
         />
 
@@ -50,6 +80,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
           id="senha"
           name="senha"
           type="password"
+          validationKind="password"
           placeholder="Digite sua senha"
           inputClassName={isModal ? "max-w-[165px] mobile:max-w-none" : undefined}
         />
@@ -66,7 +97,13 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
         </label>
 
         <div className={isModal ? "flex justify-center pt-2" : "pt-2"}>
-          <Button type="submit" variant="solid" tone="accent" className="h-11 min-w-[124px] justify-center">
+          <Button
+            type="submit"
+            variant="solid"
+            tone="accent"
+            className="h-11 min-w-[124px] justify-center"
+            disabled={!isFormValid}
+          >
             Criar conta
           </Button>
         </div>
