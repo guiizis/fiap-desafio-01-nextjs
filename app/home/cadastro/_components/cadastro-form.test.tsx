@@ -2,9 +2,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CadastroForm } from "./cadastro-form";
 
+const { registerMockAccountMock } = vi.hoisted(() => ({
+  registerMockAccountMock: vi.fn(),
+}));
+
+vi.mock("../../_services/auth-service", () => ({
+  registerMockAccount: registerMockAccountMock,
+}));
+
 describe("CadastroForm", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   const fillValidForm = () => {
@@ -83,11 +91,10 @@ describe("CadastroForm", () => {
   });
 
   it("envia cadastro e mostra feedback de sucesso da API", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+    registerMockAccountMock.mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue({ message: "Usuario criado com sucesso." }),
+      message: "Usuario criado com sucesso.",
     });
-    vi.stubGlobal("fetch", fetchMock);
 
     render(<CadastroForm layout="modal" />);
     fillValidForm();
@@ -96,28 +103,46 @@ describe("CadastroForm", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/api/mock/users", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          name: "Maria Silva",
-          email: "maria@mail.com",
-          password: "123456",
-        }),
+      expect(registerMockAccountMock).toHaveBeenCalledWith({
+        name: "Maria Silva",
+        email: "maria@mail.com",
+        password: "123456",
       });
     });
 
     expect(await screen.findByRole("status")).toHaveTextContent("Usuario criado com sucesso.");
   });
 
-  it("mostra feedback de erro quando API retorna falha", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+  it("usa fallback vazio quando FormData retorna null", async () => {
+    registerMockAccountMock.mockResolvedValue({
       ok: false,
-      json: vi.fn().mockResolvedValue({ message: "Ja existe usuario cadastrado com este email." }),
+      message: "Dados obrigatorios ausentes.",
     });
-    vi.stubGlobal("fetch", fetchMock);
+
+    render(<CadastroForm layout="modal" />);
+    const formDataGetSpy = vi.spyOn(FormData.prototype, "get").mockReturnValue(null);
+
+    const form = screen
+      .getByRole("button", { name: /criar conta/i })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(registerMockAccountMock).toHaveBeenCalledWith({
+        name: "",
+        email: "",
+        password: "",
+      });
+    });
+
+    formDataGetSpy.mockRestore();
+  });
+
+  it("mostra feedback de erro quando API retorna falha", async () => {
+    registerMockAccountMock.mockResolvedValue({
+      ok: false,
+      message: "Ja existe usuario cadastrado com este email.",
+    });
 
     render(<CadastroForm layout="modal" />);
     fillValidForm();
@@ -129,32 +154,20 @@ describe("CadastroForm", () => {
     );
   });
 
-  it("usa fallback de sucesso quando resposta nao tem JSON valido", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockRejectedValue(new Error("sem json")),
+  it("fecha alerta manualmente no botao x", async () => {
+    registerMockAccountMock.mockResolvedValue({
+      ok: false,
+      message: "Erro ao cadastrar",
     });
-    vi.stubGlobal("fetch", fetchMock);
 
     render(<CadastroForm layout="modal" />);
     fillValidForm();
 
     fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Usuario criado com sucesso.");
-  });
+    expect(await screen.findByRole("alert")).toHaveTextContent("Erro ao cadastrar");
 
-  it("mostra erro de conexao quando fetch falha", async () => {
-    const fetchMock = vi.fn().mockRejectedValue(new Error("network error"));
-    vi.stubGlobal("fetch", fetchMock);
-
-    render(<CadastroForm layout="modal" />);
-    fillValidForm();
-
-    fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Erro de conexao. Tente novamente em instantes."
-    );
+    fireEvent.click(screen.getByRole("button", { name: /fechar alerta/i }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

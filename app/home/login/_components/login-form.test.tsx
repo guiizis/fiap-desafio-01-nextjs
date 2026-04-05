@@ -2,9 +2,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LoginForm } from "./login-form";
 
+const { loginMockAccountMock } = vi.hoisted(() => ({
+  loginMockAccountMock: vi.fn(),
+}));
+
+vi.mock("../../_services/auth-service", () => ({
+  loginMockAccount: loginMockAccountMock,
+}));
+
 describe("LoginForm", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   const fillValidForm = () => {
@@ -57,11 +65,10 @@ describe("LoginForm", () => {
   });
 
   it("envia login e mostra feedback de sucesso da API", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+    loginMockAccountMock.mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue({ message: "Login realizado com sucesso." }),
+      message: "Login realizado com sucesso.",
     });
-    vi.stubGlobal("fetch", fetchMock);
 
     render(<LoginForm layout="modal" />);
     fillValidForm();
@@ -70,27 +77,44 @@ describe("LoginForm", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/api/mock/login", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          email: "user@mail.com",
-          password: "123456",
-        }),
+      expect(loginMockAccountMock).toHaveBeenCalledWith({
+        email: "user@mail.com",
+        password: "123456",
       });
     });
 
     expect(await screen.findByRole("status")).toHaveTextContent("Login realizado com sucesso.");
   });
 
-  it("mostra feedback de erro quando API retorna falha", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+  it("usa fallback vazio quando FormData retorna null", async () => {
+    loginMockAccountMock.mockResolvedValue({
       ok: false,
-      json: vi.fn().mockResolvedValue({ message: "Email ou senha invalidos." }),
+      message: "Dados obrigatorios ausentes.",
     });
-    vi.stubGlobal("fetch", fetchMock);
+
+    render(<LoginForm layout="modal" />);
+    const formDataGetSpy = vi.spyOn(FormData.prototype, "get").mockReturnValue(null);
+
+    const form = screen
+      .getByRole("button", { name: /acessar/i })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(loginMockAccountMock).toHaveBeenCalledWith({
+        email: "",
+        password: "",
+      });
+    });
+
+    formDataGetSpy.mockRestore();
+  });
+
+  it("mostra feedback de erro quando API retorna falha", async () => {
+    loginMockAccountMock.mockResolvedValue({
+      ok: false,
+      message: "Email ou senha invalidos.",
+    });
 
     render(<LoginForm layout="modal" />);
     fillValidForm();
@@ -100,32 +124,20 @@ describe("LoginForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Email ou senha invalidos.");
   });
 
-  it("usa fallback de sucesso quando resposta nao tem JSON valido", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockRejectedValue(new Error("sem json")),
+  it("fecha alerta manualmente no botao x", async () => {
+    loginMockAccountMock.mockResolvedValue({
+      ok: false,
+      message: "Falha ao autenticar",
     });
-    vi.stubGlobal("fetch", fetchMock);
 
     render(<LoginForm layout="modal" />);
     fillValidForm();
 
     fireEvent.click(screen.getByRole("button", { name: /acessar/i }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Login realizado com sucesso.");
-  });
+    expect(await screen.findByRole("alert")).toHaveTextContent("Falha ao autenticar");
 
-  it("mostra erro de conexao quando fetch falha", async () => {
-    const fetchMock = vi.fn().mockRejectedValue(new Error("network error"));
-    vi.stubGlobal("fetch", fetchMock);
-
-    render(<LoginForm layout="modal" />);
-    fillValidForm();
-
-    fireEvent.click(screen.getByRole("button", { name: /acessar/i }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Erro de conexao. Tente novamente em instantes."
-    );
+    fireEvent.click(screen.getByRole("button", { name: /fechar alerta/i }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

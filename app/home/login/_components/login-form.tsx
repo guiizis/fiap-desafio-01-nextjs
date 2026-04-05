@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { Alert } from "../../../../components/ui/alert";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { loginMockAccount } from "../../_services/auth-service";
@@ -18,7 +19,7 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{
-    tone: "success" | "error";
+    variant: "success" | "error";
     message: string;
   } | null>(null);
 
@@ -54,11 +55,13 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
     const result = await loginMockAccount(payload);
 
     setFeedback({
-      tone: result.ok ? "success" : "error",
+      variant: result.ok ? "success" : "error",
       message: result.message,
     });
     setIsSubmitting(false);
   };
+
+  const handleAlertClose = () => setFeedback(null);
 
   return (
     <div className={isModal ? "w-full" : "w-full rounded-lg bg-surface p-6 shadow-sm md:p-8"}>
@@ -107,6 +110,18 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
           Esqueci a senha!
         </a>
 
+        {feedback ? (
+          <div className="pt-2">
+            <Alert
+              variant={feedback.variant}
+              message={feedback.message}
+              dismissAfterMs={5000}
+              onClose={handleAlertClose}
+              className="w-full"
+            />
+          </div>
+        ) : null}
+
         <div className={isModal ? "flex justify-center pt-2" : "pt-2"}>
           <Button
             type="submit"
@@ -118,19 +133,6 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
             {isSubmitting ? "Entrando..." : "Acessar"}
           </Button>
         </div>
-
-        {feedback ? (
-          <p
-            role={feedback.tone === "error" ? "alert" : "status"}
-            className={
-              feedback.tone === "error"
-                ? "text-body-sm font-semibold text-error"
-                : "text-body-sm font-semibold text-success"
-            }
-          >
-            {feedback.message}
-          </p>
-        ) : null}
       </form>
     </div>
   );
