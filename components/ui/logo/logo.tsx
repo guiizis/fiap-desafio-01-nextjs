@@ -79,6 +79,7 @@ export function Logo({
       width={dimensions.width}
       height={dimensions.height}
       priority={priority}
+      style={{ width: dimensions.width, height: dimensions.height }}
       className={["block", className].filter(Boolean).join(" ")}
     />
   );
