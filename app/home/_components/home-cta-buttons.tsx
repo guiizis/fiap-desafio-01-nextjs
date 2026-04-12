@@ -45,6 +45,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
     <div className={config.containerClassName}>
       <Link
         href="/home/cadastro"
+        scroll={false}
         className={buttonVariants({
           variant: "solid",
           tone: config.tone,
@@ -55,6 +56,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
       </Link>
       <Link
         href="/home/login"
+        scroll={false}
         className={buttonVariants({
           variant: "outline",
           tone: config.tone,

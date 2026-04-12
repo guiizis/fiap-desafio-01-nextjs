@@ -9,6 +9,9 @@ type ModalShellProps = {
 
 export function ModalShell({ children }: ModalShellProps) {
   const router = useRouter();
+  const closeModal = () => {
+    router.replace("/home");
+  };
 
   return (
     <div
@@ -17,7 +20,7 @@ export function ModalShell({ children }: ModalShellProps) {
       aria-modal="true"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
-          router.back();
+          closeModal();
         }
       }}
     >
@@ -29,7 +32,7 @@ export function ModalShell({ children }: ModalShellProps) {
           <button
             type="button"
             aria-label="Fechar cadastro"
-            onClick={() => router.back()}
+            onClick={closeModal}
             className="absolute right-4 top-3 inline-flex h-8 w-8 items-center justify-center rounded-sm text-body hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             x

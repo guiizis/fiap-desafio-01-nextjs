@@ -16,7 +16,7 @@ vi.mock("../../../home/login/_components/login-form", () => ({
 }));
 
 describe("LoginModalPage", () => {
-  it("renderiza formulario de login dentro do shell modal com layout='modal'", () => {
+  it("renderiza formulario de login no slot modal com layout='modal'", () => {
     render(<LoginModalPage />);
 
     expect(screen.getByTestId("modal-shell-mock")).toBeInTheDocument();
