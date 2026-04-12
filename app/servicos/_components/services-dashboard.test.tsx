@@ -3,18 +3,23 @@ import { describe, expect, it } from "vitest";
 import { ServicesDashboard } from "./services-dashboard";
 
 describe("ServicesDashboard", () => {
-  it("renderiza estrutura base e troca conteudo ao mudar de aba", () => {
+  it("renderiza estrutura base com painel de nova transacao e abas indisponiveis", () => {
     render(<ServicesDashboard />);
 
     expect(screen.getByRole("heading", { name: "Ola, Joana! :)" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Extrato", level: 2 })).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Confira os servicos disponiveis", level: 2 })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Nova transação", level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Concluir transação" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Transferencias" })).toBeDisabled();
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "Meus cartoes" }));
+  it("alterna visibilidade do saldo", () => {
+    render(<ServicesDashboard />);
 
-    expect(screen.getByRole("heading", { name: "Meus cartoes", level: 2 })).toBeInTheDocument();
-    expect(screen.getByText("Gerenciamento de cartoes")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ocultar saldo" }));
+    expect(screen.getByText("R$ ******")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mostrar saldo" }));
+    expect(screen.getByText("R$ 2.500,00")).toBeInTheDocument();
   });
 });
