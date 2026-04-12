@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import type { FormEvent } from "react";
+import type { FormEventHandler } from "react";
 import { useState } from "react";
 import { Alert } from "../../../../components/ui/alert";
 import { Button } from "../../../../components/ui/button";
@@ -37,13 +37,11 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
     });
   };
 
-  const updateFormValidity = (event: FormEvent<HTMLFormElement>) => {
+  const updateFormValidity: FormEventHandler<HTMLFormElement> = (event) => {
     setIsFormValid(isFormElementValid(event.currentTarget));
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formElement = event.currentTarget;
+  const submitCadastro = async (formElement: HTMLFormElement) => {
     setIsSubmitting(true);
     setFeedback(null);
 
@@ -66,6 +64,11 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
       message: result.message,
     });
     setIsSubmitting(false);
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    void submitCadastro(event.currentTarget);
   };
 
   const handleAlertClose = () => setFeedback(null);
@@ -126,6 +129,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
           <input
             type="checkbox"
             name="consentimento"
+            required
             className="mt-0.5 h-4 w-4 rounded border-border text-secondary focus:ring-secondary"
           />
           <span>

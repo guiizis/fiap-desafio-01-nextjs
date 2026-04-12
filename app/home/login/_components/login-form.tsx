@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import type { FormEvent } from "react";
+import type { FormEventHandler } from "react";
 import { useState } from "react";
 import { Alert } from "../../../../components/ui/alert";
 import { Button } from "../../../../components/ui/button";
@@ -37,16 +37,15 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
     });
   };
 
-  const updateFormValidity = (event: FormEvent<HTMLFormElement>) => {
+  const updateFormValidity: FormEventHandler<HTMLFormElement> = (event) => {
     setIsFormValid(isFormElementValid(event.currentTarget));
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const submitLogin = async (formElement: HTMLFormElement) => {
     setIsSubmitting(true);
     setFeedback(null);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(formElement);
     const payload = {
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("senha") ?? ""),
@@ -59,6 +58,11 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
       message: result.message,
     });
     setIsSubmitting(false);
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    void submitLogin(event.currentTarget);
   };
 
   const handleAlertClose = () => setFeedback(null);
