@@ -12,12 +12,12 @@ type StatementPanelProps = {
 
 export function StatementPanel({ entries }: StatementPanelProps) {
   return (
-    <aside className="rounded-md bg-surface p-4" aria-label="Extrato da conta">
+    <aside className="rounded-md bg-surface px-4 py-5" aria-label="Extrato da conta">
       <h2 className="text-title-xl font-bold text-black">Extrato</h2>
 
-      <ul className="mt-4 space-y-4">
+      <ul className="mt-3 space-y-3">
         {entries.map((entry) => (
-          <li key={entry.id} className="border-b border-secondary/30 pb-2">
+          <li key={entry.id} className="border-b border-secondary/35 pb-2">
             <div className="mb-1 flex items-center justify-between gap-2">
               <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>
               <span className="text-body-sm text-subtle">{entry.date}</span>

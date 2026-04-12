@@ -7,3 +7,5 @@ export {
   validateInputValue,
 } from "./validators/input-validators";
 export type { InputValidationKind } from "./validators/input-validators";
+export { Select, selectClasses } from "./select";
+export type { SelectClassOptions, SelectOption, SelectProps } from "./select";

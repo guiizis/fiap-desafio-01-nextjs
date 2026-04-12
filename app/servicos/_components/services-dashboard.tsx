@@ -6,12 +6,11 @@ import { ServicesContentPanel } from "./services-content-panel";
 import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
 import { StatementPanel } from "./statement-panel";
 
-const sidebarItems: readonly { key: ServicesTabKey; label: string }[] = [
+const sidebarItems: readonly { key: ServicesTabKey; label: string; disabled?: boolean }[] = [
   { key: "inicio", label: "Inicio" },
-  { key: "transferencias", label: "Transferencias" },
-  { key: "investimentos", label: "Investimentos" },
-  { key: "outros-servicos", label: "Outros servicos" },
-  { key: "meus-cartoes", label: "Meus cartoes" },
+  { key: "transferencias", label: "Transferencias", disabled: true },
+  { key: "investimentos", label: "Investimentos", disabled: true },
+  { key: "outros-servicos", label: "Outros servicos", disabled: true },
 ];
 
 const statementEntries = [
@@ -23,19 +22,22 @@ const statementEntries = [
 
 export function ServicesDashboard() {
   const [activeTab, setActiveTab] = useState<ServicesTabKey>("inicio");
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 md:px-6">
-      <div className="grid gap-4 lg:grid-cols-[150px_minmax(0,1fr)_250px]">
+    <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
+      <div className="grid gap-4 lg:grid-cols-[176px_minmax(0,1fr)_240px] lg:items-start">
         <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <AccountSummaryCard
             name="Joana"
             dateLabel="Quinta-feira, 08/09/2024"
             balanceLabel="Saldo"
             accountLabel="Conta corrente"
             balanceValue="R$ 2.500,00"
+            isBalanceVisible={isBalanceVisible}
+            onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
           />
           <ServicesContentPanel activeTab={activeTab} />
         </div>

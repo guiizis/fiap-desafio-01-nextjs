@@ -1,9 +1,13 @@
+import Image from "next/image";
+
 type AccountSummaryCardProps = {
   name: string;
   dateLabel: string;
   balanceLabel: string;
   accountLabel: string;
   balanceValue: string;
+  isBalanceVisible: boolean;
+  onToggleBalanceVisibility: () => void;
 };
 
 export function AccountSummaryCard({
@@ -12,26 +16,46 @@ export function AccountSummaryCard({
   balanceLabel,
   accountLabel,
   balanceValue,
+  isBalanceVisible,
+  onToggleBalanceVisibility,
 }: AccountSummaryCardProps) {
+  const displayedBalance = isBalanceVisible ? balanceValue : "R$ ******";
+
   return (
-    <section className="rounded-md bg-primary p-6 text-surface" aria-label="Resumo da conta">
-      <div className="grid gap-6 md:grid-cols-2 md:items-start">
+    <section
+      className="min-h-[350px] rounded-md bg-primary px-6 py-7 text-surface"
+      aria-label="Resumo da conta"
+    >
+      <div className="grid gap-6 md:grid-cols-[1fr_340px] md:items-start">
         <div className="space-y-2">
           <h1 className="text-title-xl font-bold text-surface">Ola, {name}! :)</h1>
           <p className="text-body-sm text-menu-hover">{dateLabel}</p>
         </div>
 
-        <div className="md:justify-self-end">
+        <div className="w-full md:pt-6">
           <p className="flex items-center gap-2 text-title-lg font-semibold text-surface">
             {balanceLabel}
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 text-accent">
-              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
-              <circle cx="12" cy="12" r="2.2" fill="currentColor" />
-            </svg>
+            <button
+              type="button"
+              onClick={onToggleBalanceVisibility}
+              aria-label={isBalanceVisible ? "Ocultar saldo" : "Mostrar saldo"}
+              aria-pressed={!isBalanceVisible}
+              className="inline-flex h-5 w-6 cursor-pointer items-center justify-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
+            >
+              <Image
+                src="/servicos/show-balance.svg"
+                alt=""
+                width={19}
+                height={13}
+                aria-hidden="true"
+              />
+            </button>
           </p>
-          <span className="mt-2 block h-[2px] w-full max-w-[140px] bg-accent" />
+          <span className="mt-2 block h-[2px] w-full bg-accent" />
           <p className="mt-2 text-body-md text-menu-hover">{accountLabel}</p>
-          <p className="text-[2rem] leading-none text-surface">{balanceValue}</p>
+          <p className="mt-1 min-w-[300px] whitespace-nowrap text-[3.2rem] leading-none text-surface">
+            {displayedBalance}
+          </p>
         </div>
       </div>
     </section>
