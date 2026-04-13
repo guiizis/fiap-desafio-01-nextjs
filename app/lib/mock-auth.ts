@@ -4,9 +4,19 @@ export type MockUser = {
   email: string;
   password: string;
   createdAt: string;
+  accountBalanceInCents: number;
+  statementEntries: MockStatementEntry[];
 };
 
 export type PublicMockUser = Omit<MockUser, "password">;
+
+export type MockStatementEntry = {
+  id: string;
+  month: string;
+  type: string;
+  amountInCents: number;
+  date: string;
+};
 
 type RegisterMockUserInput = {
   name: string;
@@ -47,11 +57,28 @@ function toPublicUser(user: MockUser): PublicMockUser {
     name: user.name,
     email: user.email,
     createdAt: user.createdAt,
+    accountBalanceInCents: user.accountBalanceInCents,
+    statementEntries: user.statementEntries.map((entry) => ({ ...entry })),
   };
 }
 
 function createMockToken(userId: string) {
   return `mock-token-${userId}`;
+}
+
+function createDefaultStatementEntries() {
+  return [
+    { id: crypto.randomUUID(), month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+    { id: crypto.randomUUID(), month: "Novembro", type: "Deposito", amountInCents: 10000, date: "21/11/2022" },
+    { id: crypto.randomUUID(), month: "Novembro", type: "Deposito", amountInCents: 5000, date: "21/11/2022" },
+    {
+      id: crypto.randomUUID(),
+      month: "Novembro",
+      type: "Transferencia",
+      amountInCents: -50000,
+      date: "21/11/2022",
+    },
+  ] satisfies MockStatementEntry[];
 }
 
 export function registerMockUser({
@@ -76,6 +103,8 @@ export function registerMockUser({
     email: normalizedEmail,
     password,
     createdAt: new Date().toISOString(),
+    accountBalanceInCents: 250000,
+    statementEntries: createDefaultStatementEntries(),
   };
 
   users.push(newUser);

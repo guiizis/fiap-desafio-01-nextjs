@@ -1,9 +1,17 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LoginForm } from "./login-form";
+import { AUTH_SESSION_STORAGE_KEY } from "../../../lib/auth-session";
 
-const { loginMockAccountMock } = vi.hoisted(() => ({
+const { loginMockAccountMock, pushMock } = vi.hoisted(() => ({
   loginMockAccountMock: vi.fn(),
+  pushMock: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: pushMock,
+  }),
 }));
 
 vi.mock("../../_services/auth-service", () => ({
@@ -13,6 +21,7 @@ vi.mock("../../_services/auth-service", () => ({
 describe("LoginForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
   });
 
   const fillValidForm = () => {
@@ -64,17 +73,25 @@ describe("LoginForm", () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it("envia login e mostra feedback de sucesso da API", async () => {
+  it("envia login, salva sessao e redireciona quando sucesso", async () => {
     loginMockAccountMock.mockResolvedValue({
       ok: true,
       message: "Login realizado com sucesso.",
+      token: "mock-token-user-1",
+      user: {
+        id: "user-1",
+        name: "Joana da Silva Oliveira",
+        email: "joana@mail.com",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        accountBalanceInCents: 250000,
+        statementEntries: [{ id: "entry-1", month: "Novembro", type: "Deposito", amountInCents: 5000, date: "21/11/2022" }],
+      },
     });
 
     render(<LoginForm layout="modal" />);
     fillValidForm();
 
-    const submitButton = screen.getByRole("button", { name: /acessar/i });
-    fireEvent.click(submitButton);
+    fireEvent.click(screen.getByRole("button", { name: /acessar/i }));
 
     await waitFor(() => {
       expect(loginMockAccountMock).toHaveBeenCalledWith({
@@ -83,7 +100,21 @@ describe("LoginForm", () => {
       });
     });
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Login realizado com sucesso.");
+    expect(pushMock).toHaveBeenCalledWith("/servicos");
+
+    const stored = sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
+    expect(stored).not.toBeNull();
+    expect(stored ? JSON.parse(stored) : null).toEqual({
+      token: "mock-token-user-1",
+      user: {
+        id: "user-1",
+        name: "Joana da Silva Oliveira",
+        email: "joana@mail.com",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        accountBalanceInCents: 250000,
+        statementEntries: [{ id: "entry-1", month: "Novembro", type: "Deposito", amountInCents: 5000, date: "21/11/2022" }],
+      },
+    });
   });
 
   it("usa fallback vazio quando FormData retorna null", async () => {
@@ -122,6 +153,7 @@ describe("LoginForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /acessar/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Email ou senha invalidos.");
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it("fecha alerta manualmente no botao x", async () => {

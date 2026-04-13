@@ -1,10 +1,5 @@
-type StatementEntry = {
-  id: string;
-  month: string;
-  type: string;
-  value: string;
-  date: string;
-};
+import type { StatementEntry } from "./interfaces/statement-panel.interfaces";
+import { formatCurrencyFromCents } from "../../lib/calc";
 
 type StatementPanelProps = {
   entries: readonly StatementEntry[];
@@ -23,7 +18,9 @@ export function StatementPanel({ entries }: StatementPanelProps) {
               <span className="text-body-sm text-subtle">{entry.date}</span>
             </div>
             <p className="text-body-md text-heading">{entry.type}</p>
-            <p className="text-title-lg font-semibold text-black">{entry.value}</p>
+            <p className="text-title-lg font-semibold text-black">
+              {formatCurrencyFromCents(entry.amountInCents)}
+            </p>
           </li>
         ))}
       </ul>

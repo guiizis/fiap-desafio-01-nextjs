@@ -10,7 +10,7 @@ describe("AccountSummaryCard", () => {
         dateLabel="Quinta-feira, 08/09/2024"
         balanceLabel="Saldo"
         accountLabel="Conta corrente"
-        balanceValue="R$ 2.500,00"
+        balanceInCents={250000}
         isBalanceVisible
         onToggleBalanceVisibility={() => {}}
       />

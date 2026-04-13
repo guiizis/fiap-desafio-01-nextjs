@@ -2,9 +2,22 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ServicesDashboard } from "./services-dashboard";
 
+const statementEntries = [
+  { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+  { id: "2", month: "Novembro", type: "Deposito", amountInCents: 10000, date: "21/11/2022" },
+  { id: "3", month: "Novembro", type: "Deposito", amountInCents: 5000, date: "21/11/2022" },
+  { id: "4", month: "Novembro", type: "Transferencia", amountInCents: -50000, date: "21/11/2022" },
+] as const;
+
 describe("ServicesDashboard", () => {
   it("renderiza estrutura base com painel de nova transacao e abas indisponiveis", () => {
-    render(<ServicesDashboard />);
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
 
     expect(screen.getByRole("heading", { name: "Ola, Joana! :)" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Extrato", level: 2 })).toBeInTheDocument();
@@ -14,7 +27,13 @@ describe("ServicesDashboard", () => {
   });
 
   it("alterna visibilidade do saldo", () => {
-    render(<ServicesDashboard />);
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Ocultar saldo" }));
     expect(screen.getByText("R$ ******")).toBeInTheDocument();

@@ -1,12 +1,14 @@
 ﻿"use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { FormEventHandler } from "react";
 import { useState } from "react";
 import { Alert } from "../../../../components/ui/alert";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { loginMockAccount } from "../../_services/auth-service";
+import { setAuthSession } from "../../../lib/auth-session";
 
 type LoginFormLayout = "page" | "modal";
 
@@ -15,6 +17,7 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ layout = "page" }: LoginFormProps) {
+  const router = useRouter();
   const isModal = layout === "modal";
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,8 +56,18 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
 
     const result = await loginMockAccount(payload);
 
+    if (result.ok) {
+      setAuthSession({
+        token: result.token,
+        user: result.user,
+      });
+      setIsSubmitting(false);
+      router.push("/servicos");
+      return;
+    }
+
     setFeedback({
-      variant: result.ok ? "success" : "error",
+      variant: "error",
       message: result.message,
     });
     setIsSubmitting(false);

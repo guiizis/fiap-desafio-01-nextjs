@@ -7,8 +7,8 @@ describe("StatementPanel", () => {
     render(
       <StatementPanel
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", value: "R$ 150", date: "18/11/2022" },
-          { id: "2", month: "Novembro", type: "Transferencia", value: "-R$ 500", date: "21/11/2022" },
+          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "2", month: "Novembro", type: "Transferencia", amountInCents: -50000, date: "21/11/2022" },
         ]}
       />
     );

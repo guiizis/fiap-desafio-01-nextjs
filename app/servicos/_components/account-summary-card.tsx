@@ -1,11 +1,12 @@
 import Image from "next/image";
+import { formatCurrencyFromCents } from "../../lib/calc";
 
 type AccountSummaryCardProps = {
   name: string;
   dateLabel: string;
   balanceLabel: string;
   accountLabel: string;
-  balanceValue: string;
+  balanceInCents: number;
   isBalanceVisible: boolean;
   onToggleBalanceVisibility: () => void;
 };
@@ -15,11 +16,11 @@ export function AccountSummaryCard({
   dateLabel,
   balanceLabel,
   accountLabel,
-  balanceValue,
+  balanceInCents,
   isBalanceVisible,
   onToggleBalanceVisibility,
 }: AccountSummaryCardProps) {
-  const displayedBalance = isBalanceVisible ? balanceValue : "R$ ******";
+  const displayedBalance = isBalanceVisible ? formatCurrencyFromCents(balanceInCents) : "R$ ******";
 
   return (
     <section
