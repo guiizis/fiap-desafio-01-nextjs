@@ -1,0 +1,70 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { AccountSummaryCard } from "./account-summary-card";
+import type { StatementEntry } from "./interfaces/statement-panel.interfaces";
+import { ServicesContentPanel } from "./services-content-panel";
+import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
+import { StatementPanel } from "./statement-panel";
+
+const sidebarItems: readonly { key: ServicesTabKey; label: string; disabled?: boolean }[] = [
+  { key: "inicio", label: "Inicio" },
+  { key: "transferencias", label: "Transferencias", disabled: true },
+  { key: "investimentos", label: "Investimentos", disabled: true },
+  { key: "outros-servicos", label: "Outros servicos", disabled: true },
+];
+
+type ServicesDashboardProps = {
+  userFirstName: string;
+  balanceInCents: number;
+  statementEntries: readonly StatementEntry[];
+};
+
+function formatCurrentDateLabel() {
+  const now = new Date();
+  const weekday = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    timeZone: "America/Sao_Paulo",
+  }).format(now);
+  const date = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  }).format(now);
+
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${date}`;
+}
+
+export function ServicesDashboard({
+  userFirstName,
+  balanceInCents,
+  statementEntries,
+}: ServicesDashboardProps) {
+  const [activeTab, setActiveTab] = useState<ServicesTabKey>("inicio");
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+  const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+
+  return (
+    <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
+      <div className="grid gap-4 lg:grid-cols-[176px_minmax(0,1fr)_240px] lg:items-start">
+        <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
+
+        <div className="space-y-3">
+          <AccountSummaryCard
+            name={userFirstName}
+            dateLabel={currentDateLabel}
+            balanceLabel="Saldo"
+            accountLabel="Conta corrente"
+            balanceInCents={balanceInCents}
+            isBalanceVisible={isBalanceVisible}
+            onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
+          />
+          <ServicesContentPanel activeTab={activeTab} />
+        </div>
+
+        <StatementPanel entries={statementEntries} />
+      </div>
+    </div>
+  );
+}
