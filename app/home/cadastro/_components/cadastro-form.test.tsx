@@ -19,6 +19,7 @@ describe("CadastroForm", () => {
     fireEvent.input(screen.getByLabelText("Nome"), { target: { value: "Maria Silva" } });
     fireEvent.input(screen.getByLabelText("Email"), { target: { value: "maria@mail.com" } });
     fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123456" } });
+    fireEvent.click(screen.getByRole("checkbox"));
   };
 
   it("renderiza campos e botao no layout padrao", () => {
@@ -84,6 +85,9 @@ describe("CadastroForm", () => {
     fireEvent.input(screen.getByLabelText("Email"), { target: { value: "maria@mail.com" } });
     fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123456" } });
 
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("checkbox"));
     expect(submitButton).toBeEnabled();
 
     fireEvent.input(screen.getByLabelText("Email"), { target: { value: "email-invalido" } });

@@ -16,7 +16,7 @@ vi.mock("../../../home/cadastro/_components/cadastro-form", () => ({
 }));
 
 describe("CadastroModalPage", () => {
-  it("renderiza formulario dentro do shell e passa layout='modal'", () => {
+  it("renderiza formulario de cadastro no slot modal com layout='modal'", () => {
     render(<CadastroModalPage />);
 
     expect(screen.getByTestId("modal-shell-mock")).toBeInTheDocument();

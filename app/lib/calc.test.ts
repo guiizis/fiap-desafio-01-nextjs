@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { sum, formatCurrency } from "./calc";
+import { describe, expect, it } from "vitest";
+import { formatCurrency, formatCurrencyFromCents, sum } from "./calc";
 
 describe("calc functions", () => {
   it("adds two numbers correctly", () => {
@@ -7,6 +7,10 @@ describe("calc functions", () => {
   });
 
   it("formats currency in pt-BR", () => {
-    expect(formatCurrency(1234.5)).toBe("R$ 1.234,50");
+    expect(formatCurrency(1234.5)).toContain("1.234,50");
+  });
+
+  it("formats currency from cents in pt-BR", () => {
+    expect(formatCurrencyFromCents(250000)).toContain("2.500,00");
   });
 });

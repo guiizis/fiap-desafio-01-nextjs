@@ -2,19 +2,19 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ModalShell } from "./modal-shell";
 
-const { backMock } = vi.hoisted(() => ({
-  backMock: vi.fn(),
+const { replaceMock } = vi.hoisted(() => ({
+  replaceMock: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    back: backMock,
+    replace: replaceMock,
   }),
 }));
 
 describe("ModalShell", () => {
   beforeEach(() => {
-    backMock.mockClear();
+    replaceMock.mockClear();
   });
 
   it("renderiza container de dialogo com conteudo", () => {
@@ -28,7 +28,7 @@ describe("ModalShell", () => {
     expect(screen.getByText("Conteudo do modal")).toBeInTheDocument();
   });
 
-  it("fecha modal chamando router.back", () => {
+  it("fecha modal chamando router.replace('/home')", () => {
     render(
       <ModalShell>
         <div>Conteudo</div>
@@ -36,7 +36,7 @@ describe("ModalShell", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /fechar cadastro/i }));
-    expect(backMock).toHaveBeenCalledTimes(1);
+    expect(replaceMock).toHaveBeenCalledWith("/home");
   });
 
   it("fecha modal ao clicar no backdrop", () => {
@@ -47,7 +47,7 @@ describe("ModalShell", () => {
     );
 
     fireEvent.click(screen.getByRole("dialog"));
-    expect(backMock).toHaveBeenCalledTimes(1);
+    expect(replaceMock).toHaveBeenCalledWith("/home");
   });
 
   it("nao fecha modal ao clicar dentro do conteudo", () => {
@@ -58,6 +58,6 @@ describe("ModalShell", () => {
     );
 
     fireEvent.click(screen.getByText("Conteudo interno"));
-    expect(backMock).not.toHaveBeenCalled();
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 });
