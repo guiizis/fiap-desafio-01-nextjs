@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { formatCurrencyFromCents } from "../../lib/calc";
+import Image from 'next/image';
+import { formatCurrencyFromCents } from '../../lib/calc';
 
 type AccountSummaryCardProps = {
   name: string;
@@ -20,7 +20,7 @@ export function AccountSummaryCard({
   isBalanceVisible,
   onToggleBalanceVisibility,
 }: AccountSummaryCardProps) {
-  const displayedBalance = isBalanceVisible ? formatCurrencyFromCents(balanceInCents) : "R$ ******";
+  const displayedBalance = isBalanceVisible ? formatCurrencyFromCents(balanceInCents) : 'R$ ******';
 
   return (
     <section
@@ -39,7 +39,7 @@ export function AccountSummaryCard({
             <button
               type="button"
               onClick={onToggleBalanceVisibility}
-              aria-label={isBalanceVisible ? "Ocultar saldo" : "Mostrar saldo"}
+              aria-label={isBalanceVisible ? 'Ocultar saldo' : 'Mostrar saldo'}
               aria-pressed={!isBalanceVisible}
               className="inline-flex h-5 w-6 cursor-pointer items-center justify-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
             >
