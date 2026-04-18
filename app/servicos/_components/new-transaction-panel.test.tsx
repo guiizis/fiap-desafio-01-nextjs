@@ -1,4 +1,4 @@
-import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+﻿import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { NewTransactionPanel } from "./new-transaction-panel";
 
@@ -84,5 +84,28 @@ describe("NewTransactionPanel", () => {
     });
     expect(typeSelect).toHaveValue("");
     expect(amountInput).toHaveValue("00,00");
+  });
+
+  it("mostra alerta de erro e mantem os dados quando transacao e bloqueada", () => {
+    const onSubmitTransaction = vi.fn().mockReturnValue({
+      ok: false,
+      message: "Saldo insuficiente para concluir a transferência.",
+    });
+
+    render(<NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />);
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(amountInput, { target: { value: "300000" } });
+    fireEvent.click(submitButton);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Saldo insuficiente para concluir a transferência."
+    );
+    expect(typeSelect).toHaveValue("transferencia");
+    expect(amountInput).toHaveValue("3.000,00");
   });
 });

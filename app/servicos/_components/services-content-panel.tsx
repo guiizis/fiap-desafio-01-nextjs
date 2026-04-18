@@ -1,12 +1,13 @@
-import {
-  NewTransactionPanel,
-} from "./new-transaction-panel";
-import type { NewTransactionPayload } from "./interfaces/new-transaction-panel.interfaces";
+import { NewTransactionPanel } from "./new-transaction-panel";
+import type {
+  NewTransactionPayload,
+  NewTransactionResult,
+} from "./interfaces/new-transaction-panel.interfaces";
 import type { ServicesTabKey } from "./services-sidebar-nav";
 
 type ServicesContentPanelProps = {
   activeTab: ServicesTabKey;
-  onSubmitTransaction?: (payload: NewTransactionPayload) => void;
+  onSubmitTransaction?: (payload: NewTransactionPayload) => NewTransactionResult | void;
 };
 
 type ServiceOption = {

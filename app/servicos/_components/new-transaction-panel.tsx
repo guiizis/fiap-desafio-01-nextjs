@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import type { FormEventHandler } from "react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { Alert } from "../../../components/ui/alert";
 import { Button } from "../../../components/ui/button";
 import { Input, Select } from "../../../components/ui/input";
 import type {
@@ -25,6 +26,7 @@ function parseCurrencyInputToCents(value: string) {
 export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanelProps) {
   const [transactionType, setTransactionType] = useState<TransactionType | "">("");
   const [transactionAmount, setTransactionAmount] = useState("00,00");
+  const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
     { value: "deposito", label: "Depósito" },
     { value: "transferencia", label: "Transferência" },
@@ -37,6 +39,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
+    setFeedback(null);
 
     if (transactionType !== "deposito" && transactionType !== "transferencia") {
       return;
@@ -46,10 +49,15 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       return;
     }
 
-    onSubmitTransaction?.({
+    const result = onSubmitTransaction?.({
       type: transactionType,
       amountInCents,
     });
+
+    if (result && !result.ok) {
+      setFeedback(result.message);
+      return;
+    }
 
     setTransactionType("");
     setTransactionAmount("00,00");
@@ -58,7 +66,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
   return (
     <section
       className="relative min-h-[560px] overflow-hidden rounded-md bg-surface-transaction p-8"
-      aria-label={"Nova transação"}
+      aria-label="Nova transação"
     >
       <Image
         src="/servicos/transacoes/square-top.svg"
@@ -78,17 +86,15 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       />
 
       <div className="relative z-10 max-w-[420px]">
-        <h2 className="text-[3rem] font-bold leading-none text-transaction-text">
-          {"Nova transação"}
-        </h2>
+        <h2 className="text-[3rem] font-bold leading-none text-transaction-text">Nova transação</h2>
 
         <form className="mt-10" onSubmit={handleSubmit} noValidate>
           <Select
-            label={"Tipo de transação"}
+            label="Tipo de transação"
             id="transaction-type"
             name="transaction-type"
             options={transactionOptions}
-            placeholder={"Selecione o tipo de transação"}
+            placeholder="Selecione o tipo de transação"
             value={transactionType}
             onChange={(event) => {
               const value = event.currentTarget.value;
@@ -129,9 +135,15 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
               ].join(" ")}
               disabled={!isFormValid}
             >
-              {"Concluir transação"}
+              Concluir transação
             </Button>
           </div>
+
+          {feedback ? (
+            <div className="mt-4 max-w-[420px]">
+              <Alert variant="error" message={feedback} onClose={() => setFeedback(null)} />
+            </div>
+          ) : null}
         </form>
       </div>
     </section>

@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AccountSummaryCard } from "./account-summary-card";
-import type { NewTransactionPayload } from "./interfaces/new-transaction-panel.interfaces";
+import type {
+  NewTransactionPayload,
+  NewTransactionResult,
+} from "./interfaces/new-transaction-panel.interfaces";
 import type { StatementEntry } from "./interfaces/statement-panel.interfaces";
 import { ServicesContentPanel } from "./services-content-panel";
 import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
@@ -54,10 +57,21 @@ export function ServicesDashboard({
   const handleSubmitTransaction = ({
     type,
     amountInCents,
-  }: NewTransactionPayload) => {
+  }: NewTransactionPayload): NewTransactionResult => {
+    if (type === "transferencia" && amountInCents > currentBalanceInCents) {
+      return {
+        ok: false,
+        message: "Saldo insuficiente para concluir a transferência.",
+      };
+    }
+
     setCurrentBalanceInCents((currentValue) =>
       type === "deposito" ? currentValue + amountInCents : currentValue - amountInCents
     );
+
+    return {
+      ok: true,
+    };
   };
 
   return (
