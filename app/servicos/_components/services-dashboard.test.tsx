@@ -41,4 +41,28 @@ describe("ServicesDashboard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mostrar saldo" }));
     expect(screen.getByText("R$ 2.500,00")).toBeInTheDocument();
   });
+
+  it("atualiza o saldo ao concluir deposito e transferencia", () => {
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
+
+    const submitButton = screen.getByRole("button", { name: /Concluir transa/i });
+    const typeSelect = screen.getByRole("combobox", { name: /Tipo de transa/i });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(amountInput, { target: { value: "10000" } });
+    fireEvent.click(submitButton);
+    expect(screen.getByText("R$ 2.600,00")).toBeInTheDocument();
+
+    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(amountInput, { target: { value: "5000" } });
+    fireEvent.click(submitButton);
+    expect(screen.getByText("R$ 2.550,00")).toBeInTheDocument();
+  });
 });

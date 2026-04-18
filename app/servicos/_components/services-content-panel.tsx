@@ -1,8 +1,12 @@
-import { NewTransactionPanel } from "./new-transaction-panel";
+import {
+  NewTransactionPanel,
+} from "./new-transaction-panel";
+import type { NewTransactionPayload } from "./interfaces/new-transaction-panel.interfaces";
 import type { ServicesTabKey } from "./services-sidebar-nav";
 
 type ServicesContentPanelProps = {
   activeTab: ServicesTabKey;
+  onSubmitTransaction?: (payload: NewTransactionPayload) => void;
 };
 
 type ServiceOption = {
@@ -45,9 +49,12 @@ const tabContent: Record<
   },
 };
 
-export function ServicesContentPanel({ activeTab }: ServicesContentPanelProps) {
+export function ServicesContentPanel({
+  activeTab,
+  onSubmitTransaction,
+}: ServicesContentPanelProps) {
   if (activeTab === "inicio") {
-    return <NewTransactionPanel />;
+    return <NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />;
   }
 
   const content = tabContent[activeTab];

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AccountSummaryCard } from "./account-summary-card";
+import type { NewTransactionPayload } from "./interfaces/new-transaction-panel.interfaces";
 import type { StatementEntry } from "./interfaces/statement-panel.interfaces";
 import { ServicesContentPanel } from "./services-content-panel";
 import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
@@ -43,7 +44,21 @@ export function ServicesDashboard({
 }: ServicesDashboardProps) {
   const [activeTab, setActiveTab] = useState<ServicesTabKey>("inicio");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+  const [currentBalanceInCents, setCurrentBalanceInCents] = useState(balanceInCents);
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+
+  useEffect(() => {
+    setCurrentBalanceInCents(balanceInCents);
+  }, [balanceInCents]);
+
+  const handleSubmitTransaction = ({
+    type,
+    amountInCents,
+  }: NewTransactionPayload) => {
+    setCurrentBalanceInCents((currentValue) =>
+      type === "deposito" ? currentValue + amountInCents : currentValue - amountInCents
+    );
+  };
 
   return (
     <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
@@ -56,11 +71,14 @@ export function ServicesDashboard({
             dateLabel={currentDateLabel}
             balanceLabel="Saldo"
             accountLabel="Conta corrente"
-            balanceInCents={balanceInCents}
+            balanceInCents={currentBalanceInCents}
             isBalanceVisible={isBalanceVisible}
             onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
           />
-          <ServicesContentPanel activeTab={activeTab} />
+          <ServicesContentPanel
+            activeTab={activeTab}
+            onSubmitTransaction={handleSubmitTransaction}
+          />
         </div>
 
         <StatementPanel entries={statementEntries} />
