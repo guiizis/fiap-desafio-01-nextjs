@@ -199,4 +199,34 @@ describe("ServicesDashboard", () => {
     );
     expect(within(screen.getByLabelText("Extrato da conta")).getAllByRole("listitem")).toHaveLength(4);
   });
+
+  it("cria lancamento com fallback de id quando randomUUID nao esta disponivel", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-18T15:00:00.000Z"));
+    vi.stubGlobal("crypto", { randomUUID: undefined } as Crypto);
+
+    try {
+      render(
+        <ServicesDashboard
+          userFirstName="Joana"
+          balanceInCents={250000}
+          statementEntries={statementEntries}
+        />
+      );
+
+      const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+      const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+      const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+      fireEvent.change(typeSelect, { target: { value: "deposito" } });
+      fireEvent.change(amountInput, { target: { value: "1000" } });
+      fireEvent.click(submitButton);
+
+      expect(screen.getByText("R$ 2.510,00")).toBeInTheDocument();
+      expect(within(screen.getByLabelText("Extrato da conta")).getAllByRole("listitem")).toHaveLength(5);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    }
+  });
 });

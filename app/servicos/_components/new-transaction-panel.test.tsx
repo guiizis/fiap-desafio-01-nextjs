@@ -65,6 +65,41 @@ describe("NewTransactionPanel", () => {
     expect(submitEvent.defaultPrevented).toBe(true);
   });
 
+  it("ignora submit quando tipo da transacao e invalido ou vazio", () => {
+    const onSubmitTransaction = vi.fn();
+
+    render(<NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />);
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+    const form = submitButton.closest("form");
+
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.change(amountInput, { target: { value: "100" } });
+    fireEvent.submit(form);
+
+    expect(onSubmitTransaction).not.toHaveBeenCalled();
+  });
+
+  it("ignora valor invalido no select e mantem ultimo tipo valido", () => {
+    render(<NewTransactionPanel />);
+
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const invalidOption = document.createElement("option");
+    invalidOption.value = "pix";
+    invalidOption.textContent = "Pix";
+    typeSelect.appendChild(invalidOption);
+
+    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    expect(typeSelect).toHaveValue("deposito");
+
+    fireEvent.change(typeSelect, { target: { value: "pix" } });
+    expect(typeSelect).toHaveValue("deposito");
+  });
+
   it("envia o valor em centavos e reseta o formulario no submit valido", () => {
     const onSubmitTransaction = vi.fn();
 
