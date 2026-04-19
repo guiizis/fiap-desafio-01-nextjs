@@ -113,6 +113,20 @@ export function ServicesDashboard({
     };
   };
 
+  const handleDeleteStatementEntry = (entryId: string) => {
+    setCurrentStatementEntries((currentEntries) => {
+      const entryToDelete = currentEntries.find((entry) => entry.id === entryId);
+
+      if (!entryToDelete) {
+        return currentEntries;
+      }
+
+      setCurrentBalanceInCents((currentBalance) => currentBalance - entryToDelete.amountInCents);
+
+      return currentEntries.filter((entry) => entry.id !== entryId);
+    });
+  };
+
   return (
     <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
       <div className="grid gap-4 lg:grid-cols-[176px_minmax(0,1fr)_240px] lg:items-start">
@@ -134,7 +148,7 @@ export function ServicesDashboard({
           />
         </div>
 
-        <StatementPanel entries={currentStatementEntries} />
+        <StatementPanel entries={currentStatementEntries} onDeleteEntry={handleDeleteStatementEntry} />
       </div>
     </div>
   );

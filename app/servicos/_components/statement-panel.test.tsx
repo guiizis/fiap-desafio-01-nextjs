@@ -1,11 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { StatementPanel } from "./statement-panel";
 
 describe("StatementPanel", () => {
-  it("renderiza titulo e lancamentos do extrato e habilita acoes ao selecionar um item", () => {
+  it("renderiza titulo e lancamentos do extrato, habilita acoes e exclui item selecionado", () => {
+    const onDeleteEntry = vi.fn();
+
     render(
       <StatementPanel
+        onDeleteEntry={onDeleteEntry}
         entries={[
           { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
           { id: "2", month: "Novembro", type: "Transferencia", amountInCents: -50000, date: "21/11/2022" },
@@ -34,5 +37,8 @@ describe("StatementPanel", () => {
 
     expect(editButton).toBeEnabled();
     expect(deleteButton).toBeEnabled();
+
+    fireEvent.click(deleteButton);
+    expect(onDeleteEntry).toHaveBeenCalledWith("1");
   });
 });

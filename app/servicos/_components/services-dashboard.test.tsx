@@ -101,6 +101,39 @@ describe("ServicesDashboard", () => {
     }
   });
 
+  it("ajusta o saldo ao excluir lancamento selecionado do extrato", () => {
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
+
+    const statementPanel = screen.getByLabelText("Extrato da conta");
+    const deleteButton = screen.getByRole("button", { name: "Excluir extrato" });
+
+    const transferEntry = screen.getByText("-R$ 500,00").closest("li");
+    if (!transferEntry) {
+      throw new Error("Lancamento de transferencia nao encontrado");
+    }
+
+    fireEvent.click(transferEntry);
+    fireEvent.click(deleteButton);
+    expect(screen.getByText("R$ 3.000,00")).toBeInTheDocument();
+    expect(within(statementPanel).queryByText("-R$ 500,00")).not.toBeInTheDocument();
+
+    const depositEntry = screen.getByText("R$ 150,00").closest("li");
+    if (!depositEntry) {
+      throw new Error("Lancamento de deposito nao encontrado");
+    }
+
+    fireEvent.click(depositEntry);
+    fireEvent.click(deleteButton);
+    expect(screen.getByText("R$ 2.850,00")).toBeInTheDocument();
+    expect(within(statementPanel).queryByText("R$ 150,00")).not.toBeInTheDocument();
+  });
+
   it("bloqueia transferencia que negativaria o saldo e exibe alerta", () => {
     render(
       <ServicesDashboard

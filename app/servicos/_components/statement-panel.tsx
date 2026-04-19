@@ -8,11 +8,23 @@ import { formatCurrencyFromCents } from "../../lib/calc";
 
 type StatementPanelProps = {
   entries: readonly StatementEntry[];
+  onDeleteEntry?: (entryId: string) => void;
 };
 
-export function StatementPanel({ entries }: StatementPanelProps) {
+export function StatementPanel({ entries, onDeleteEntry }: StatementPanelProps) {
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  const hasSelectedEntry = selectedEntryId !== null;
+  const activeSelectedEntryId = entries.some((entry) => entry.id === selectedEntryId)
+    ? selectedEntryId
+    : null;
+  const hasSelectedEntry = activeSelectedEntryId !== null;
+
+  const handleDeleteSelectedEntry = () => {
+    if (!activeSelectedEntryId) {
+      return;
+    }
+
+    onDeleteEntry?.(activeSelectedEntryId);
+  };
 
   return (
     <aside className="rounded-md bg-surface px-5 py-5" aria-label="Extrato da conta">
@@ -34,6 +46,7 @@ export function StatementPanel({ entries }: StatementPanelProps) {
             tone="primary"
             className="h-12 w-12 !rounded-full p-0"
             disabled={!hasSelectedEntry}
+            onClick={handleDeleteSelectedEntry}
           >
             <Image src="/icons/trash-exclude.svg" alt="" width={24} height={24} aria-hidden="true" />
           </Button>
@@ -47,7 +60,7 @@ export function StatementPanel({ entries }: StatementPanelProps) {
             onClick={() => setSelectedEntryId(entry.id)}
             className={[
               "cursor-pointer border-b border-secondary/35 pb-2 transition-colors",
-              selectedEntryId === entry.id ? "bg-surface-muted/60" : "",
+              activeSelectedEntryId === entry.id ? "bg-surface-muted/60" : "",
             ].join(" ")}
           >
             <div className="mb-1 flex items-center justify-between gap-2">
