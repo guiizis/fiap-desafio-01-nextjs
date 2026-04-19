@@ -7,7 +7,7 @@ type ServicosHeaderProps = {
 export function ServicosHeader({ userName }: ServicosHeaderProps) {
   return (
     <header className="w-full bg-primary text-surface">
-      <div className="mx-auto flex w-full max-w-[1140px] items-center justify-end gap-4 px-4 py-4 md:px-0">
+      <div className="mx-auto flex w-full max-w-[688px] items-center justify-end gap-4 px-4 py-4 md:py-7 xl:max-w-[1140px] xl:px-0 xl:py-4">
         <span className="text-body-sm">{userName}</span>
         <button
           type="button"
