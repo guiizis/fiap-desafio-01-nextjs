@@ -1,37 +1,72 @@
-"use client";
+﻿"use client";
 
 import type { FormEventHandler } from "react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { Alert } from "../../../components/ui/alert";
 import { Button } from "../../../components/ui/button";
 import { Input, Select } from "../../../components/ui/input";
+import type {
+  NewTransactionPanelProps,
+  TransactionType,
+} from "./interfaces/new-transaction-panel.interfaces";
 import { formatCurrencyInput } from "../_utils/currency-mask";
 
-export function NewTransactionPanel() {
-  const [transactionType, setTransactionType] = useState("");
+function parseCurrencyInputToCents(value: string) {
+  const normalizedAmount = value.replace(/\./g, "").replace(",", ".");
+  const amountValue = Number(normalizedAmount);
+
+  if (!Number.isFinite(amountValue) || amountValue <= 0) {
+    return 0;
+  }
+
+  return Math.round(amountValue * 100);
+}
+
+export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanelProps) {
+  const [transactionType, setTransactionType] = useState<TransactionType | "">("");
   const [transactionAmount, setTransactionAmount] = useState("00,00");
-  const transactionOptions = [
-    { value: "deposito", label: "Dep\u00f3sito" },
-    { value: "transferencia", label: "Transfer\u00eancia" },
-  ] as const;
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const transactionOptions: readonly { value: TransactionType; label: string }[] = [
+    { value: "deposito", label: "Depósito" },
+    { value: "transferencia", label: "Transferência" },
+  ];
 
-  const isAmountValid = useMemo(() => {
-    const normalizedAmount = transactionAmount.replace(/\./g, "").replace(",", ".");
-    const amountValue = Number(normalizedAmount);
-
-    return Number.isFinite(amountValue) && amountValue > 0;
-  }, [transactionAmount]);
+  const amountInCents = useMemo(() => parseCurrencyInputToCents(transactionAmount), [transactionAmount]);
+  const isAmountValid = amountInCents > 0;
 
   const isFormValid = transactionType !== "" && isAmountValid;
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
+    setFeedback(null);
+
+    if (transactionType !== "deposito" && transactionType !== "transferencia") {
+      return;
+    }
+
+    if (!isAmountValid) {
+      return;
+    }
+
+    const result = onSubmitTransaction?.({
+      type: transactionType,
+      amountInCents,
+    });
+
+    if (result && !result.ok) {
+      setFeedback(result.message);
+      return;
+    }
+
+    setTransactionType("");
+    setTransactionAmount("00,00");
   };
 
   return (
     <section
       className="relative min-h-[560px] overflow-hidden rounded-md bg-surface-transaction p-8"
-      aria-label={"Nova transa\u00e7\u00e3o"}
+      aria-label="Nova transação"
     >
       <Image
         src="/servicos/transacoes/square-top.svg"
@@ -51,19 +86,23 @@ export function NewTransactionPanel() {
       />
 
       <div className="relative z-10 max-w-[420px]">
-        <h2 className="text-[3rem] font-bold leading-none text-transaction-text">
-          {"Nova transa\u00e7\u00e3o"}
-        </h2>
+        <h2 className="text-[3rem] font-bold leading-none text-transaction-text">Nova transação</h2>
 
         <form className="mt-10" onSubmit={handleSubmit} noValidate>
           <Select
-            label={"Tipo de transa\u00e7\u00e3o"}
+            label="Tipo de transação"
             id="transaction-type"
             name="transaction-type"
             options={transactionOptions}
-            placeholder={"Selecione o tipo de transa\u00e7\u00e3o"}
+            placeholder="Selecione o tipo de transação"
             value={transactionType}
-            onChange={(event) => setTransactionType(event.currentTarget.value)}
+            onChange={(event) => {
+              const value = event.currentTarget.value;
+
+              if (value === "deposito" || value === "transferencia" || value === "") {
+                setTransactionType(value);
+              }
+            }}
             required
             containerClassName=""
             labelClassName="sr-only"
@@ -96,9 +135,15 @@ export function NewTransactionPanel() {
               ].join(" ")}
               disabled={!isFormValid}
             >
-              {"Concluir transa\u00e7\u00e3o"}
+              Concluir transação
             </Button>
           </div>
+
+          {feedback ? (
+            <div className="mt-4 max-w-[420px]">
+              <Alert variant="error" message={feedback} onClose={() => setFeedback(null)} />
+            </div>
+          ) : null}
         </form>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+﻿import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ServicesDashboard } from "./services-dashboard";
 
@@ -40,5 +40,52 @@ describe("ServicesDashboard", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Mostrar saldo" }));
     expect(screen.getByText("R$ 2.500,00")).toBeInTheDocument();
+  });
+
+  it("atualiza o saldo ao concluir deposito e transferencia", () => {
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(amountInput, { target: { value: "10000" } });
+    fireEvent.click(submitButton);
+    expect(screen.getByText("R$ 2.600,00")).toBeInTheDocument();
+
+    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(amountInput, { target: { value: "5000" } });
+    fireEvent.click(submitButton);
+    expect(screen.getByText("R$ 2.550,00")).toBeInTheDocument();
+  });
+
+  it("bloqueia transferencia que negativaria o saldo e exibe alerta", () => {
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(amountInput, { target: { value: "300000" } });
+    fireEvent.click(submitButton);
+
+    expect(screen.getByText("R$ 2.500,00")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Saldo insuficiente para concluir a transferência."
+    );
   });
 });

@@ -1,5 +1,5 @@
-import { createEvent, fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+﻿import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { NewTransactionPanel } from "./new-transaction-panel";
 
 describe("NewTransactionPanel", () => {
@@ -7,14 +7,14 @@ describe("NewTransactionPanel", () => {
     render(<NewTransactionPanel />);
 
     expect(
-      screen.getByRole("heading", { name: "Nova transa\u00e7\u00e3o", level: 2 })
+      screen.getByRole("heading", { name: "Nova transação", level: 2 })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Tipo de transa\u00e7\u00e3o" })
+      screen.getByRole("combobox", { name: "Tipo de transação" })
     ).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Valor" })).toHaveValue("00,00");
     expect(
-      screen.getByRole("button", { name: "Concluir transa\u00e7\u00e3o" })
+      screen.getByRole("button", { name: "Concluir transação" })
     ).toBeDisabled();
   });
 
@@ -30,8 +30,8 @@ describe("NewTransactionPanel", () => {
   it("habilita botao somente quando tipo e valor sao validos", () => {
     render(<NewTransactionPanel />);
 
-    const submitButton = screen.getByRole("button", { name: "Concluir transa\u00e7\u00e3o" });
-    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transa\u00e7\u00e3o" });
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
     const amountInput = screen.getByRole("textbox", { name: "Valor" });
 
     fireEvent.change(amountInput, { target: { value: "0" } });
@@ -47,8 +47,8 @@ describe("NewTransactionPanel", () => {
   it("previne submit padrao do formulario", () => {
     render(<NewTransactionPanel />);
 
-    const submitButton = screen.getByRole("button", { name: "Concluir transa\u00e7\u00e3o" });
-    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transa\u00e7\u00e3o" });
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
     const amountInput = screen.getByRole("textbox", { name: "Valor" });
     const form = submitButton.closest("form");
 
@@ -63,5 +63,49 @@ describe("NewTransactionPanel", () => {
     fireEvent(form, submitEvent);
 
     expect(submitEvent.defaultPrevented).toBe(true);
+  });
+
+  it("envia o valor em centavos e reseta o formulario no submit valido", () => {
+    const onSubmitTransaction = vi.fn();
+
+    render(<NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />);
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(amountInput, { target: { value: "123456" } });
+    fireEvent.click(submitButton);
+
+    expect(onSubmitTransaction).toHaveBeenCalledWith({
+      type: "deposito",
+      amountInCents: 123456,
+    });
+    expect(typeSelect).toHaveValue("");
+    expect(amountInput).toHaveValue("00,00");
+  });
+
+  it("mostra alerta de erro e mantem os dados quando transacao e bloqueada", () => {
+    const onSubmitTransaction = vi.fn().mockReturnValue({
+      ok: false,
+      message: "Saldo insuficiente para concluir a transferência.",
+    });
+
+    render(<NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />);
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(amountInput, { target: { value: "300000" } });
+    fireEvent.click(submitButton);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Saldo insuficiente para concluir a transferência."
+    );
+    expect(typeSelect).toHaveValue("transferencia");
+    expect(amountInput).toHaveValue("3.000,00");
   });
 });

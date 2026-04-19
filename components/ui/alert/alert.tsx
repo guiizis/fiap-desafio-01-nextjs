@@ -8,7 +8,7 @@ const baseClasses =
 const variantClasses: Record<AlertVariant, string> = {
   info: "border-primary/25 bg-primary/10 text-primary",
   warning: "border-accent/25 bg-accent/10 text-accent",
-  error: "border-error/25 bg-error/10 text-error",
+  error: "border-error bg-error text-black",
   success: "border-success/35 bg-success/20 text-success",
 };
 
