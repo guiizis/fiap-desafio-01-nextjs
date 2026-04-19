@@ -40,6 +40,34 @@ function formatCurrentDateLabel() {
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${date}`;
 }
 
+function createStatementEntry({
+  type,
+  amountInCents,
+}: NewTransactionPayload): StatementEntry {
+  const now = new Date();
+  const month = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    timeZone: "America/Sao_Paulo",
+  }).format(now);
+  const date = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  }).format(now);
+  const id = typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  return {
+    id,
+    month: `${month.charAt(0).toUpperCase()}${month.slice(1)}`,
+    type: type === "deposito" ? "Deposito" : "Transferencia",
+    amountInCents: type === "deposito" ? amountInCents : -amountInCents,
+    date,
+  };
+}
+
 export function ServicesDashboard({
   userFirstName,
   balanceInCents,
@@ -48,11 +76,18 @@ export function ServicesDashboard({
   const [activeTab, setActiveTab] = useState<ServicesTabKey>("inicio");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const [currentBalanceInCents, setCurrentBalanceInCents] = useState(balanceInCents);
+  const [currentStatementEntries, setCurrentStatementEntries] = useState<StatementEntry[]>([
+    ...statementEntries,
+  ]);
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
 
   useEffect(() => {
     setCurrentBalanceInCents(balanceInCents);
   }, [balanceInCents]);
+
+  useEffect(() => {
+    setCurrentStatementEntries([...statementEntries]);
+  }, [statementEntries]);
 
   const handleSubmitTransaction = ({
     type,
@@ -68,10 +103,50 @@ export function ServicesDashboard({
     setCurrentBalanceInCents((currentValue) =>
       type === "deposito" ? currentValue + amountInCents : currentValue - amountInCents
     );
+    setCurrentStatementEntries((currentValue) => [
+      createStatementEntry({ type, amountInCents }),
+      ...currentValue,
+    ]);
 
     return {
       ok: true,
     };
+  };
+
+  const handleDeleteStatementEntry = (entryId: string) => {
+    setCurrentStatementEntries((currentEntries) => {
+      const entryToDelete = currentEntries.find((entry) => entry.id === entryId);
+
+      if (!entryToDelete) {
+        return currentEntries;
+      }
+
+      setCurrentBalanceInCents((currentBalance) => currentBalance - entryToDelete.amountInCents);
+
+      return currentEntries.filter((entry) => entry.id !== entryId);
+    });
+  };
+
+  const handleEditStatementEntry = (entryId: string, nextAmountInCents: number) => {
+    setCurrentStatementEntries((currentEntries) => {
+      const entryToEdit = currentEntries.find((entry) => entry.id === entryId);
+      if (!entryToEdit) {
+        return currentEntries;
+      }
+
+      const normalizedAmountInCents =
+        entryToEdit.type === "Transferencia"
+          ? -Math.abs(nextAmountInCents)
+          : Math.abs(nextAmountInCents);
+
+      setCurrentBalanceInCents(
+        (currentBalance) => currentBalance - entryToEdit.amountInCents + normalizedAmountInCents
+      );
+
+      return currentEntries.map((entry) =>
+        entry.id === entryId ? { ...entry, amountInCents: normalizedAmountInCents } : entry
+      );
+    });
   };
 
   return (
@@ -95,7 +170,11 @@ export function ServicesDashboard({
           />
         </div>
 
-        <StatementPanel entries={statementEntries} />
+        <StatementPanel
+          entries={currentStatementEntries}
+          onDeleteEntry={handleDeleteStatementEntry}
+          onEditEntry={handleEditStatementEntry}
+        />
       </div>
     </div>
   );
