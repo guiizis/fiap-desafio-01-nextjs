@@ -16,12 +16,12 @@ type ServiceOption = {
 };
 
 const serviceOptions: readonly ServiceOption[] = [
-  { id: "emprestimo", label: "Emprestimo" },
-  { id: "meus-cartoes", label: "Meus cartoes" },
-  { id: "doacoes", label: "Doacoes" },
+  { id: "emprestimo", label: "Empréstimo" },
+  { id: "meus-cartoes", label: "Meus cartões" },
+  { id: "doacoes", label: "Doações" },
   { id: "pix", label: "Pix" },
   { id: "seguros", label: "Seguros" },
-  { id: "credito-celular", label: "Credito celular" },
+  { id: "credito-celular", label: "Crédito celular" },
 ];
 
 const tabContent: Record<

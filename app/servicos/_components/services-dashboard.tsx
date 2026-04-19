@@ -19,7 +19,7 @@ const sidebarItems: readonly { key: ServicesTabKey; label: string; disabled?: bo
   { key: "inicio", label: "Inicio" },
   { key: "transferencias", label: "Transferencias", disabled: true },
   { key: "investimentos", label: "Investimentos", disabled: true },
-  { key: "outros-servicos", label: "Outros servicos", disabled: true },
+  { key: "outros-servicos", label: "Outros servicos", disabled: false },
 ];
 
 type ServicesDashboardProps = {
