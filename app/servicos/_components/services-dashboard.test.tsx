@@ -1,4 +1,5 @@
 ﻿import { fireEvent, render, screen, within } from "@testing-library/react";
+import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ServicesDashboard } from "./services-dashboard";
 
@@ -228,5 +229,38 @@ describe("ServicesDashboard", () => {
       vi.unstubAllGlobals();
       vi.useRealTimers();
     }
+  });
+
+  it("nao duplica ajuste de saldo ao excluir transferencia no StrictMode", () => {
+    render(
+      <StrictMode>
+        <ServicesDashboard
+          userFirstName="Joana"
+          balanceInCents={250000}
+          statementEntries={statementEntries}
+        />
+      </StrictMode>
+    );
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(amountInput, { target: { value: "7000" } });
+    fireEvent.click(submitButton);
+
+    expect(screen.getByText("R$ 2.430,00")).toBeInTheDocument();
+
+    const deleteButton = screen.getByRole("button", { name: "Excluir extrato" });
+    const transferEntry = screen.getByText("-R$ 70,00").closest("li");
+    if (!transferEntry) {
+      throw new Error("Lancamento de transferencia nao encontrado");
+    }
+
+    fireEvent.click(transferEntry);
+    fireEvent.click(deleteButton);
+
+    expect(screen.getByText("R$ 2.500,00")).toBeInTheDocument();
   });
 });

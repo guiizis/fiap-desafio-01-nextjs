@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { AccountSummaryCard } from "./account-summary-card";
 import type {
   NewTransactionPayload,
   NewTransactionResult,
 } from "./interfaces/new-transaction-panel.interfaces";
 import type { StatementEntry } from "./interfaces/statement-panel.interfaces";
+import {
+  accountReducer,
+  createAccountState,
+} from "../_state/account.reducer";
 import { ServicesContentPanel } from "./services-content-panel";
 import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
 import { StatementPanel } from "./statement-panel";
@@ -75,38 +79,35 @@ export function ServicesDashboard({
 }: ServicesDashboardProps) {
   const [activeTab, setActiveTab] = useState<ServicesTabKey>("inicio");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const [currentBalanceInCents, setCurrentBalanceInCents] = useState(balanceInCents);
-  const [currentStatementEntries, setCurrentStatementEntries] = useState<StatementEntry[]>([
-    ...statementEntries,
-  ]);
+  const [accountState, dispatchAccountAction] = useReducer(
+    accountReducer,
+    createAccountState(balanceInCents, statementEntries)
+  );
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
 
   useEffect(() => {
-    setCurrentBalanceInCents(balanceInCents);
-  }, [balanceInCents]);
-
-  useEffect(() => {
-    setCurrentStatementEntries([...statementEntries]);
-  }, [statementEntries]);
+    dispatchAccountAction({
+      type: "hydrate-from-props",
+      balanceInCents,
+      statementEntries,
+    });
+  }, [balanceInCents, statementEntries]);
 
   const handleSubmitTransaction = ({
     type,
     amountInCents,
   }: NewTransactionPayload): NewTransactionResult => {
-    if (type === "transferencia" && amountInCents > currentBalanceInCents) {
+    if (type === "transferencia" && amountInCents > accountState.currentBalanceInCents) {
       return {
         ok: false,
         message: "Saldo insuficiente para concluir a transferência.",
       };
     }
 
-    setCurrentBalanceInCents((currentValue) =>
-      type === "deposito" ? currentValue + amountInCents : currentValue - amountInCents
-    );
-    setCurrentStatementEntries((currentValue) => [
-      createStatementEntry({ type, amountInCents }),
-      ...currentValue,
-    ]);
+    dispatchAccountAction({
+      type: "append-transaction-entry",
+      entry: createStatementEntry({ type, amountInCents }),
+    });
 
     return {
       ok: true,
@@ -114,38 +115,17 @@ export function ServicesDashboard({
   };
 
   const handleDeleteStatementEntry = (entryId: string) => {
-    setCurrentStatementEntries((currentEntries) => {
-      const entryToDelete = currentEntries.find((entry) => entry.id === entryId);
-
-      if (!entryToDelete) {
-        return currentEntries;
-      }
-
-      setCurrentBalanceInCents((currentBalance) => currentBalance - entryToDelete.amountInCents);
-
-      return currentEntries.filter((entry) => entry.id !== entryId);
+    dispatchAccountAction({
+      type: "delete-statement-entry",
+      entryId,
     });
   };
 
   const handleEditStatementEntry = (entryId: string, nextAmountInCents: number) => {
-    setCurrentStatementEntries((currentEntries) => {
-      const entryToEdit = currentEntries.find((entry) => entry.id === entryId);
-      if (!entryToEdit) {
-        return currentEntries;
-      }
-
-      const normalizedAmountInCents =
-        entryToEdit.type === "Transferencia"
-          ? -Math.abs(nextAmountInCents)
-          : Math.abs(nextAmountInCents);
-
-      setCurrentBalanceInCents(
-        (currentBalance) => currentBalance - entryToEdit.amountInCents + normalizedAmountInCents
-      );
-
-      return currentEntries.map((entry) =>
-        entry.id === entryId ? { ...entry, amountInCents: normalizedAmountInCents } : entry
-      );
+    dispatchAccountAction({
+      type: "edit-statement-entry",
+      entryId,
+      nextAmountInCents,
     });
   };
 
@@ -160,7 +140,7 @@ export function ServicesDashboard({
             dateLabel={currentDateLabel}
             balanceLabel="Saldo"
             accountLabel="Conta corrente"
-            balanceInCents={currentBalanceInCents}
+            balanceInCents={accountState.currentBalanceInCents}
             isBalanceVisible={isBalanceVisible}
             onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
           />
@@ -171,7 +151,7 @@ export function ServicesDashboard({
         </div>
 
         <StatementPanel
-          entries={currentStatementEntries}
+          entries={accountState.currentStatementEntries}
           onDeleteEntry={handleDeleteStatementEntry}
           onEditEntry={handleEditStatementEntry}
         />
