@@ -24,7 +24,7 @@ export function AccountSummaryCard({
 
   return (
     <section
-      className="relative min-h-[560px] overflow-hidden rounded-md bg-primary px-9 py-8 text-surface mobile:min-h-[520px] mobile:px-5 mobile:py-7 xl:min-h-[350px] xl:px-6 xl:py-7"
+      className="relative min-h-[560px] overflow-hidden rounded-md bg-primary px-9 py-8 text-surface mobile:min-h-[520px] mobile:px-5 mobile:py-7 desktop:min-h-[350px] desktop:px-6 desktop:py-7"
       aria-label="Resumo da conta"
     >
       <Image
@@ -33,7 +33,7 @@ export function AccountSummaryCard({
         width={600}
         height={402}
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 z-0 xl:hidden"
+        className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
       <Image
         src="/servicos/banker.svg"
@@ -41,16 +41,16 @@ export function AccountSummaryCard({
         width={172}
         height={228}
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-8 z-0 mobile:left-4 xl:hidden"
+        className="pointer-events-none absolute bottom-0 left-8 z-0 mobile:left-4 desktop:hidden"
       />
 
-      <div className="relative z-10 grid grid-cols-[minmax(0,1fr)_minmax(0,270px)] items-start gap-6 mobile:grid-cols-1 xl:grid-cols-[1fr_340px]">
+      <div className="relative z-10 grid grid-cols-[minmax(0,1fr)_minmax(0,270px)] items-start gap-6 mobile:grid-cols-1 desktop:grid-cols-[1fr_340px]">
         <div className="space-y-2">
           <h1 className="text-title-xl font-bold text-surface">Ola, {name}! :)</h1>
           <p className="text-body-sm text-menu-hover">{dateLabel}</p>
         </div>
 
-        <div className="w-full pt-6 mobile:pt-0 xl:pt-6">
+        <div className="w-full pt-6 mobile:pt-0 desktop:pt-6">
           <p className="flex items-center gap-2 text-title-lg font-semibold text-surface">
             {balanceLabel}
             <button
@@ -71,7 +71,7 @@ export function AccountSummaryCard({
           </p>
           <span className="mt-2 block h-[2px] w-full bg-accent" />
           <p className="mt-2 text-body-md text-menu-hover">{accountLabel}</p>
-          <p className="mt-1 min-w-0 whitespace-nowrap text-[clamp(2.4rem,5vw,3rem)] leading-none text-surface mobile:text-[2.6rem] xl:text-[3.2rem]">
+          <p className="mt-1 min-w-0 whitespace-nowrap text-[clamp(2.4rem,5vw,3rem)] leading-none text-surface mobile:text-[2.6rem] desktop:text-[3.2rem]">
             {displayedBalance}
           </p>
         </div>

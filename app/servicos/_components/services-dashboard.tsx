@@ -130,27 +130,29 @@ export function ServicesDashboard({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 xl:max-w-[1140px] xl:px-0 xl:pb-8 xl:pt-4">
-      <div className="space-y-6 xl:space-y-4">
-        <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
+    <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
+      <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
+        <div className="desktop:flex desktop:h-full">
+          <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
+        </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start xl:gap-4">
-          <div className="space-y-6 xl:space-y-3">
-            <AccountSummaryCard
-              name={userFirstName}
-              dateLabel={currentDateLabel}
-              balanceLabel="Saldo"
-              accountLabel="Conta corrente"
-              balanceInCents={accountState.currentBalanceInCents}
-              isBalanceVisible={isBalanceVisible}
-              onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
-            />
-            <ServicesContentPanel
-              activeTab={activeTab}
-              onSubmitTransaction={handleSubmitTransaction}
-            />
-          </div>
+        <div className="space-y-6 desktop:col-start-2 desktop:min-w-0 desktop:space-y-3">
+          <AccountSummaryCard
+            name={userFirstName}
+            dateLabel={currentDateLabel}
+            balanceLabel="Saldo"
+            accountLabel="Conta corrente"
+            balanceInCents={accountState.currentBalanceInCents}
+            isBalanceVisible={isBalanceVisible}
+            onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
+          />
+          <ServicesContentPanel
+            activeTab={activeTab}
+            onSubmitTransaction={handleSubmitTransaction}
+          />
+        </div>
 
+        <div className="desktop:col-start-3 desktop:flex desktop:h-full">
           <StatementPanel
             entries={accountState.currentStatementEntries}
             onDeleteEntry={handleDeleteStatementEntry}

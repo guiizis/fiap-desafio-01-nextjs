@@ -32,7 +32,7 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
   };
 
   return (
-    <nav aria-label="Menu de servicos" className="relative">
+    <nav aria-label="Menu de servicos" className="relative desktop:h-full desktop:w-full">
       <div className="relative mb-2 md:hidden">
         <button
           type="button"
@@ -87,19 +87,22 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
         ) : null}
       </div>
 
-      <ul className="hidden flex-wrap items-center gap-8 border-b border-secondary/40 pb-2 md:flex">
+      <ul className="hidden md:flex md:flex-wrap md:items-center md:gap-8 md:border-b md:border-secondary/40 md:pb-2 desktop:h-full desktop:w-full desktop:flex-col desktop:items-stretch desktop:gap-0 desktop:rounded-md desktop:border desktop:border-border desktop:bg-surface desktop:px-5 desktop:py-4 desktop:shadow-sm desktop:border-b-0">
         {items.map((item) => {
           const isDisabled = Boolean(item.disabled);
           const isActive = item.key === activeItem && !isDisabled;
 
           return (
-            <li key={item.key} className="shrink-0">
+            <li
+              key={item.key}
+              className="shrink-0 desktop:w-full desktop:border-b desktop:border-border desktop:last:border-b-0"
+            >
               <button
                 type="button"
                 disabled={isDisabled}
                 onClick={() => handleSelectItem(item)}
                 className={[
-                  "w-auto border-b border-transparent px-0 py-1 text-left text-body-md transition-colors",
+                  "w-auto border-b border-transparent px-0 py-1 text-left text-body-md transition-colors desktop:w-full desktop:border-0 desktop:py-3",
                   isActive
                     ? "font-semibold text-secondary"
                     : isDisabled

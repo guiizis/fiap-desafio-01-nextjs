@@ -65,7 +65,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
 
   return (
     <section
-      className="relative min-h-[610px] overflow-hidden rounded-md bg-surface-transaction px-9 py-8 mobile:min-h-[580px] mobile:px-5 mobile:py-6 xl:min-h-[560px] xl:p-8"
+      className="relative min-h-[610px] overflow-hidden rounded-md bg-surface-transaction px-9 py-8 mobile:min-h-[580px] mobile:px-5 mobile:py-6 desktop:min-h-[560px] desktop:p-8"
       aria-label="Nova transação"
     >
       <Image
@@ -74,7 +74,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={178}
         height={180}
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 z-0 hidden xl:block"
+        className="pointer-events-none absolute right-0 top-0 z-0 hidden desktop:block"
       />
       <Image
         src="/servicos/transacoes/square-bottom.svg"
@@ -82,7 +82,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={178}
         height={180}
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden xl:block"
+        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden desktop:block"
       />
 
       <Image
@@ -91,7 +91,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={600}
         height={402}
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 z-0 xl:hidden"
+        className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
       <Image
         src="/servicos/responsive/squares-bottom.svg"
@@ -99,7 +99,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={181}
         height={178}
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 z-0 xl:hidden"
+        className="pointer-events-none absolute bottom-0 left-0 z-0 desktop:hidden"
       />
       <Image
         src="/servicos/responsive/people-card.svg"
@@ -107,7 +107,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={328}
         height={231}
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-5 z-0 mobile:right-0 mobile:w-[270px] mobile:max-w-[68%] xl:hidden"
+        className="pointer-events-none absolute bottom-0 right-5 z-0 mobile:right-0 mobile:w-[270px] mobile:max-w-[68%] desktop:hidden"
       />
 
       <div className="relative z-10 max-w-[420px]">
