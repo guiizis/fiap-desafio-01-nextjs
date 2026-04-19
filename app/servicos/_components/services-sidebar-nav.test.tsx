@@ -10,6 +10,18 @@ const items = [
   { key: "outros-servicos", label: "Outros servicos", disabled: true },
 ] as const;
 
+function triggerButtonClickHandler(element: HTMLElement) {
+  const reactPropsKey = Object.keys(element).find((key) => key.startsWith("__reactProps$"));
+  if (!reactPropsKey) {
+    throw new Error("Props internas do React nao encontradas");
+  }
+
+  const reactProps = (element as Record<string, unknown>)[reactPropsKey] as {
+    onClick?: () => void;
+  };
+  reactProps.onClick?.();
+}
+
 function getOpenButtons() {
   return screen.queryAllByRole("button", { name: "Fechar menu de servicos" });
 }
@@ -89,6 +101,16 @@ describe("ServicesSidebarNav", () => {
 
     expect(onChange).not.toHaveBeenCalledWith("transferencias");
     expect(getOpenButtons()).toHaveLength(2);
+  });
+
+  it("ignora item desabilitado mesmo quando handler onClick e disparado manualmente", () => {
+    const onChange = vi.fn();
+    render(<ServicesSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+
+    const disabledDesktopButton = screen.getByRole("button", { name: "Transferencias" });
+    triggerButtonClickHandler(disabledDesktopButton);
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("fecha o menu mobile pelo botao interno do painel", () => {

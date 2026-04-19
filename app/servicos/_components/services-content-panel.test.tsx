@@ -31,9 +31,9 @@ describe("ServicesContentPanel", () => {
     fireEvent.click(openWarningButton);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Ainda em construcao")).toBeInTheDocument();
+    expect(screen.getByText("Ainda em construção")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Voltar para servicos" }));
+    fireEvent.click(screen.getByRole("button", { name: "Voltar para serviços" }));
 
     expect(replaceMock).toHaveBeenCalledWith("/servicos");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

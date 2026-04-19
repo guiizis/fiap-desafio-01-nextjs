@@ -28,10 +28,6 @@ function parseIsoDate(value: string) {
   const month = Number(monthLabel);
   const day = Number(dayLabel);
 
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
-    return null;
-  }
-
   const date = new Date(Date.UTC(year, month - 1, day));
   const isValidDate = date.getUTCFullYear() === year
     && date.getUTCMonth() + 1 === month
