@@ -11,6 +11,12 @@ import {
   accountReducer,
   createAccountState,
 } from "../_state/account.reducer";
+import {
+  formatIsoDateToPtBr,
+  getTransactionDateRange,
+  toStatementDate,
+  type TransactionStatementDate,
+} from "../_utils/transaction-date";
 import { ServicesContentPanel } from "./services-content-panel";
 import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
 import { StatementPanel } from "./statement-panel";
@@ -19,7 +25,7 @@ const sidebarItems: readonly { key: ServicesTabKey; label: string; disabled?: bo
   { key: "inicio", label: "Inicio" },
   { key: "transferencias", label: "Transferencias", disabled: true },
   { key: "investimentos", label: "Investimentos", disabled: true },
-  { key: "outros-servicos", label: "Outros servicos", disabled: true },
+  { key: "outros-servicos", label: "Outros servicos", disabled: false },
 ];
 
 type ServicesDashboardProps = {
@@ -47,28 +53,17 @@ function formatCurrentDateLabel() {
 function createStatementEntry({
   type,
   amountInCents,
-}: NewTransactionPayload): StatementEntry {
-  const now = new Date();
-  const month = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    timeZone: "America/Sao_Paulo",
-  }).format(now);
-  const date = new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(now);
+}: Omit<NewTransactionPayload, "transactionDate">, statementDate: TransactionStatementDate): StatementEntry {
   const id = typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   return {
     id,
-    month: `${month.charAt(0).toUpperCase()}${month.slice(1)}`,
+    month: statementDate.monthLabel,
     type: type === "deposito" ? "Deposito" : "Transferencia",
     amountInCents: type === "deposito" ? amountInCents : -amountInCents,
-    date,
+    date: statementDate.dateLabel,
   };
 }
 
@@ -84,6 +79,7 @@ export function ServicesDashboard({
     createAccountState(balanceInCents, statementEntries)
   );
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+  const transactionDateRange = useMemo(() => getTransactionDateRange(), []);
 
   useEffect(() => {
     dispatchAccountAction({
@@ -96,6 +92,7 @@ export function ServicesDashboard({
   const handleSubmitTransaction = ({
     type,
     amountInCents,
+    transactionDate,
   }: NewTransactionPayload): NewTransactionResult => {
     if (type === "transferencia" && amountInCents > accountState.currentBalanceInCents) {
       return {
@@ -104,9 +101,17 @@ export function ServicesDashboard({
       };
     }
 
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data invalida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
     dispatchAccountAction({
       type: "append-transaction-entry",
-      entry: createStatementEntry({ type, amountInCents }),
+      entry: createStatementEntry({ type, amountInCents }, statementDate),
     });
 
     return {
@@ -130,27 +135,29 @@ export function ServicesDashboard({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 xl:max-w-[1140px] xl:px-0 xl:pb-8 xl:pt-4">
-      <div className="space-y-6 xl:space-y-4">
-        <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
+    <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
+      <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
+        <div className="desktop:flex desktop:h-full">
+          <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
+        </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start xl:gap-4">
-          <div className="space-y-6 xl:space-y-3">
-            <AccountSummaryCard
-              name={userFirstName}
-              dateLabel={currentDateLabel}
-              balanceLabel="Saldo"
-              accountLabel="Conta corrente"
-              balanceInCents={accountState.currentBalanceInCents}
-              isBalanceVisible={isBalanceVisible}
-              onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
-            />
-            <ServicesContentPanel
-              activeTab={activeTab}
-              onSubmitTransaction={handleSubmitTransaction}
-            />
-          </div>
+        <div className="space-y-6 desktop:col-start-2 desktop:min-w-0 desktop:space-y-3">
+          <AccountSummaryCard
+            name={userFirstName}
+            dateLabel={currentDateLabel}
+            balanceLabel="Saldo"
+            accountLabel="Conta corrente"
+            balanceInCents={accountState.currentBalanceInCents}
+            isBalanceVisible={isBalanceVisible}
+            onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
+          />
+          <ServicesContentPanel
+            activeTab={activeTab}
+            onSubmitTransaction={handleSubmitTransaction}
+          />
+        </div>
 
+        <div className="desktop:col-start-3 desktop:flex desktop:h-full">
           <StatementPanel
             entries={accountState.currentStatementEntries}
             onDeleteEntry={handleDeleteStatementEntry}

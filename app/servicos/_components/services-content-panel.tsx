@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { NewTransactionPanel } from "./new-transaction-panel";
 import type {
   NewTransactionPayload,
   NewTransactionResult,
 } from "./interfaces/new-transaction-panel.interfaces";
+import { ServiceUnderConstructionModal } from "./service-under-construction-modal";
 import type { ServicesTabKey } from "./services-sidebar-nav";
 
 type ServicesContentPanelProps = {
@@ -16,12 +20,12 @@ type ServiceOption = {
 };
 
 const serviceOptions: readonly ServiceOption[] = [
-  { id: "emprestimo", label: "Emprestimo" },
-  { id: "meus-cartoes", label: "Meus cartoes" },
-  { id: "doacoes", label: "Doacoes" },
+  { id: "emprestimo", label: "Empréstimo" },
+  { id: "meus-cartoes", label: "Meus cartões" },
+  { id: "doacoes", label: "Doações" },
   { id: "pix", label: "Pix" },
   { id: "seguros", label: "Seguros" },
-  { id: "credito-celular", label: "Credito celular" },
+  { id: "credito-celular", label: "Crédito celular" },
 ];
 
 const tabContent: Record<
@@ -54,6 +58,8 @@ export function ServicesContentPanel({
   activeTab,
   onSubmitTransaction,
 }: ServicesContentPanelProps) {
+  const [selectedServiceLabel, setSelectedServiceLabel] = useState<string | null>(null);
+
   if (activeTab === "inicio") {
     return <NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />;
   }
@@ -70,14 +76,28 @@ export function ServicesContentPanel({
           {serviceOptions.map((option) => (
             <article
               key={option.id}
-              className="flex min-h-[98px] items-center justify-center rounded-md bg-surface p-4 text-center shadow-sm"
+              className="min-h-[98px] rounded-md bg-surface shadow-sm"
               aria-label={option.label}
             >
-              <span className="text-body-md font-semibold text-heading">{option.label}</span>
+              <button
+                type="button"
+                onClick={() => setSelectedServiceLabel(option.label)}
+                className="flex h-full w-full cursor-pointer items-center justify-center rounded-md p-4 text-center transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label={`Abrir aviso do servico ${option.label}`}
+              >
+                <span className="text-body-md font-semibold text-heading">{option.label}</span>
+              </button>
             </article>
           ))}
         </div>
       </div>
+
+      {selectedServiceLabel ? (
+        <ServiceUnderConstructionModal
+          serviceLabel={selectedServiceLabel}
+          onClose={() => setSelectedServiceLabel(null)}
+        />
+      ) : null}
     </section>
   );
 }
