@@ -1,5 +1,5 @@
-﻿import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+﻿import { fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { ServicesDashboard } from "./services-dashboard";
 
 const statementEntries = [
@@ -66,6 +66,41 @@ describe("ServicesDashboard", () => {
     expect(screen.getByText("R$ 2.550,00")).toBeInTheDocument();
   });
 
+  it("adiciona novo lancamento no extrato ao concluir transacao", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-18T15:00:00.000Z"));
+
+    try {
+      render(
+        <ServicesDashboard
+          userFirstName="Joana"
+          balanceInCents={250000}
+          statementEntries={statementEntries}
+        />
+      );
+
+      const statementPanel = screen.getByLabelText("Extrato da conta");
+      const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+      const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+      const amountInput = screen.getByRole("textbox", { name: "Valor" });
+
+      expect(within(statementPanel).getAllByRole("listitem")).toHaveLength(4);
+
+      fireEvent.change(typeSelect, { target: { value: "deposito" } });
+      fireEvent.change(amountInput, { target: { value: "12345" } });
+      fireEvent.click(submitButton);
+
+      const statementItems = within(statementPanel).getAllByRole("listitem");
+      expect(statementItems).toHaveLength(5);
+      expect(within(statementItems[0]).getByText("Abril")).toBeInTheDocument();
+      expect(within(statementItems[0]).getByText("18/04/2026")).toBeInTheDocument();
+      expect(within(statementItems[0]).getByText("Deposito")).toBeInTheDocument();
+      expect(within(statementItems[0]).getByText(/123,45/)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("bloqueia transferencia que negativaria o saldo e exibe alerta", () => {
     render(
       <ServicesDashboard
@@ -87,5 +122,6 @@ describe("ServicesDashboard", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Saldo insuficiente para concluir a transferência."
     );
+    expect(within(screen.getByLabelText("Extrato da conta")).getAllByRole("listitem")).toHaveLength(4);
   });
 });
