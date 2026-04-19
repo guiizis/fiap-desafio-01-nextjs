@@ -131,30 +131,32 @@ export function ServicesDashboard({
 
   return (
     <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 xl:max-w-[1140px] xl:px-0 xl:pb-8 xl:pt-4">
-      <div className="grid gap-6 xl:grid-cols-[176px_minmax(0,1fr)_240px] xl:items-start xl:gap-4">
+      <div className="space-y-6 xl:space-y-4">
         <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
 
-        <div className="space-y-6 xl:space-y-3">
-          <AccountSummaryCard
-            name={userFirstName}
-            dateLabel={currentDateLabel}
-            balanceLabel="Saldo"
-            accountLabel="Conta corrente"
-            balanceInCents={accountState.currentBalanceInCents}
-            isBalanceVisible={isBalanceVisible}
-            onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
-          />
-          <ServicesContentPanel
-            activeTab={activeTab}
-            onSubmitTransaction={handleSubmitTransaction}
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start xl:gap-4">
+          <div className="space-y-6 xl:space-y-3">
+            <AccountSummaryCard
+              name={userFirstName}
+              dateLabel={currentDateLabel}
+              balanceLabel="Saldo"
+              accountLabel="Conta corrente"
+              balanceInCents={accountState.currentBalanceInCents}
+              isBalanceVisible={isBalanceVisible}
+              onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
+            />
+            <ServicesContentPanel
+              activeTab={activeTab}
+              onSubmitTransaction={handleSubmitTransaction}
+            />
+          </div>
+
+          <StatementPanel
+            entries={accountState.currentStatementEntries}
+            onDeleteEntry={handleDeleteStatementEntry}
+            onEditEntry={handleEditStatementEntry}
           />
         </div>
-
-        <StatementPanel
-          entries={accountState.currentStatementEntries}
-          onDeleteEntry={handleDeleteStatementEntry}
-          onEditEntry={handleEditStatementEntry}
-        />
       </div>
     </div>
   );
