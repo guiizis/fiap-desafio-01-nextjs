@@ -150,11 +150,11 @@ export function ServicesDashboard({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
-      <div className="grid gap-4 lg:grid-cols-[176px_minmax(0,1fr)_240px] lg:items-start">
+    <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 xl:max-w-[1140px] xl:px-0 xl:pb-8 xl:pt-4">
+      <div className="grid gap-6 xl:grid-cols-[176px_minmax(0,1fr)_240px] xl:items-start xl:gap-4">
         <ServicesSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
 
-        <div className="space-y-3">
+        <div className="space-y-6 xl:space-y-3">
           <AccountSummaryCard
             name={userFirstName}
             dateLabel={currentDateLabel}

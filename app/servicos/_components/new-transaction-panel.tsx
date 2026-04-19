@@ -65,7 +65,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
 
   return (
     <section
-      className="relative min-h-[560px] overflow-hidden rounded-md bg-surface-transaction p-8"
+      className="relative min-h-[610px] overflow-hidden rounded-md bg-surface-transaction px-9 py-8 mobile:min-h-[580px] mobile:px-5 mobile:py-6 xl:min-h-[560px] xl:p-8"
       aria-label="Nova transação"
     >
       <Image
@@ -74,7 +74,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={178}
         height={180}
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 z-0"
+        className="pointer-events-none absolute right-0 top-0 z-0 hidden xl:block"
       />
       <Image
         src="/servicos/transacoes/square-bottom.svg"
@@ -82,13 +82,38 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         width={178}
         height={180}
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 z-0"
+        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden xl:block"
+      />
+
+      <Image
+        src="/servicos/responsive/squares-top.svg"
+        alt=""
+        width={600}
+        height={402}
+        aria-hidden="true"
+        className="pointer-events-none absolute right-0 top-0 z-0 xl:hidden"
+      />
+      <Image
+        src="/servicos/responsive/squares-bottom.svg"
+        alt=""
+        width={181}
+        height={178}
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-0 z-0 xl:hidden"
+      />
+      <Image
+        src="/servicos/responsive/people-card.svg"
+        alt=""
+        width={328}
+        height={231}
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-5 z-0 mobile:right-0 mobile:w-[270px] mobile:max-w-[68%] xl:hidden"
       />
 
       <div className="relative z-10 max-w-[420px]">
         <h2 className="text-[3rem] font-bold leading-none text-transaction-text">Nova transação</h2>
 
-        <form className="mt-10" onSubmit={handleSubmit} noValidate>
+        <form className="mt-10 mobile:mt-8" onSubmit={handleSubmit} noValidate>
           <Select
             label="Tipo de transação"
             id="transaction-type"
@@ -118,19 +143,19 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
             value={transactionAmount}
             onChange={(event) => setTransactionAmount(formatCurrencyInput(event.currentTarget.value))}
             required
-            containerClassName="mt-10 max-w-[296px]"
+            containerClassName="mt-10 max-w-[296px] mobile:mt-8"
             labelClassName="mb-3 text-title-xl font-bold text-transaction-text"
             inputClassName="h-14 border-primary bg-surface text-center text-title-lg text-body focus-visible:ring-primary"
             validationKind="none"
           />
 
-          <div className={["mt-10 w-fit", !isFormValid ? "cursor-not-allowed" : ""].join(" ")}>
+          <div className={["mt-10 w-fit mobile:mt-8", !isFormValid ? "cursor-not-allowed" : ""].join(" ")}>
             <Button
               type="submit"
               variant="solid"
               tone="primary"
               className={[
-                "h-14 w-[296px] text-title-xl font-bold",
+                "h-14 w-full max-w-[296px] text-title-xl font-bold",
                 !isFormValid ? "pointer-events-none" : "",
               ].join(" ")}
               disabled={!isFormValid}
