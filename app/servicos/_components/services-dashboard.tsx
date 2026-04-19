@@ -127,6 +127,28 @@ export function ServicesDashboard({
     });
   };
 
+  const handleEditStatementEntry = (entryId: string, nextAmountInCents: number) => {
+    setCurrentStatementEntries((currentEntries) => {
+      const entryToEdit = currentEntries.find((entry) => entry.id === entryId);
+      if (!entryToEdit) {
+        return currentEntries;
+      }
+
+      const normalizedAmountInCents =
+        entryToEdit.type === "Transferencia"
+          ? -Math.abs(nextAmountInCents)
+          : Math.abs(nextAmountInCents);
+
+      setCurrentBalanceInCents(
+        (currentBalance) => currentBalance - entryToEdit.amountInCents + normalizedAmountInCents
+      );
+
+      return currentEntries.map((entry) =>
+        entry.id === entryId ? { ...entry, amountInCents: normalizedAmountInCents } : entry
+      );
+    });
+  };
+
   return (
     <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
       <div className="grid gap-4 lg:grid-cols-[176px_minmax(0,1fr)_240px] lg:items-start">
@@ -148,7 +170,11 @@ export function ServicesDashboard({
           />
         </div>
 
-        <StatementPanel entries={currentStatementEntries} onDeleteEntry={handleDeleteStatementEntry} />
+        <StatementPanel
+          entries={currentStatementEntries}
+          onDeleteEntry={handleDeleteStatementEntry}
+          onEditEntry={handleEditStatementEntry}
+        />
       </div>
     </div>
   );

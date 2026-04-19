@@ -134,6 +134,48 @@ describe("ServicesDashboard", () => {
     expect(within(statementPanel).queryByText("R$ 150,00")).not.toBeInTheDocument();
   });
 
+  it("ajusta o saldo ao editar deposito e transferencia usando valor positivo", () => {
+    render(
+      <ServicesDashboard
+        userFirstName="Joana"
+        balanceInCents={250000}
+        statementEntries={statementEntries}
+      />
+    );
+
+    const editButton = screen.getByRole("button", { name: "Editar extrato" });
+
+    const depositEntry = screen.getByText("R$ 150,00").closest("li");
+    if (!depositEntry) {
+      throw new Error("Lancamento de deposito nao encontrado");
+    }
+
+    fireEvent.click(depositEntry);
+    fireEvent.click(editButton);
+
+    const depositInput = screen.getByRole("textbox", { name: "Valor do lancamento" });
+    fireEvent.change(depositInput, { target: { value: "20000" } });
+    fireEvent.keyDown(depositInput, { key: "Enter" });
+
+    expect(screen.getByText("R$ 2.550,00")).toBeInTheDocument();
+    expect(screen.getByText("R$ 200,00")).toBeInTheDocument();
+
+    const transferEntry = screen.getByText("-R$ 500,00").closest("li");
+    if (!transferEntry) {
+      throw new Error("Lancamento de transferencia nao encontrado");
+    }
+
+    fireEvent.click(transferEntry);
+    fireEvent.click(editButton);
+
+    const transferInput = screen.getByRole("textbox", { name: "Valor do lancamento" });
+    fireEvent.change(transferInput, { target: { value: "70000" } });
+    fireEvent.keyDown(transferInput, { key: "Enter" });
+
+    expect(screen.getByText("R$ 2.350,00")).toBeInTheDocument();
+    expect(screen.getByText("-R$ 700,00")).toBeInTheDocument();
+  });
+
   it("bloqueia transferencia que negativaria o saldo e exibe alerta", () => {
     render(
       <ServicesDashboard
