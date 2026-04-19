@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export type ServicesTabKey =
   | "inicio"
   | "transferencias"
@@ -18,12 +20,74 @@ type ServicesSidebarNavProps = {
 };
 
 export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSidebarNavProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleSelectItem = (item: ServicesSidebarItem) => {
+    if (item.disabled) {
+      return;
+    }
+
+    onChange(item.key);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <nav
-      aria-label="Menu de servicos"
-      className="h-full rounded-none bg-transparent px-0 py-0 xl:rounded-md xl:bg-surface xl:px-4 xl:py-5"
-    >
-      <ul className="flex flex-wrap items-center gap-4 border-b border-secondary/40 pb-2 md:gap-5 xl:block xl:border-b-0 xl:pb-0">
+    <nav aria-label="Menu de servicos" className="relative">
+      <div className="relative mb-2 md:hidden">
+        <button
+          type="button"
+          aria-label={isMobileMenuOpen ? "Fechar menu de servicos" : "Abrir menu de servicos"}
+          aria-expanded={isMobileMenuOpen}
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          className="inline-flex h-8 w-8 items-center justify-center text-secondary"
+        >
+          <span aria-hidden="true" className="text-title-lg leading-none">
+            {isMobileMenuOpen ? "×" : "☰"}
+          </span>
+        </button>
+
+        {isMobileMenuOpen ? (
+          <div className="absolute left-0 top-0 z-20 w-[142px] border border-border bg-surface px-3 py-2 shadow-md">
+            <button
+              type="button"
+              aria-label="Fechar menu de servicos"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center text-secondary"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+
+            <ul className="space-y-0 pr-3">
+              {items.map((item) => {
+                const isDisabled = Boolean(item.disabled);
+                const isActive = item.key === activeItem && !isDisabled;
+
+                return (
+                  <li key={item.key}>
+                    <button
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => handleSelectItem(item)}
+                      className={[
+                        "w-full border-b border-border py-2 text-left text-body-sm transition-colors",
+                        isActive
+                          ? "font-semibold text-accent"
+                          : isDisabled
+                            ? "cursor-not-allowed font-normal text-menu-disabled"
+                            : "font-normal text-heading",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      <ul className="hidden flex-wrap items-center gap-8 border-b border-secondary/40 pb-2 md:flex">
         {items.map((item) => {
           const isDisabled = Boolean(item.disabled);
           const isActive = item.key === activeItem && !isDisabled;
@@ -33,9 +97,9 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
               <button
                 type="button"
                 disabled={isDisabled}
-                onClick={() => onChange(item.key)}
+                onClick={() => handleSelectItem(item)}
                 className={[
-                  "w-auto border-b border-transparent px-0 py-1 text-left text-body-sm transition-colors xl:w-full xl:border-b xl:border-border xl:py-3 xl:text-body-md",
+                  "w-auto border-b border-transparent px-0 py-1 text-left text-body-md transition-colors",
                   isActive
                     ? "font-semibold text-secondary"
                     : isDisabled
