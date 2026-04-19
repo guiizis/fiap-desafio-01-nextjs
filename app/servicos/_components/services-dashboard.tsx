@@ -11,6 +11,12 @@ import {
   accountReducer,
   createAccountState,
 } from "../_state/account.reducer";
+import {
+  formatIsoDateToPtBr,
+  getTransactionDateRange,
+  toStatementDate,
+  type TransactionStatementDate,
+} from "../_utils/transaction-date";
 import { ServicesContentPanel } from "./services-content-panel";
 import { ServicesSidebarNav, type ServicesTabKey } from "./services-sidebar-nav";
 import { StatementPanel } from "./statement-panel";
@@ -47,28 +53,17 @@ function formatCurrentDateLabel() {
 function createStatementEntry({
   type,
   amountInCents,
-}: NewTransactionPayload): StatementEntry {
-  const now = new Date();
-  const month = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    timeZone: "America/Sao_Paulo",
-  }).format(now);
-  const date = new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Sao_Paulo",
-  }).format(now);
+}: Omit<NewTransactionPayload, "transactionDate">, statementDate: TransactionStatementDate): StatementEntry {
   const id = typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   return {
     id,
-    month: `${month.charAt(0).toUpperCase()}${month.slice(1)}`,
+    month: statementDate.monthLabel,
     type: type === "deposito" ? "Deposito" : "Transferencia",
     amountInCents: type === "deposito" ? amountInCents : -amountInCents,
-    date,
+    date: statementDate.dateLabel,
   };
 }
 
@@ -84,6 +79,7 @@ export function ServicesDashboard({
     createAccountState(balanceInCents, statementEntries)
   );
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+  const transactionDateRange = useMemo(() => getTransactionDateRange(), []);
 
   useEffect(() => {
     dispatchAccountAction({
@@ -96,6 +92,7 @@ export function ServicesDashboard({
   const handleSubmitTransaction = ({
     type,
     amountInCents,
+    transactionDate,
   }: NewTransactionPayload): NewTransactionResult => {
     if (type === "transferencia" && amountInCents > accountState.currentBalanceInCents) {
       return {
@@ -104,9 +101,17 @@ export function ServicesDashboard({
       };
     }
 
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data invalida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
     dispatchAccountAction({
       type: "append-transaction-entry",
-      entry: createStatementEntry({ type, amountInCents }),
+      entry: createStatementEntry({ type, amountInCents }, statementDate),
     });
 
     return {

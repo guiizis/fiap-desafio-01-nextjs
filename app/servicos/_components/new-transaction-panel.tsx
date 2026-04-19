@@ -5,11 +5,17 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { Alert } from "../../../components/ui/alert";
 import { Button } from "../../../components/ui/button";
+import { CalendarInput } from "../../../components/ui/calendar-input";
 import { Input, Select } from "../../../components/ui/input";
 import type {
   NewTransactionPanelProps,
   TransactionType,
 } from "./interfaces/new-transaction-panel.interfaces";
+import {
+  getDefaultTransactionDate,
+  getTransactionDateRange,
+  isTransactionDateWithinRange,
+} from "../_utils/transaction-date";
 import { formatCurrencyInput } from "../_utils/currency-mask";
 
 function parseCurrencyInputToCents(value: string) {
@@ -24,8 +30,10 @@ function parseCurrencyInputToCents(value: string) {
 }
 
 export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanelProps) {
+  const calendarRange = useMemo(() => getTransactionDateRange(), []);
   const [transactionType, setTransactionType] = useState<TransactionType | "">("");
   const [transactionAmount, setTransactionAmount] = useState("00,00");
+  const [transactionDate, setTransactionDate] = useState(() => getDefaultTransactionDate());
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
     { value: "deposito", label: "Depósito" },
@@ -35,7 +43,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
   const amountInCents = useMemo(() => parseCurrencyInputToCents(transactionAmount), [transactionAmount]);
   const isAmountValid = amountInCents > 0;
 
-  const isFormValid = transactionType !== "" && isAmountValid;
+  const isDateValid = isTransactionDateWithinRange(transactionDate, calendarRange);
+  const isFormValid = transactionType !== "" && isAmountValid && isDateValid;
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -49,9 +58,14 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       return;
     }
 
+    if (!isDateValid) {
+      return;
+    }
+
     const result = onSubmitTransaction?.({
       type: transactionType,
       amountInCents,
+      transactionDate,
     });
 
     if (result && !result.ok) {
@@ -61,6 +75,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
 
     setTransactionType("");
     setTransactionAmount("00,00");
+    setTransactionDate(getDefaultTransactionDate());
   };
 
   return (
@@ -147,6 +162,20 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
             labelClassName="mb-3 text-title-xl font-bold text-transaction-text"
             inputClassName="h-14 border-primary bg-surface text-center text-title-lg text-body focus-visible:ring-primary"
             validationKind="none"
+          />
+
+          <CalendarInput
+            label="Data"
+            id="transaction-date"
+            name="transaction-date"
+            value={transactionDate}
+            onChange={setTransactionDate}
+            required
+            minDate={calendarRange.minDate}
+            maxDate={calendarRange.maxDate}
+            containerClassName="mt-8 max-w-[296px]"
+            labelClassName="mb-3 text-title-xl font-bold text-transaction-text"
+            inputClassName="h-14 border-primary bg-surface text-center text-title-lg text-body focus-visible:ring-primary"
           />
 
           <div className={["mt-10 w-fit mobile:mt-8", !isFormValid ? "cursor-not-allowed" : ""].join(" ")}>
