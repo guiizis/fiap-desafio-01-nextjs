@@ -1,21 +1,28 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { AccountSummaryCard } from './account-summary-card';
 import type {
   NewTransactionPayload,
   NewTransactionResult,
 } from './interfaces/new-transaction-panel.interfaces';
 import type { StatementEntry } from './interfaces/statement-panel.interfaces';
-import { DashboardContentPanel } from './dashboard-content-panel';
-import { DashboardSidebarNav, type DashboardTabKey } from './dashboard-sidebar-nav';
+import { accountReducer, createAccountState } from '../_state/account.reducer';
+import {
+  formatIsoDateToPtBr,
+  getTransactionDateRange,
+  toStatementDate,
+  type TransactionStatementDate,
+} from '../_utils/transaction-date';
+import { DashboardContentPanel } from './services-content-panel';
+import { DashboardSidebarNav, type DashboardTabKey } from './services-sidebar-nav';
 import { StatementPanel } from './statement-panel';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
   { key: 'inicio', label: 'Inicio' },
   { key: 'transferencias', label: 'Transferencias', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros servicos', disabled: true },
+  { key: 'outros-servicos', label: 'Outros servicos', disabled: false },
 ];
 
 type DashboardProps = {
@@ -40,18 +47,10 @@ function formatCurrentDateLabel() {
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${date}`;
 }
 
-function createStatementEntry({ type, amountInCents }: NewTransactionPayload): StatementEntry {
-  const now = new Date();
-  const month = new Intl.DateTimeFormat('pt-BR', {
-    month: 'long',
-    timeZone: 'America/Sao_Paulo',
-  }).format(now);
-  const date = new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    timeZone: 'America/Sao_Paulo',
-  }).format(now);
+function createStatementEntry(
+  { type, amountInCents }: Omit<NewTransactionPayload, 'transactionDate'>,
+  statementDate: TransactionStatementDate
+): StatementEntry {
   const id =
     typeof crypto.randomUUID === 'function'
       ? crypto.randomUUID()
@@ -59,48 +58,55 @@ function createStatementEntry({ type, amountInCents }: NewTransactionPayload): S
 
   return {
     id,
-    month: `${month.charAt(0).toUpperCase()}${month.slice(1)}`,
+    month: statementDate.monthLabel,
     type: type === 'deposito' ? 'Deposito' : 'Transferencia',
     amountInCents: type === 'deposito' ? amountInCents : -amountInCents,
-    date,
+    date: statementDate.dateLabel,
   };
 }
 
 export function Dashboard({ userFirstName, balanceInCents, statementEntries }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabKey>('inicio');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const [currentBalanceInCents, setCurrentBalanceInCents] = useState(balanceInCents);
-  const [currentStatementEntries, setCurrentStatementEntries] = useState<StatementEntry[]>([
-    ...statementEntries,
-  ]);
+  const [accountState, dispatchAccountAction] = useReducer(
+    accountReducer,
+    createAccountState(balanceInCents, statementEntries)
+  );
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+  const transactionDateRange = useMemo(() => getTransactionDateRange(), []);
 
   useEffect(() => {
-    setCurrentBalanceInCents(balanceInCents);
-  }, [balanceInCents]);
-
-  useEffect(() => {
-    setCurrentStatementEntries([...statementEntries]);
-  }, [statementEntries]);
+    dispatchAccountAction({
+      type: 'hydrate-from-props',
+      balanceInCents,
+      statementEntries,
+    });
+  }, [balanceInCents, statementEntries]);
 
   const handleSubmitTransaction = ({
     type,
     amountInCents,
+    transactionDate,
   }: NewTransactionPayload): NewTransactionResult => {
-    if (type === 'transferencia' && amountInCents > currentBalanceInCents) {
+    if (type === 'transferencia' && amountInCents > accountState.currentBalanceInCents) {
       return {
         ok: false,
         message: 'Saldo insuficiente para concluir a transferência.',
       };
     }
 
-    setCurrentBalanceInCents((currentValue) =>
-      type === 'deposito' ? currentValue + amountInCents : currentValue - amountInCents
-    );
-    setCurrentStatementEntries((currentValue) => [
-      createStatementEntry({ type, amountInCents }),
-      ...currentValue,
-    ]);
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data invalida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
+    dispatchAccountAction({
+      type: 'append-transaction-entry',
+      entry: createStatementEntry({ type, amountInCents }, statementDate),
+    });
 
     return {
       ok: true,
@@ -108,53 +114,38 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
   };
 
   const handleDeleteStatementEntry = (entryId: string) => {
-    setCurrentStatementEntries((currentEntries) => {
-      const entryToDelete = currentEntries.find((entry) => entry.id === entryId);
-
-      if (!entryToDelete) {
-        return currentEntries;
-      }
-
-      setCurrentBalanceInCents((currentBalance) => currentBalance - entryToDelete.amountInCents);
-
-      return currentEntries.filter((entry) => entry.id !== entryId);
+    dispatchAccountAction({
+      type: 'delete-statement-entry',
+      entryId,
     });
   };
 
   const handleEditStatementEntry = (entryId: string, nextAmountInCents: number) => {
-    setCurrentStatementEntries((currentEntries) => {
-      const entryToEdit = currentEntries.find((entry) => entry.id === entryId);
-      if (!entryToEdit) {
-        return currentEntries;
-      }
-
-      const normalizedAmountInCents =
-        entryToEdit.type === 'Transferencia'
-          ? -Math.abs(nextAmountInCents)
-          : Math.abs(nextAmountInCents);
-
-      setCurrentBalanceInCents(
-        (currentBalance) => currentBalance - entryToEdit.amountInCents + normalizedAmountInCents
-      );
-
-      return currentEntries.map((entry) =>
-        entry.id === entryId ? { ...entry, amountInCents: normalizedAmountInCents } : entry
-      );
+    dispatchAccountAction({
+      type: 'edit-statement-entry',
+      entryId,
+      nextAmountInCents,
     });
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1140px] px-4 pb-8 pt-4 md:px-0">
-      <div className="grid gap-4 lg:grid-cols-[176px_minmax(0,1fr)_240px] lg:items-start">
-        <DashboardSidebarNav items={sidebarItems} activeItem={activeTab} onChange={setActiveTab} />
+    <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
+      <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
+        <div className="desktop:flex desktop:h-full">
+          <DashboardSidebarNav
+            items={sidebarItems}
+            activeItem={activeTab}
+            onChange={setActiveTab}
+          />
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-6 desktop:col-start-2 desktop:min-w-0 desktop:space-y-3">
           <AccountSummaryCard
             name={userFirstName}
             dateLabel={currentDateLabel}
             balanceLabel="Saldo"
             accountLabel="Conta corrente"
-            balanceInCents={currentBalanceInCents}
+            balanceInCents={accountState.currentBalanceInCents}
             isBalanceVisible={isBalanceVisible}
             onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
           />
@@ -164,11 +155,13 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
           />
         </div>
 
-        <StatementPanel
-          entries={currentStatementEntries}
-          onDeleteEntry={handleDeleteStatementEntry}
-          onEditEntry={handleEditStatementEntry}
-        />
+        <div className="desktop:col-start-3 desktop:flex desktop:h-full">
+          <StatementPanel
+            entries={accountState.currentStatementEntries}
+            onDeleteEntry={handleDeleteStatementEntry}
+            onEditEntry={handleEditStatementEntry}
+          />
+        </div>
       </div>
     </div>
   );

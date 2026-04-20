@@ -59,9 +59,9 @@ export function HomeFooter() {
               <Image
                 src="/icons/yt.svg"
                 alt="YouTube"
-                width={24}
-                height={24}
-                className="block"
+                width={31}
+                height={22}
+                className="block h-auto w-6"
               />
             </Link>
           </div>

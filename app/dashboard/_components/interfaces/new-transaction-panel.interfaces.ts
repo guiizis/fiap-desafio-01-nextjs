@@ -3,6 +3,7 @@ export type TransactionType = "deposito" | "transferencia";
 export type NewTransactionPayload = {
   type: TransactionType;
   amountInCents: number;
+  transactionDate: string;
 };
 
 export type NewTransactionResult =

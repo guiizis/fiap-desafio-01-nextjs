@@ -24,16 +24,33 @@ export function AccountSummaryCard({
 
   return (
     <section
-      className="min-h-[350px] rounded-md bg-primary px-6 py-7 text-surface"
+      className="relative min-h-[560px] overflow-hidden rounded-md bg-primary px-9 py-8 text-surface mobile:min-h-[520px] mobile:px-5 mobile:py-7 desktop:min-h-[350px] desktop:px-6 desktop:py-7"
       aria-label="Resumo da conta"
     >
-      <div className="grid gap-6 md:grid-cols-[1fr_340px] md:items-start">
+      <Image
+        src="/servicos/responsive/squares-top.svg"
+        alt=""
+        width={600}
+        height={402}
+        aria-hidden="true"
+        className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
+      />
+      <Image
+        src="/servicos/banker.svg"
+        alt=""
+        width={172}
+        height={228}
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-8 z-0 mobile:left-4 desktop:hidden"
+      />
+
+      <div className="relative z-10 grid grid-cols-[minmax(0,1fr)_minmax(0,270px)] items-start gap-6 mobile:grid-cols-1 desktop:grid-cols-[1fr_340px]">
         <div className="space-y-2">
           <h1 className="text-title-xl font-bold text-surface">Ola, {name}! :)</h1>
           <p className="text-body-sm text-menu-hover">{dateLabel}</p>
         </div>
 
-        <div className="w-full md:pt-6">
+        <div className="w-full pt-6 mobile:pt-0 desktop:pt-6">
           <p className="flex items-center gap-2 text-title-lg font-semibold text-surface">
             {balanceLabel}
             <button
@@ -54,7 +71,7 @@ export function AccountSummaryCard({
           </p>
           <span className="mt-2 block h-[2px] w-full bg-accent" />
           <p className="mt-2 text-body-md text-menu-hover">{accountLabel}</p>
-          <p className="mt-1 min-w-[300px] whitespace-nowrap text-[3.2rem] leading-none text-surface">
+          <p className="mt-1 min-w-0 whitespace-nowrap text-[clamp(2.4rem,5vw,3rem)] leading-none text-surface mobile:text-[2.6rem] desktop:text-[3.2rem]">
             {displayedBalance}
           </p>
         </div>

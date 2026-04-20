@@ -13,6 +13,7 @@ describe("NewTransactionPanel", () => {
       screen.getByRole("combobox", { name: "Tipo de transação" })
     ).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Valor" })).toHaveValue("00,00");
+    expect(screen.getByLabelText("Data")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Concluir transação" })
     ).toBeDisabled();
@@ -42,6 +43,23 @@ describe("NewTransactionPanel", () => {
 
     fireEvent.change(amountInput, { target: { value: "1" } });
     expect(submitButton).toBeEnabled();
+  });
+
+  it("mantem submit desabilitado quando data esta fora do intervalo permitido", () => {
+    render(<NewTransactionPanel />);
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+    const dateInput = screen.getByLabelText("Data");
+
+    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(amountInput, { target: { value: "100" } });
+    fireEvent.change(dateInput, { target: { value: "275760-04-19" } });
+    fireEvent.blur(dateInput);
+
+    expect(submitButton).toBeDisabled();
+    expect(screen.getByText(/Informe uma data entre/i)).toBeInTheDocument();
   });
 
   it("previne submit padrao do formulario", () => {
@@ -108,14 +126,17 @@ describe("NewTransactionPanel", () => {
     const submitButton = screen.getByRole("button", { name: "Concluir transação" });
     const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
     const amountInput = screen.getByRole("textbox", { name: "Valor" });
+    const dateInput = screen.getByLabelText("Data");
 
     fireEvent.change(typeSelect, { target: { value: "deposito" } });
     fireEvent.change(amountInput, { target: { value: "123456" } });
+    fireEvent.change(dateInput, { target: { value: "2026-04-19" } });
     fireEvent.click(submitButton);
 
     expect(onSubmitTransaction).toHaveBeenCalledWith({
       type: "deposito",
       amountInCents: 123456,
+      transactionDate: "2026-04-19",
     });
     expect(typeSelect).toHaveValue("");
     expect(amountInput).toHaveValue("00,00");

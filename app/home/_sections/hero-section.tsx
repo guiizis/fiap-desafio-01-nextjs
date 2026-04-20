@@ -19,10 +19,9 @@ export function HeroSection() {
         <Image
           src="/home/hero-img.svg"
           alt="Ilustracao de crescimento financeiro"
-          width={590}
-          height={408}
+          width={662}
+          height={413}
           priority
-          style={{ width: "100%", height: "auto" }}
           className="h-auto w-full max-w-[590px]"
         />
 
