@@ -5,5 +5,7 @@ type DashboardLayoutProps = {
 };
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  return <div className="flex min-h-screen flex-col bg-background">{children}</div>;
+  return (
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-background">{children}</div>
+  );
 }
