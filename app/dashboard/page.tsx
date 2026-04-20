@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import type { AuthSession } from "../lib/auth-session";
-import { ServicesDashboard } from "./_components/services-dashboard";
-import { ServicosHeader } from "./_components/servicos-header";
-import { withAuth } from "./_components/with-auth";
-import { useAuthSession } from "./_hooks/use-auth-session";
+import type { AuthSession } from '../lib/auth-session';
+import { Dashboard } from './_components/dashboard';
+import { DashboardHeader } from './_components/dashboard-header';
+import { withAuth } from './_components/with-auth';
+import { useAuthSession } from './_hooks/use-auth-session';
 
-type ServicosPageContentProps = {
+type DashboardPageContentProps = {
   session: AuthSession;
 };
 
@@ -15,12 +15,12 @@ function getUserFirstName(fullName: string) {
   return firstName || fullName;
 }
 
-function ServicosPageContent({ session }: ServicosPageContentProps) {
+function DashboardPageContent({ session }: DashboardPageContentProps) {
   return (
     <>
-      <ServicosHeader userName={session.user.name} />
+      <DashboardHeader userName={session.user.name} />
       <main className="flex-1">
-        <ServicesDashboard
+        <Dashboard
           userFirstName={getUserFirstName(session.user.name)}
           balanceInCents={session.user.accountBalanceInCents}
           statementEntries={session.user.statementEntries}
@@ -30,10 +30,10 @@ function ServicosPageContent({ session }: ServicosPageContentProps) {
   );
 }
 
-const GuardedServicosPageContent = withAuth(ServicosPageContent);
+const GuardedDashboardPageContent = withAuth(DashboardPageContent);
 
-export default function ServicosPage() {
+export default function DashboardPage() {
   const { session, status } = useAuthSession();
 
-  return <GuardedServicosPageContent authStatus={status} session={session} />;
+  return <GuardedDashboardPageContent authStatus={status} session={session} />;
 }

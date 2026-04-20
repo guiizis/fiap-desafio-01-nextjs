@@ -3,7 +3,7 @@ import type {
   NewTransactionPayload,
   NewTransactionResult,
 } from './interfaces/new-transaction-panel.interfaces';
-import type { DashboardTabKey } from './services-sidebar-nav';
+import type { DashboardTabKey } from './dashboard-sidebar-nav';
 
 type DashboardContentPanelProps = {
   activeTab: DashboardTabKey;

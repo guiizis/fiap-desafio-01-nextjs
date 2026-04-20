@@ -1,9 +1,9 @@
 export type DashboardTabKey =
-  | 'inicio'
-  | 'transferencias'
-  | 'investimentos'
-  | 'outros-servicos'
-  | 'meus-cartoes';
+  | "inicio"
+  | "transferencias"
+  | "investimentos"
+  | "outros-servicos"
+  | "meus-cartoes";
 
 type DashboardSidebarItem = {
   key: DashboardTabKey;
@@ -32,13 +32,13 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
                 disabled={isDisabled}
                 onClick={() => onChange(item.key)}
                 className={[
-                  'w-full border-b border-border py-3 text-left text-body-md transition-colors',
+                  "w-full border-b border-border py-3 text-left text-body-md transition-colors",
                   isActive
-                    ? 'font-semibold text-secondary'
+                    ? "font-semibold text-secondary"
                     : isDisabled
-                      ? 'cursor-not-allowed font-normal text-menu-disabled'
-                      : 'font-normal text-heading hover:text-secondary',
-                ].join(' ')}
+                      ? "cursor-not-allowed font-normal text-menu-disabled"
+                      : "font-normal text-heading hover:text-secondary",
+                ].join(" ")}
               >
                 {item.label}
               </button>

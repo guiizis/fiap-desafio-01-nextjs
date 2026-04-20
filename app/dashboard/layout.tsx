@@ -1,9 +1,9 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-type ServicosLayoutProps = {
+type DashboardLayoutProps = {
   children: ReactNode;
 };
 
-export default function ServicosLayout({ children }: ServicosLayoutProps) {
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return <div className="flex min-h-screen flex-col bg-background">{children}</div>;
 }
