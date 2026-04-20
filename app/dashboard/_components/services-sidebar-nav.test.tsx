@@ -7,7 +7,7 @@ const items = [
   { key: 'meus-cartoes', label: 'Meus cartoes' },
   { key: 'transferencias', label: 'Transferencias', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros servicos', disabled: true },
+  { key: 'outros-servicos', label: 'Outros serviços', disabled: true },
 ] as const;
 
 describe('DashboardSidebarNav', () => {

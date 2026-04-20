@@ -32,11 +32,11 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
   };
 
   return (
-    <nav aria-label="Menu de servicos" className="relative desktop:h-full desktop:w-full">
+    <nav aria-label="Menu de serviços" className="relative desktop:h-full desktop:w-full">
       <div className="relative mb-2 md:hidden">
         <button
           type="button"
-          aria-label={isMobileMenuOpen ? 'Fechar menu de servicos' : 'Abrir menu de servicos'}
+          aria-label={isMobileMenuOpen ? 'Fechar menu de serviços' : 'Abrir menu de serviços'}
           aria-expanded={isMobileMenuOpen}
           onClick={() => setIsMobileMenuOpen((current) => !current)}
           className="inline-flex h-8 w-8 items-center justify-center text-secondary"
@@ -50,7 +50,7 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
           <div className="absolute left-0 top-0 z-20 w-[142px] border border-border bg-surface px-3 py-2 shadow-md">
             <button
               type="button"
-              aria-label="Fechar menu de servicos"
+              aria-label="Fechar menu de serviços"
               onClick={() => setIsMobileMenuOpen(false)}
               className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center text-secondary"
             >

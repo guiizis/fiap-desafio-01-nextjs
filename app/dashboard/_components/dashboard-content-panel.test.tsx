@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { DashboardContentPanel } from './services-content-panel';
+import { DashboardContentPanel } from './dashboard-content-panel';
 
 const replaceMock = vi.fn();
 

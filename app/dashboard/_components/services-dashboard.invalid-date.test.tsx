@@ -1,14 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 const submitResultSpy = vi.fn();
 
-vi.mock("./services-content-panel", () => ({
+vi.mock('./dashboard-content-panel', () => ({
   ServicesContentPanel: ({
     onSubmitTransaction,
   }: {
     onSubmitTransaction?: (payload: {
-      type: "deposito" | "transferencia";
+      type: 'deposito' | 'transferencia';
       amountInCents: number;
       transactionDate: string;
     }) => { ok: boolean; message?: string } | void;
@@ -17,9 +17,9 @@ vi.mock("./services-content-panel", () => ({
       type="button"
       onClick={() => {
         const result = onSubmitTransaction?.({
-          type: "deposito",
+          type: 'deposito',
           amountInCents: 100,
-          transactionDate: "275760-04-19",
+          transactionDate: '275760-04-19',
         });
         submitResultSpy(result);
       }}
@@ -29,31 +29,30 @@ vi.mock("./services-content-panel", () => ({
   ),
 }));
 
-import { ServicesDashboard } from "./services-dashboard";
+import { Dashboard } from './dashboard';
 
 const statementEntries = [
-  { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+  { id: '1', month: 'Novembro', type: 'Deposito', amountInCents: 15000, date: '18/11/2022' },
 ] as const;
 
-describe("ServicesDashboard invalid date guard", () => {
-  it("retorna erro quando callback recebe data fora do range permitido", () => {
+describe('Dashboard invalid date guard', () => {
+  it('retorna erro quando callback recebe data fora do range permitido', () => {
     submitResultSpy.mockReset();
 
     render(
-      <ServicesDashboard
+      <Dashboard
         userFirstName="Joana"
         balanceInCents={250000}
         statementEntries={statementEntries}
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Disparar transacao invalida" }));
+    fireEvent.click(screen.getByRole('button', { name: 'Disparar transacao invalida' }));
 
     const result = submitResultSpy.mock.calls[0]?.[0] as { ok: boolean; message: string };
     expect(result.ok).toBe(false);
-    expect(result.message).toContain("Data invalida.");
-    expect(result.message).toContain("01/01/");
-    expect(result.message).toContain("31/12/");
+    expect(result.message).toContain('Data invalida.');
+    expect(result.message).toContain('01/01/');
+    expect(result.message).toContain('31/12/');
   });
 });
-

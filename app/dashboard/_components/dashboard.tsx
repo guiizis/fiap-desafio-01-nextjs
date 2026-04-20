@@ -14,15 +14,15 @@ import {
   toStatementDate,
   type TransactionStatementDate,
 } from '../_utils/transaction-date';
-import { DashboardContentPanel } from './services-content-panel';
-import { DashboardSidebarNav, type DashboardTabKey } from './services-sidebar-nav';
+import { DashboardContentPanel } from './dashboard-content-panel';
+import { DashboardSidebarNav, type DashboardTabKey } from './dashboard-sidebar-nav';
 import { StatementPanel } from './statement-panel';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
   { key: 'inicio', label: 'Inicio' },
   { key: 'transferencias', label: 'Transferencias', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros servicos', disabled: false },
+  { key: 'outros-servicos', label: 'Outros serviços', disabled: false },
 ];
 
 type DashboardProps = {

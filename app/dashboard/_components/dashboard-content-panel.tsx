@@ -26,24 +26,24 @@ const serviceOptions: readonly ServiceOption[] = [
 
 const tabContent: Record<DashboardTabKey, { title: string; description: string }> = {
   inicio: {
-    title: 'Confira os servicos disponiveis',
-    description: 'Acesse atalhos do seu banco em um unico lugar.',
+    title: 'Confira os serviços disponiveis',
+    description: 'Acesse atalhos do seu banco em um único lugar.',
   },
   transferencias: {
-    title: 'Transferencias',
-    description: 'Consulte e organize suas transferencias com facilidade.',
+    title: 'Transferências',
+    description: 'Consulte e organize suas transferências com facilidade.',
   },
   investimentos: {
     title: 'Investimentos',
-    description: 'Acompanhe sua carteira e proximos passos de investimento.',
+    description: 'Acompanhe sua carteira e próximos passos de investimento.',
   },
   'outros-servicos': {
-    title: 'Confira os servicos disponiveis',
-    description: 'Acesse atalhos do seu banco em um unico lugar.',
+    title: 'Confira os serviços disponíveis',
+    description: 'Acesse atalhos do seu banco em um único lugar.',
   },
   'meus-cartoes': {
-    title: 'Meus cartoes',
-    description: 'Gerencie seus cartoes fisico e digital com rapidez.',
+    title: 'Meus cartões',
+    description: 'Gerencie seus cartões físico e digital com rapidez.',
   },
 };
 
