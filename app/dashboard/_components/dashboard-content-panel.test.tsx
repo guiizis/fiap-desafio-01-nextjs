@@ -25,7 +25,7 @@ describe('DashboardContentPanel', () => {
     ).toBeInTheDocument();
   });
 
-  it('abre modal de ainda em construcao e volta para /servicos', () => {
+  it('abre modal de ainda em construcao e volta para /dashboard', () => {
     replaceMock.mockClear();
 
     render(<DashboardContentPanel activeTab="meus-cartoes" />);
@@ -41,7 +41,7 @@ describe('DashboardContentPanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Voltar para serviços' }));
 
-    expect(replaceMock).toHaveBeenCalledWith('/servicos');
+    expect(replaceMock).toHaveBeenCalledWith('/dashboard');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

@@ -1,15 +1,18 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { getDefaultTransactionDate, getTransactionDateRange } from "../../../app/servicos/_utils/transaction-date";
-import { CalendarInput } from "./calendar-input";
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import {
+  getDefaultTransactionDate,
+  getTransactionDateRange,
+} from '../../../app/dashboard/_utils/transaction-date';
+import { CalendarInput } from './calendar-input';
 
 const calendarRange = getTransactionDateRange();
 
 const meta = {
-  title: "Components/UI/CalendarInput",
+  title: 'Components/UI/CalendarInput',
   component: CalendarInput,
   args: {
-    label: "Data",
-    name: "transaction-date",
+    label: 'Data',
+    name: 'transaction-date',
     value: getDefaultTransactionDate(),
     minDate: calendarRange.minDate,
     maxDate: calendarRange.maxDate,
@@ -27,6 +30,6 @@ export const Playground: Story = {};
 
 export const WithExternalError: Story = {
   args: {
-    errorMessage: "Campo obrigatorio.",
+    errorMessage: 'Campo obrigatorio.',
   },
 };

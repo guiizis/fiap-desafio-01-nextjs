@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Button } from "../../../components/ui/button";
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { Button } from '../../../components/ui/button';
 
 type ServiceUnderConstructionModalProps = {
   serviceLabel: string;
@@ -18,18 +18,18 @@ export function ServiceUnderConstructionModal({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         onClose();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
   const handleBackToServices = () => {
     onClose();
-    router.replace("/servicos");
+    router.replace('/dashboard');
   };
 
   return (
@@ -48,10 +48,7 @@ export function ServiceUnderConstructionModal({
         className="mx-auto w-full max-w-[620px] rounded-md bg-surface p-5 shadow-xl md:p-7"
         onClick={(event) => event.stopPropagation()}
       >
-        <h3
-          id="service-under-construction-title"
-          className="text-title-xl font-bold text-black"
-        >
+        <h3 id="service-under-construction-title" className="text-title-xl font-bold text-black">
           Ainda em construção
         </h3>
 
@@ -60,7 +57,7 @@ export function ServiceUnderConstructionModal({
         </p>
 
         <Image
-          src="/servicos/under-construction.svg"
+          src="/dashboard/under-construction.svg"
           alt="Ilustracao de area em construcao"
           width={960}
           height={600}

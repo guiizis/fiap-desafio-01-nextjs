@@ -104,7 +104,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       />
 
       <Image
-        src="/servicos/responsive/squares-top.svg"
+        src="/dashboard/responsive/squares-top.svg"
         alt=""
         width={600}
         height={402}
@@ -112,7 +112,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
       <Image
-        src="/servicos/responsive/squares-bottom.svg"
+        src="/dashboard/responsive/squares-bottom.svg"
         alt=""
         width={181}
         height={178}
@@ -120,7 +120,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute bottom-0 left-0 z-0 desktop:hidden"
       />
       <Image
-        src="/servicos/responsive/people-card.svg"
+        src="/dashboard/responsive/people-card.svg"
         alt=""
         width={328}
         height={231}

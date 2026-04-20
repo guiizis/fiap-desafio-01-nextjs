@@ -28,7 +28,7 @@ export function AccountSummaryCard({
       aria-label="Resumo da conta"
     >
       <Image
-        src="/servicos/responsive/squares-top.svg"
+        src="/dashboard/responsive/squares-top.svg"
         alt=""
         width={600}
         height={402}
@@ -36,7 +36,7 @@ export function AccountSummaryCard({
         className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
       <Image
-        src="/servicos/banker.svg"
+        src="/dashboard/banker.svg"
         alt=""
         width={172}
         height={228}
