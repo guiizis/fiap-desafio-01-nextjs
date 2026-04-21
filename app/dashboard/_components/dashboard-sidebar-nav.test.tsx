@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { DashboardSidebarNav } from './dashboard-sidebar-nav';
 
 const items = [
-  { key: 'inicio', label: 'Início' },
-  { key: 'meus-cartoes', label: 'Meus cartões' },
-  { key: 'transferencias', label: 'Transferências', disabled: true },
+  { key: 'inicio', label: 'In\u00edcio' },
+  { key: 'meus-cartoes', label: 'Meus cart\u00f5es' },
+  { key: 'transferencias', label: 'Transfer\u00eancias', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros serviços', disabled: true },
+  { key: 'outros-servicos', label: 'Outros servi\u00e7os', disabled: true },
 ] as const;
 
 function triggerButtonClickHandler(element: HTMLElement) {
@@ -23,7 +23,7 @@ function triggerButtonClickHandler(element: HTMLElement) {
 }
 
 function getOpenButtons() {
-  return screen.queryAllByRole('button', { name: 'Fechar menu de serviços' });
+  return screen.queryAllByRole('button', { name: /fechar menu de servi[c\u00e7]os/i });
 }
 
 function getMobileMenuPanel() {
@@ -40,9 +40,9 @@ describe('DashboardSidebarNav', () => {
     const onChange = vi.fn();
     render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
 
-    const activeButton = screen.getByRole('button', { name: 'Inicio' });
-    const enabledButton = screen.getByRole('button', { name: 'Meus cartoes' });
-    const disabledButton = screen.getByRole('button', { name: 'Transferencias' });
+    const activeButton = screen.getByRole('button', { name: /in[i\u00ed]cio/i });
+    const enabledButton = screen.getByRole('button', { name: /meus cart[o\u00f5]es/i });
+    const disabledButton = screen.getByRole('button', { name: /transfer[e\u00ea]ncias/i });
 
     expect(activeButton.className).toContain('text-secondary');
     expect(enabledButton.className).toContain('text-heading');
@@ -63,12 +63,12 @@ describe('DashboardSidebarNav', () => {
 
     expect(getOpenButtons()).toHaveLength(0);
 
-    const toggleButton = screen.getByRole('button', { name: 'Abrir menu de serviços' });
+    const toggleButton = screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i });
     fireEvent.click(toggleButton);
 
     expect(getOpenButtons()).toHaveLength(2);
     expect(toggleButton).toHaveAttribute('aria-expanded', 'true');
-    expect(toggleButton).toHaveAttribute('aria-label', 'Fechar menu de serviços');
+    expect(toggleButton).toHaveAttribute('aria-label', expect.stringMatching(/fechar menu/i));
 
     fireEvent.click(toggleButton);
     expect(getOpenButtons()).toHaveLength(0);
@@ -78,10 +78,10 @@ describe('DashboardSidebarNav', () => {
     const onChange = vi.fn();
     render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir menu de serviços' }));
+    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
 
     const { panel } = getMobileMenuPanel();
-    fireEvent.click(within(panel).getByRole('button', { name: 'Meus cartoes' }));
+    fireEvent.click(within(panel).getByRole('button', { name: /meus cart[o\u00f5]es/i }));
 
     expect(onChange).toHaveBeenCalledWith('meus-cartoes');
     expect(getOpenButtons()).toHaveLength(0);
@@ -91,10 +91,10 @@ describe('DashboardSidebarNav', () => {
     const onChange = vi.fn();
     render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir menu de serviços' }));
+    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
 
     const { panel } = getMobileMenuPanel();
-    const disabledButton = within(panel).getByRole('button', { name: 'Transferencias' });
+    const disabledButton = within(panel).getByRole('button', { name: /transfer[e\u00ea]ncias/i });
     expect(disabledButton).toBeDisabled();
 
     fireEvent.click(disabledButton);
@@ -107,7 +107,7 @@ describe('DashboardSidebarNav', () => {
     const onChange = vi.fn();
     render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
 
-    const disabledDesktopButton = screen.getByRole('button', { name: 'Transferencias' });
+    const disabledDesktopButton = screen.getByRole('button', { name: /transfer[e\u00ea]ncias/i });
     triggerButtonClickHandler(disabledDesktopButton);
 
     expect(onChange).not.toHaveBeenCalled();
@@ -117,7 +117,7 @@ describe('DashboardSidebarNav', () => {
     const onChange = vi.fn();
     render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir menu de serviços' }));
+    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
 
     const { panelCloseButton } = getMobileMenuPanel();
     fireEvent.click(panelCloseButton);

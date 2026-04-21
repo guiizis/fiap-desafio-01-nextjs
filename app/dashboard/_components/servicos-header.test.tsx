@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { DashboardHeader } from './dashboard-header';
+import { DashboardHeader } from './servicos-header';
 
 describe('DashboardHeader', () => {
   it('renderiza nome do usuario e botao de perfil', () => {

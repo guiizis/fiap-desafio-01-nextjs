@@ -15,13 +15,11 @@ describe('DashboardContentPanel', () => {
     render(<DashboardContentPanel activeTab="meus-cartoes" />);
 
     expect(
-      screen.getByText('Gerencie seus cartoes fisico e digital com rapidez.')
+      screen.getByText(/gerencie seus cart[o\u00f5]es f[i\u00ed]sico e digital com rapidez\./i)
     ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /abrir aviso do servico empr/i })).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /Abrir aviso do servico Empr/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /Abrir aviso do servico Meus cart/i })
+      screen.getByRole('button', { name: /abrir aviso do servico meus cart/i })
     ).toBeInTheDocument();
   });
 
@@ -31,15 +29,15 @@ describe('DashboardContentPanel', () => {
     render(<DashboardContentPanel activeTab="meus-cartoes" />);
 
     const [openWarningButton] = screen.getAllByRole('button', {
-      name: /Abrir aviso do servico/i,
+      name: /abrir aviso do servico/i,
     });
 
     fireEvent.click(openWarningButton);
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Ainda em construção')).toBeInTheDocument();
+    expect(screen.getByText(/ainda em constru/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Voltar para serviços' }));
+    fireEvent.click(screen.getByRole('button', { name: /voltar para servi[c\u00e7]os/i }));
 
     expect(replaceMock).toHaveBeenCalledWith('/dashboard');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

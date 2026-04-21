@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 const submitResultSpy = vi.fn();
 
 vi.mock('./dashboard-content-panel', () => ({
-  ServicesContentPanel: ({
+  DashboardContentPanel: ({
     onSubmitTransaction,
   }: {
     onSubmitTransaction?: (payload: {

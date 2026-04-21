@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { DashboardSidebarNav } from './dashboard-sidebar-nav';
+import { DashboardSidebarNav } from './services-sidebar-nav';
 
 const items = [
   { key: 'inicio', label: 'Inicio' },
