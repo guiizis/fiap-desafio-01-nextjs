@@ -66,17 +66,46 @@ function createMockToken(userId: string) {
   return `mock-token-${userId}`;
 }
 
+function getDefaultStatementYear(referenceDate: Date = new Date()) {
+  const yearLabel = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  }).format(referenceDate);
+
+  return Number(yearLabel) - 1;
+}
+
 function createDefaultStatementEntries() {
+  const statementYear = getDefaultStatementYear();
+
   return [
-    { id: crypto.randomUUID(), month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
-    { id: crypto.randomUUID(), month: "Novembro", type: "Deposito", amountInCents: 10000, date: "21/11/2022" },
-    { id: crypto.randomUUID(), month: "Novembro", type: "Deposito", amountInCents: 5000, date: "21/11/2022" },
+    {
+      id: crypto.randomUUID(),
+      month: "Novembro",
+      type: "Deposito",
+      amountInCents: 15000,
+      date: `18/11/${statementYear}`,
+    },
+    {
+      id: crypto.randomUUID(),
+      month: "Novembro",
+      type: "Deposito",
+      amountInCents: 10000,
+      date: `21/11/${statementYear}`,
+    },
+    {
+      id: crypto.randomUUID(),
+      month: "Novembro",
+      type: "Deposito",
+      amountInCents: 5000,
+      date: `21/11/${statementYear}`,
+    },
     {
       id: crypto.randomUUID(),
       month: "Novembro",
       type: "Transferencia",
       amountInCents: -50000,
-      date: "21/11/2022",
+      date: `21/11/${statementYear}`,
     },
   ] satisfies MockStatementEntry[];
 }

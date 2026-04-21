@@ -82,10 +82,17 @@ describe("account.reducer", () => {
       type: "edit-statement-entry",
       entryId: "2",
       nextAmountInCents: 7000,
+      nextType: "Transferencia",
+      nextMonth: "Dezembro",
+      nextDate: "10/12/2022",
     });
 
     expect(nextState.currentBalanceInCents).toBe(248000);
-    expect(nextState.currentStatementEntries.find((entry) => entry.id === "2")?.amountInCents).toBe(-7000);
+    const editedTransfer = nextState.currentStatementEntries.find((entry) => entry.id === "2");
+    expect(editedTransfer?.amountInCents).toBe(-7000);
+    expect(editedTransfer?.type).toBe("Transferencia");
+    expect(editedTransfer?.month).toBe("Dezembro");
+    expect(editedTransfer?.date).toBe("10/12/2022");
   });
 
   it("edita deposito normalizando para valor positivo", () => {
@@ -95,10 +102,17 @@ describe("account.reducer", () => {
       type: "edit-statement-entry",
       entryId: "1",
       nextAmountInCents: -20000,
+      nextType: "Deposito",
+      nextMonth: "Janeiro",
+      nextDate: "02/01/2023",
     });
 
     expect(nextState.currentBalanceInCents).toBe(255000);
-    expect(nextState.currentStatementEntries.find((entry) => entry.id === "1")?.amountInCents).toBe(20000);
+    const editedDeposit = nextState.currentStatementEntries.find((entry) => entry.id === "1");
+    expect(editedDeposit?.amountInCents).toBe(20000);
+    expect(editedDeposit?.type).toBe("Deposito");
+    expect(editedDeposit?.month).toBe("Janeiro");
+    expect(editedDeposit?.date).toBe("02/01/2023");
   });
 
   it("mantem estado quando edit recebe id inexistente", () => {
@@ -108,6 +122,9 @@ describe("account.reducer", () => {
       type: "edit-statement-entry",
       entryId: "inexistente",
       nextAmountInCents: 100,
+      nextType: "Deposito",
+      nextMonth: "Novembro",
+      nextDate: "18/11/2022",
     });
 
     expect(nextState).toBe(initialState);

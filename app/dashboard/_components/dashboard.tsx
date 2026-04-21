@@ -6,7 +6,7 @@ import type {
   NewTransactionPayload,
   NewTransactionResult,
 } from './interfaces/new-transaction-panel.interfaces';
-import type { StatementEntry } from './interfaces/statement-panel.interfaces';
+import type { EditStatementEntryPayload, StatementEntry } from './interfaces/statement-panel.interfaces';
 import { accountReducer, createAccountState } from '../_state/account.reducer';
 import {
   formatIsoDateToPtBr,
@@ -120,12 +120,51 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     });
   };
 
-  const handleEditStatementEntry = (entryId: string, nextAmountInCents: number) => {
+  const handleEditStatementEntry = ({
+    entryId,
+    type,
+    amountInCents,
+    transactionDate,
+  }: EditStatementEntryPayload): NewTransactionResult => {
+    const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
+    if (!entryToEdit) {
+      return {
+        ok: false,
+        message: "Lançamento não encontrado para edição.",
+      };
+    }
+
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data invalida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
+    const nextSignedAmountInCents = type === "deposito" ? amountInCents : -amountInCents;
+    const projectedBalanceInCents =
+      accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
+
+    if (projectedBalanceInCents < 0) {
+      return {
+        ok: false,
+        message: "Saldo insuficiente para concluir a transferência.",
+      };
+    }
+
     dispatchAccountAction({
       type: 'edit-statement-entry',
-      entryId,
-      nextAmountInCents,
+      entryId: entryId,
+      nextAmountInCents: amountInCents,
+      nextType: type === "deposito" ? "Deposito" : "Transferencia",
+      nextMonth: statementDate.monthLabel,
+      nextDate: statementDate.dateLabel,
     });
+
+    return {
+      ok: true,
+    };
   };
 
   return (
