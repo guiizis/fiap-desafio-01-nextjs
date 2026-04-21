@@ -20,7 +20,7 @@ import { StatementPanel } from './statement-panel';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
   { key: 'inicio', label: 'Inicio' },
-  { key: 'transferencias', label: 'Transferencias', disabled: true },
+  { key: 'transacoes', label: 'Transações', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
   { key: 'outros-servicos', label: 'Outros serviços', disabled: false },
 ];

@@ -19,7 +19,7 @@ describe('ServicesContentPanel (legacy)', () => {
   });
 
   it.each([
-    ['transferencias', /transfer[e\u00ea]ncias/i],
+    ['transacoes', /transacoes/i],
     ['investimentos', /investimentos/i],
     ['outros-servicos', /confira os servi[c\u00e7]os dispon[i\u00ed]veis/i],
   ] as const)('renderiza conteudo da aba %s', (activeTab, expectedTitle) => {

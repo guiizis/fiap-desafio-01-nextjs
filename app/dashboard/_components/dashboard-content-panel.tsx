@@ -33,8 +33,8 @@ const tabContent: Record<DashboardTabKey, { title: string; description: string }
     title: 'Confira os serviços disponiveis',
     description: 'Acesse atalhos do seu banco em um único lugar.',
   },
-  transferencias: {
-    title: 'Transferências',
+  transacoes: {
+    title: 'Transações',
     description: 'Consulte e organize suas transferências com facilidade.',
   },
   investimentos: {

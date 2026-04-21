@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { DashboardSidebarNav } from './dashboard-sidebar-nav';
 
 const items = [
-  { key: 'inicio', label: 'In\u00edcio' },
-  { key: 'meus-cartoes', label: 'Meus cart\u00f5es' },
-  { key: 'transferencias', label: 'Transfer\u00eancias', disabled: true },
+  { key: 'inicio', label: 'Início' },
+  { key: 'meus-cartoes', label: 'Meus cartões' },
+  { key: 'transacoes', label: 'Transações', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros servi\u00e7os', disabled: true },
+  { key: 'outros-servicos', label: 'Outros serviços', disabled: true },
 ] as const;
 
 function triggerButtonClickHandler(element: HTMLElement) {
@@ -99,7 +99,7 @@ describe('DashboardSidebarNav', () => {
 
     fireEvent.click(disabledButton);
 
-    expect(onChange).not.toHaveBeenCalledWith('transferencias');
+    expect(onChange).not.toHaveBeenCalledWith('transacoes');
     expect(getOpenButtons()).toHaveLength(2);
   });
 

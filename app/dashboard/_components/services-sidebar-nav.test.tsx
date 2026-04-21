@@ -5,7 +5,7 @@ import { DashboardSidebarNav } from './services-sidebar-nav';
 const items = [
   { key: 'inicio', label: 'Inicio' },
   { key: 'meus-cartoes', label: 'Meus cartoes' },
-  { key: 'transferencias', label: 'Transferencias', disabled: true },
+  { key: 'transacoes', label: 'Transações', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
   { key: 'outros-servicos', label: 'Outros serviços', disabled: true },
 ] as const;
@@ -17,7 +17,7 @@ describe('DashboardSidebarNav', () => {
 
     const activeButton = screen.getByRole('button', { name: 'Inicio' });
     const enabledButton = screen.getByRole('button', { name: 'Meus cartoes' });
-    const disabledButton = screen.getByRole('button', { name: 'Transferencias' });
+    const disabledButton = screen.getByRole('button', { name: 'Transações' });
 
     expect(activeButton.className).toContain('text-secondary');
     expect(enabledButton.className).toContain('text-heading');

@@ -24,7 +24,7 @@ describe('Dashboard', () => {
     expect(screen.getByRole('heading', { name: 'Extrato', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Nova transação', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Concluir transação' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Transferencias' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Transações' })).toBeDisabled();
   });
 
   it('alterna visibilidade do saldo', () => {
