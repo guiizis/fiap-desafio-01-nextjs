@@ -1,28 +1,28 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-export type ServicesTabKey =
-  | "inicio"
-  | "transferencias"
-  | "investimentos"
-  | "outros-servicos"
-  | "meus-cartoes";
+export type DashboardTabKey =
+  | 'inicio'
+  | 'transferencias'
+  | 'investimentos'
+  | 'outros-servicos'
+  | 'meus-cartoes';
 
-type ServicesSidebarItem = {
-  key: ServicesTabKey;
+type DashboardSidebarItem = {
+  key: DashboardTabKey;
   label: string;
   disabled?: boolean;
 };
 
-type ServicesSidebarNavProps = {
-  items: readonly ServicesSidebarItem[];
-  activeItem: ServicesTabKey;
-  onChange: (key: ServicesTabKey) => void;
+type DashboardSidebarNavProps = {
+  items: readonly DashboardSidebarItem[];
+  activeItem: DashboardTabKey;
+  onChange: (key: DashboardTabKey) => void;
 };
 
-export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSidebarNavProps) {
+export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSidebarNavProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleSelectItem = (item: ServicesSidebarItem) => {
+  const handleSelectItem = (item: DashboardSidebarItem) => {
     if (item.disabled) {
       return;
     }
@@ -32,17 +32,17 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
   };
 
   return (
-    <nav aria-label="Menu de servicos" className="relative desktop:h-full desktop:w-full">
+    <nav aria-label="Menu de serviços" className="relative desktop:h-full desktop:w-full">
       <div className="relative mb-2 md:hidden">
         <button
           type="button"
-          aria-label={isMobileMenuOpen ? "Fechar menu de servicos" : "Abrir menu de servicos"}
+          aria-label={isMobileMenuOpen ? 'Fechar menu de serviços' : 'Abrir menu de serviços'}
           aria-expanded={isMobileMenuOpen}
           onClick={() => setIsMobileMenuOpen((current) => !current)}
           className="inline-flex h-8 w-8 items-center justify-center text-secondary"
         >
           <span aria-hidden="true" className="text-title-lg leading-none">
-            {isMobileMenuOpen ? "×" : "☰"}
+            {isMobileMenuOpen ? '×' : '☰'}
           </span>
         </button>
 
@@ -50,7 +50,7 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
           <div className="absolute left-0 top-0 z-20 w-[142px] border border-border bg-surface px-3 py-2 shadow-md">
             <button
               type="button"
-              aria-label="Fechar menu de servicos"
+              aria-label="Fechar menu de serviços"
               onClick={() => setIsMobileMenuOpen(false)}
               className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center text-secondary"
             >
@@ -69,13 +69,13 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
                       disabled={isDisabled}
                       onClick={() => handleSelectItem(item)}
                       className={[
-                        "w-full border-b border-border py-2 text-left text-body-sm transition-colors",
+                        'w-full border-b border-border py-2 text-left text-body-sm transition-colors',
                         isActive
-                          ? "font-semibold text-accent"
+                          ? 'font-semibold text-accent'
                           : isDisabled
-                            ? "cursor-not-allowed font-normal text-menu-disabled"
-                            : "font-normal text-heading",
-                      ].join(" ")}
+                            ? 'cursor-not-allowed font-normal text-menu-disabled'
+                            : 'font-normal text-heading',
+                      ].join(' ')}
                     >
                       {item.label}
                     </button>
@@ -102,13 +102,13 @@ export function ServicesSidebarNav({ items, activeItem, onChange }: ServicesSide
                 disabled={isDisabled}
                 onClick={() => handleSelectItem(item)}
                 className={[
-                  "w-auto border-b border-transparent px-0 py-1 text-left text-body-md transition-colors desktop:w-full desktop:border-0 desktop:py-3",
+                  'w-auto border-b border-transparent px-0 py-1 text-left text-body-md transition-colors desktop:w-full desktop:border-0 desktop:py-3',
                   isActive
-                    ? "font-semibold text-secondary"
+                    ? 'font-semibold text-secondary'
                     : isDisabled
-                      ? "cursor-not-allowed font-normal text-menu-disabled"
-                      : "font-normal text-heading hover:text-secondary",
-                ].join(" ")}
+                      ? 'cursor-not-allowed font-normal text-menu-disabled'
+                      : 'font-normal text-heading hover:text-secondary',
+                ].join(' ')}
               >
                 {item.label}
               </button>

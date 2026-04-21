@@ -1,25 +1,25 @@
-﻿"use client";
+﻿'use client';
 
-import type { FormEventHandler } from "react";
-import Image from "next/image";
-import { useMemo, useState } from "react";
-import { Alert } from "../../../components/ui/alert";
-import { Button } from "../../../components/ui/button";
-import { CalendarInput } from "../../../components/ui/calendar-input";
-import { Input, Select } from "../../../components/ui/input";
+import type { FormEventHandler } from 'react';
+import Image from 'next/image';
+import { useMemo, useState } from 'react';
+import { Alert } from '../../../components/ui/alert';
+import { Button } from '../../../components/ui/button';
+import { CalendarInput } from '../../../components/ui/calendar-input';
+import { Input, Select } from '../../../components/ui/input';
 import type {
   NewTransactionPanelProps,
   TransactionType,
-} from "./interfaces/new-transaction-panel.interfaces";
+} from './interfaces/new-transaction-panel.interfaces';
 import {
   getDefaultTransactionDate,
   getTransactionDateRange,
   isTransactionDateWithinRange,
-} from "../_utils/transaction-date";
-import { formatCurrencyInput } from "../_utils/currency-mask";
+} from '../_utils/transaction-date';
+import { formatCurrencyInput } from '../_utils/currency-mask';
 
 function parseCurrencyInputToCents(value: string) {
-  const normalizedAmount = value.replace(/\./g, "").replace(",", ".");
+  const normalizedAmount = value.replace(/\./g, '').replace(',', '.');
   const amountValue = Number(normalizedAmount);
 
   if (!Number.isFinite(amountValue) || amountValue <= 0) {
@@ -31,26 +31,29 @@ function parseCurrencyInputToCents(value: string) {
 
 export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanelProps) {
   const calendarRange = useMemo(() => getTransactionDateRange(), []);
-  const [transactionType, setTransactionType] = useState<TransactionType | "">("");
-  const [transactionAmount, setTransactionAmount] = useState("00,00");
+  const [transactionType, setTransactionType] = useState<TransactionType | ''>('');
+  const [transactionAmount, setTransactionAmount] = useState('00,00');
   const [transactionDate, setTransactionDate] = useState(() => getDefaultTransactionDate());
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: "deposito", label: "Depósito" },
-    { value: "transferencia", label: "Transferência" },
+    { value: 'deposito', label: 'Depósito' },
+    { value: 'transferencia', label: 'Transferência' },
   ];
 
-  const amountInCents = useMemo(() => parseCurrencyInputToCents(transactionAmount), [transactionAmount]);
+  const amountInCents = useMemo(
+    () => parseCurrencyInputToCents(transactionAmount),
+    [transactionAmount]
+  );
   const isAmountValid = amountInCents > 0;
 
   const isDateValid = isTransactionDateWithinRange(transactionDate, calendarRange);
-  const isFormValid = transactionType !== "" && isAmountValid && isDateValid;
+  const isFormValid = transactionType !== '' && isAmountValid && isDateValid;
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     setFeedback(null);
 
-    if (transactionType !== "deposito" && transactionType !== "transferencia") {
+    if (transactionType !== 'deposito' && transactionType !== 'transferencia') {
       return;
     }
 
@@ -73,8 +76,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       return;
     }
 
-    setTransactionType("");
-    setTransactionAmount("00,00");
+    setTransactionType('');
+    setTransactionAmount('00,00');
     setTransactionDate(getDefaultTransactionDate());
   };
 
@@ -84,7 +87,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       aria-label="Nova transação"
     >
       <Image
-        src="/servicos/transacoes/square-top.svg"
+        src="/dashboard/transacoes/square-top.svg"
         alt=""
         width={178}
         height={180}
@@ -92,7 +95,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute right-0 top-0 z-0 hidden desktop:block"
       />
       <Image
-        src="/servicos/transacoes/square-bottom.svg"
+        src="/dashboard/transacoes/square-bottom.svg"
         alt=""
         width={178}
         height={180}
@@ -101,7 +104,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       />
 
       <Image
-        src="/servicos/responsive/squares-top.svg"
+        src="/dashboard/responsive/squares-top.svg"
         alt=""
         width={600}
         height={402}
@@ -109,7 +112,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
       <Image
-        src="/servicos/responsive/squares-bottom.svg"
+        src="/dashboard/responsive/squares-bottom.svg"
         alt=""
         width={181}
         height={178}
@@ -117,7 +120,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute bottom-0 left-0 z-0 desktop:hidden"
       />
       <Image
-        src="/servicos/responsive/people-card.svg"
+        src="/dashboard/responsive/people-card.svg"
         alt=""
         width={328}
         height={231}
@@ -139,7 +142,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
             onChange={(event) => {
               const value = event.currentTarget.value;
 
-              if (value === "deposito" || value === "transferencia" || value === "") {
+              if (value === 'deposito' || value === 'transferencia' || value === '') {
                 setTransactionType(value);
               }
             }}
@@ -156,7 +159,9 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
             type="text"
             inputMode="numeric"
             value={transactionAmount}
-            onChange={(event) => setTransactionAmount(formatCurrencyInput(event.currentTarget.value))}
+            onChange={(event) =>
+              setTransactionAmount(formatCurrencyInput(event.currentTarget.value))
+            }
             required
             containerClassName="mt-10 max-w-[296px] mobile:mt-8"
             labelClassName="mb-3 text-title-xl font-bold text-transaction-text"
@@ -178,15 +183,19 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
             inputClassName="h-14 border-primary bg-surface text-center text-title-lg text-body focus-visible:ring-primary"
           />
 
-          <div className={["mt-10 w-fit mobile:mt-8", !isFormValid ? "cursor-not-allowed" : ""].join(" ")}>
+          <div
+            className={['mt-10 w-fit mobile:mt-8', !isFormValid ? 'cursor-not-allowed' : ''].join(
+              ' '
+            )}
+          >
             <Button
               type="submit"
               variant="solid"
               tone="primary"
               className={[
-                "h-14 w-full max-w-[296px] text-title-xl font-bold",
-                !isFormValid ? "pointer-events-none" : "",
-              ].join(" ")}
+                'h-14 w-full max-w-[296px] text-title-xl font-bold',
+                !isFormValid ? 'pointer-events-none' : '',
+              ].join(' ')}
               disabled={!isFormValid}
             >
               Concluir transação

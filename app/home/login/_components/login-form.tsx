@@ -1,28 +1,28 @@
-﻿"use client";
+﻿'use client';
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import type { FormEventHandler } from "react";
-import { useState } from "react";
-import { Alert } from "../../../../components/ui/alert";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
-import { loginMockAccount } from "../../_services/auth-service";
-import { setAuthSession } from "../../../lib/auth-session";
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import type { FormEventHandler } from 'react';
+import { useState } from 'react';
+import { Alert } from '../../../../components/ui/alert';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { loginMockAccount } from '../../_services/auth-service';
+import { setAuthSession } from '../../../lib/auth-session';
 
-type LoginFormLayout = "page" | "modal";
+type LoginFormLayout = 'page' | 'modal';
 
 type LoginFormProps = {
   layout?: LoginFormLayout;
 };
 
-export function LoginForm({ layout = "page" }: LoginFormProps) {
+export function LoginForm({ layout = 'page' }: LoginFormProps) {
   const router = useRouter();
-  const isModal = layout === "modal";
+  const isModal = layout === 'modal';
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{
-    variant: "success" | "error";
+    variant: 'success' | 'error';
     message: string;
   } | null>(null);
 
@@ -50,8 +50,8 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
 
     const formData = new FormData(formElement);
     const payload = {
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("senha") ?? ""),
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('senha') ?? ''),
     };
 
     const result = await loginMockAccount(payload);
@@ -62,12 +62,12 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
         user: result.user,
       });
       setIsSubmitting(false);
-      router.push("/servicos");
+      router.push('/dashboard');
       return;
     }
 
     setFeedback({
-      variant: "error",
+      variant: 'error',
       message: result.message,
     });
     setIsSubmitting(false);
@@ -81,14 +81,14 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
   const handleAlertClose = () => setFeedback(null);
 
   return (
-    <div className={isModal ? "w-full" : "w-full rounded-lg bg-surface p-6 shadow-sm md:p-8"}>
+    <div className={isModal ? 'w-full' : 'w-full rounded-lg bg-surface p-6 shadow-sm md:p-8'}>
       <div className="mb-6 flex justify-center">
         <Image
           src="/home/login/login.svg"
           alt="Ilustração de login"
           width={333}
           height={267}
-          className={isModal ? "h-auto w-full max-w-[260px]" : "h-auto w-full max-w-[320px]"}
+          className={isModal ? 'h-auto w-full max-w-[260px]' : 'h-auto w-full max-w-[320px]'}
           priority
         />
       </div>
@@ -139,7 +139,7 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
           </div>
         ) : null}
 
-        <div className={isModal ? "flex justify-center pt-2" : "pt-2"}>
+        <div className={isModal ? 'flex justify-center pt-2' : 'pt-2'}>
           <Button
             type="submit"
             variant="solid"
@@ -147,7 +147,7 @@ export function LoginForm({ layout = "page" }: LoginFormProps) {
             className="h-11 min-w-[124px] justify-center"
             disabled={!isFormValid || isSubmitting}
           >
-            {isSubmitting ? "Entrando..." : "Acessar"}
+            {isSubmitting ? 'Entrando...' : 'Acessar'}
           </Button>
         </div>
       </form>

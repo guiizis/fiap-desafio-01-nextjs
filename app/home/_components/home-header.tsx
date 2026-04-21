@@ -1,7 +1,7 @@
-﻿import Link from "next/link";
-import { Logo } from "../../../components/ui/logo";
-import { HomeCtaButtons } from "./home-cta-buttons";
-import { MobileMenuButton } from "./mobile-menu-button";
+﻿import Link from 'next/link';
+import { Logo } from '../../../components/ui/logo';
+import { HomeCtaButtons } from './home-cta-buttons';
+import { MobileMenuButton } from './mobile-menu-button';
 
 export function HomeHeader() {
   return (
@@ -9,13 +9,7 @@ export function HomeHeader() {
       <div className="mx-auto w-full max-w-7xl px-4 py-3 lg:px-6">
         <div className="hidden items-center justify-between mobile:flex">
           <MobileMenuButton />
-          <Logo
-            size="md"
-            variant="full"
-            tone="secondary"
-            priority
-            alt="McIntosh Bank mobile"
-          />
+          <Logo size="md" variant="full" tone="secondary" priority alt="McIntosh Bank mobile" />
         </div>
 
         <div className="flex items-center justify-between gap-6 mobile:hidden">
@@ -48,7 +42,7 @@ export function HomeHeader() {
                 </li>
                 <li>
                   <Link
-                    href="/servicos"
+                    href="/dashboard"
                     className="text-body-md font-semibold text-secondary hover:text-menu-hover"
                   >
                     Serviços

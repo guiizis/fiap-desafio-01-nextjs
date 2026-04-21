@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { formatCurrencyFromCents } from "../../lib/calc";
+import Image from 'next/image';
+import { formatCurrencyFromCents } from '../../lib/calc';
 
 type AccountSummaryCardProps = {
   name: string;
@@ -20,7 +20,7 @@ export function AccountSummaryCard({
   isBalanceVisible,
   onToggleBalanceVisibility,
 }: AccountSummaryCardProps) {
-  const displayedBalance = isBalanceVisible ? formatCurrencyFromCents(balanceInCents) : "R$ ******";
+  const displayedBalance = isBalanceVisible ? formatCurrencyFromCents(balanceInCents) : 'R$ ******';
 
   return (
     <section
@@ -28,7 +28,7 @@ export function AccountSummaryCard({
       aria-label="Resumo da conta"
     >
       <Image
-        src="/servicos/responsive/squares-top.svg"
+        src="/dashboard/responsive/squares-top.svg"
         alt=""
         width={600}
         height={402}
@@ -36,7 +36,7 @@ export function AccountSummaryCard({
         className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
       <Image
-        src="/servicos/banker.svg"
+        src="/dashboard/banker.svg"
         alt=""
         width={172}
         height={228}
@@ -56,12 +56,12 @@ export function AccountSummaryCard({
             <button
               type="button"
               onClick={onToggleBalanceVisibility}
-              aria-label={isBalanceVisible ? "Ocultar saldo" : "Mostrar saldo"}
+              aria-label={isBalanceVisible ? 'Ocultar saldo' : 'Mostrar saldo'}
               aria-pressed={!isBalanceVisible}
               className="inline-flex h-5 w-6 cursor-pointer items-center justify-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
             >
               <Image
-                src="/servicos/show-balance.svg"
+                src="/dashboard/show-balance.svg"
                 alt=""
                 width={19}
                 height={13}

@@ -29,7 +29,7 @@ export function ServiceUnderConstructionModal({
 
   const handleBackToServices = () => {
     onClose();
-    router.replace("/servicos");
+    router.replace('/dashboard');
   };
 
   return (
@@ -60,7 +60,7 @@ export function ServiceUnderConstructionModal({
         </p>
 
         <Image
-          src="/servicos/under-construction.svg"
+          src="/dashboard/under-construction.svg"
           alt="Ilustracao de area em construcao"
           width={960}
           height={600}

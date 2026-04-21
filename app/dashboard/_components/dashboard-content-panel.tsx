@@ -7,10 +7,10 @@ import type {
   NewTransactionResult,
 } from "./interfaces/new-transaction-panel.interfaces";
 import { ServiceUnderConstructionModal } from "./service-under-construction-modal";
-import type { ServicesTabKey } from "./services-sidebar-nav";
+import type { DashboardTabKey } from "./dashboard-sidebar-nav";
 
-type ServicesContentPanelProps = {
-  activeTab: ServicesTabKey;
+type DashboardContentPanelProps = {
+  activeTab: DashboardTabKey;
   onSubmitTransaction?: (payload: NewTransactionPayload) => NewTransactionResult | void;
 };
 
@@ -20,44 +20,41 @@ type ServiceOption = {
 };
 
 const serviceOptions: readonly ServiceOption[] = [
-  { id: "emprestimo", label: "Empréstimo" },
-  { id: "meus-cartoes", label: "Meus cartões" },
-  { id: "doacoes", label: "Doações" },
-  { id: "pix", label: "Pix" },
-  { id: "seguros", label: "Seguros" },
-  { id: "credito-celular", label: "Crédito celular" },
+  { id: 'emprestimo', label: 'Emprestimo' },
+  { id: 'meus-cartoes', label: 'Meus cartoes' },
+  { id: 'doacoes', label: 'Doacoes' },
+  { id: 'pix', label: 'Pix' },
+  { id: 'seguros', label: 'Seguros' },
+  { id: 'credito-celular', label: 'Credito celular' },
 ];
 
-const tabContent: Record<
-  ServicesTabKey,
-  { title: string; description: string }
-> = {
+const tabContent: Record<DashboardTabKey, { title: string; description: string }> = {
   inicio: {
-    title: "Confira os servicos disponiveis",
-    description: "Acesse atalhos do seu banco em um unico lugar.",
+    title: 'Confira os serviços disponiveis',
+    description: 'Acesse atalhos do seu banco em um único lugar.',
   },
   transferencias: {
-    title: "Transferencias",
-    description: "Consulte e organize suas transferencias com facilidade.",
+    title: 'Transferências',
+    description: 'Consulte e organize suas transferências com facilidade.',
   },
   investimentos: {
-    title: "Investimentos",
-    description: "Acompanhe sua carteira e proximos passos de investimento.",
+    title: 'Investimentos',
+    description: 'Acompanhe sua carteira e próximos passos de investimento.',
   },
-  "outros-servicos": {
-    title: "Confira os servicos disponiveis",
-    description: "Acesse atalhos do seu banco em um unico lugar.",
+  'outros-servicos': {
+    title: 'Confira os serviços disponíveis',
+    description: 'Acesse atalhos do seu banco em um único lugar.',
   },
-  "meus-cartoes": {
-    title: "Meus cartoes",
-    description: "Gerencie seus cartoes fisico e digital com rapidez.",
+  'meus-cartoes': {
+    title: 'Meus cartões',
+    description: 'Gerencie seus cartões físico e digital com rapidez.',
   },
 };
 
-export function ServicesContentPanel({
+export function DashboardContentPanel({
   activeTab,
   onSubmitTransaction,
-}: ServicesContentPanelProps) {
+}: DashboardContentPanelProps) {
   const [selectedServiceLabel, setSelectedServiceLabel] = useState<string | null>(null);
 
   if (activeTab === "inicio") {
