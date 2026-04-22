@@ -3,6 +3,8 @@ import {
   formatIsoDateToPtBr,
   getDefaultTransactionDate,
   getTransactionDateRange,
+  getTimestampFromPtBrDate,
+  getYearFromPtBrDate,
   isTransactionDateWithinRange,
   toStatementDate,
 } from "./transaction-date";
@@ -74,5 +76,16 @@ describe("transaction-date utils", () => {
 
   it("mantem valor original quando data ISO e invalida", () => {
     expect(formatIsoDateToPtBr("2026-02-31")).toBe("2026-02-31");
+  });
+
+  it("extrai ano de data pt-BR valida e retorna null para valor invalido", () => {
+    expect(getYearFromPtBrDate("19/04/2026")).toBe(2026);
+    expect(getYearFromPtBrDate("31/02/2026")).toBeNull();
+    expect(getYearFromPtBrDate("2026-04-19")).toBeNull();
+  });
+
+  it("converte data pt-BR para timestamp UTC e retorna null quando invalida", () => {
+    expect(getTimestampFromPtBrDate("19/04/2026")).toBe(Date.UTC(2026, 3, 19, 12));
+    expect(getTimestampFromPtBrDate("31/02/2026")).toBeNull();
   });
 });

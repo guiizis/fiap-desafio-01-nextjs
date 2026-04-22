@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { DashboardSidebarNav } from './dashboard-sidebar-nav';
 
 const items = [
-  { key: 'inicio', label: 'In\u00edcio' },
-  { key: 'meus-cartoes', label: 'Meus cart\u00f5es' },
-  { key: 'transferencias', label: 'Transfer\u00eancias', disabled: true },
+  { key: 'inicio', label: 'Início' },
+  { key: 'meus-cartoes', label: 'Meus cartões' },
+  { key: 'transacoes', label: 'Transações', disabled: true },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros servi\u00e7os', disabled: true },
+  { key: 'outros-servicos', label: 'Outros serviços', disabled: true },
 ] as const;
 
 function triggerButtonClickHandler(element: HTMLElement) {
@@ -42,7 +42,7 @@ describe('DashboardSidebarNav', () => {
 
     const activeButton = screen.getByRole('button', { name: /in[i\u00ed]cio/i });
     const enabledButton = screen.getByRole('button', { name: /meus cart[o\u00f5]es/i });
-    const disabledButton = screen.getByRole('button', { name: /transfer[e\u00ea]ncias/i });
+    const disabledButton = screen.getByRole('button', { name: /transa[c\u00e7][o\u00f5]es/i });
 
     expect(activeButton.className).toContain('text-secondary');
     expect(enabledButton.className).toContain('text-heading');
@@ -94,12 +94,12 @@ describe('DashboardSidebarNav', () => {
     fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
 
     const { panel } = getMobileMenuPanel();
-    const disabledButton = within(panel).getByRole('button', { name: /transfer[e\u00ea]ncias/i });
+    const disabledButton = within(panel).getByRole('button', { name: /transa[c\u00e7][o\u00f5]es/i });
     expect(disabledButton).toBeDisabled();
 
     fireEvent.click(disabledButton);
 
-    expect(onChange).not.toHaveBeenCalledWith('transferencias');
+    expect(onChange).not.toHaveBeenCalledWith('transacoes');
     expect(getOpenButtons()).toHaveLength(2);
   });
 
@@ -107,7 +107,7 @@ describe('DashboardSidebarNav', () => {
     const onChange = vi.fn();
     render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
 
-    const disabledDesktopButton = screen.getByRole('button', { name: /transfer[e\u00ea]ncias/i });
+    const disabledDesktopButton = screen.getByRole('button', { name: /transa[c\u00e7][o\u00f5]es/i });
     triggerButtonClickHandler(disabledDesktopButton);
 
     expect(onChange).not.toHaveBeenCalled();

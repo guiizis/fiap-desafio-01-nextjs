@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import { AccountSummaryCard } from './account-summary-card';
@@ -6,10 +6,11 @@ import type {
   NewTransactionPayload,
   NewTransactionResult,
 } from './interfaces/new-transaction-panel.interfaces';
-import type { StatementEntry } from './interfaces/statement-panel.interfaces';
+import type { EditStatementEntryPayload, StatementEntry } from './interfaces/statement-panel.interfaces';
 import { accountReducer, createAccountState } from '../_state/account.reducer';
 import {
   formatIsoDateToPtBr,
+  getTimestampFromPtBrDate,
   getTransactionDateRange,
   toStatementDate,
   type TransactionStatementDate,
@@ -19,8 +20,8 @@ import { DashboardSidebarNav, type DashboardTabKey } from './dashboard-sidebar-n
 import { StatementPanel } from './statement-panel';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
-  { key: 'inicio', label: 'Inicio' },
-  { key: 'transferencias', label: 'Transferencias', disabled: true },
+  { key: 'inicio', label: 'Início' },
+  { key: 'transacoes', label: 'Transações' },
   { key: 'investimentos', label: 'Investimentos', disabled: true },
   { key: 'outros-servicos', label: 'Outros serviços', disabled: false },
 ];
@@ -83,6 +84,31 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     });
   }, [balanceInCents, statementEntries]);
 
+  const orderedStatementEntries = useMemo(() => {
+    return [...accountState.currentStatementEntries].sort((entryA, entryB) => {
+      const timestampA = getTimestampFromPtBrDate(entryA.date);
+      const timestampB = getTimestampFromPtBrDate(entryB.date);
+
+      if (timestampA === null && timestampB === null) {
+        return 0;
+      }
+
+      if (timestampA === null) {
+        return 1;
+      }
+
+      if (timestampB === null) {
+        return -1;
+      }
+
+      return timestampB - timestampA;
+    });
+  }, [accountState.currentStatementEntries]);
+
+  const visibleStatementEntries = useMemo(() => {
+    return orderedStatementEntries.slice(0, 6);
+  }, [orderedStatementEntries]);
+
   const handleSubmitTransaction = ({
     type,
     amountInCents,
@@ -99,7 +125,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     if (!statementDate) {
       return {
         ok: false,
-        message: `Data invalida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
       };
     }
 
@@ -120,12 +146,51 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     });
   };
 
-  const handleEditStatementEntry = (entryId: string, nextAmountInCents: number) => {
+  const handleEditStatementEntry = ({
+    entryId,
+    type,
+    amountInCents,
+    transactionDate,
+  }: EditStatementEntryPayload): NewTransactionResult => {
+    const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
+    if (!entryToEdit) {
+      return {
+        ok: false,
+        message: 'Lançamento não encontrado para edição.',
+      };
+    }
+
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
+    const nextSignedAmountInCents = type === 'deposito' ? amountInCents : -amountInCents;
+    const projectedBalanceInCents =
+      accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
+
+    if (projectedBalanceInCents < 0) {
+      return {
+        ok: false,
+        message: 'Saldo insuficiente para concluir a transferência.',
+      };
+    }
+
     dispatchAccountAction({
       type: 'edit-statement-entry',
       entryId,
-      nextAmountInCents,
+      nextAmountInCents: amountInCents,
+      nextType: type === 'deposito' ? 'Deposito' : 'Transferencia',
+      nextMonth: statementDate.monthLabel,
+      nextDate: statementDate.dateLabel,
     });
+
+    return {
+      ok: true,
+    };
   };
 
   return (
@@ -152,12 +217,16 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
           <DashboardContentPanel
             activeTab={activeTab}
             onSubmitTransaction={handleSubmitTransaction}
+            transactionEntries={orderedStatementEntries}
+            onDeleteEntry={handleDeleteStatementEntry}
+            onEditEntry={handleEditStatementEntry}
           />
         </div>
 
         <div className="desktop:col-start-3 desktop:flex desktop:h-full">
           <StatementPanel
-            entries={accountState.currentStatementEntries}
+            title="Extrato"
+            entries={visibleStatementEntries}
             onDeleteEntry={handleDeleteStatementEntry}
             onEditEntry={handleEditStatementEntry}
           />

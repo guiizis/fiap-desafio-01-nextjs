@@ -63,6 +63,50 @@ function normalizeStatementEntry(
   };
 }
 
+function createFallbackStatementEntry(index: number): AuthenticatedMockUser["statementEntries"][number] {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - (index * 3 + 2));
+
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    timeZone: "America/Sao_Paulo",
+  }).format(date);
+
+  const dateLabel = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  }).format(date);
+
+  const isTransfer = index % 2 === 1;
+
+  return {
+    id: `fallback-session-entry-${index}-${dateLabel.replace(/\//g, "-")}`,
+    month: `${monthLabel.charAt(0).toUpperCase()}${monthLabel.slice(1)}`,
+    type: isTransfer ? "Transferencia" : "Deposito",
+    amountInCents: isTransfer ? -(3500 + index * 300) : 6500 + index * 500,
+    date: dateLabel,
+  };
+}
+
+function ensureMinimumStatementEntries(
+  entries: AuthenticatedMockUser["statementEntries"],
+  minimumEntries: number = 8
+) {
+  if (entries.length >= minimumEntries) {
+    return entries;
+  }
+
+  const missingEntriesCount = minimumEntries - entries.length;
+  const fallbackEntries = Array.from({ length: missingEntriesCount }, (_, index) =>
+    createFallbackStatementEntry(index)
+  );
+
+  return [...entries, ...fallbackEntries];
+}
+
 export function normalizeAuthSession(value: unknown): AuthSession | null {
   if (!isRecord(value) || typeof value.token !== "string" || !isRecord(value.user)) {
     return null;
@@ -76,9 +120,10 @@ export function normalizeAuthSession(value: unknown): AuthSession | null {
         : null;
 
   const rawEntries = Array.isArray(value.user.statementEntries) ? value.user.statementEntries : [];
-  const statementEntries = rawEntries
+  const normalizedEntries = rawEntries
     .map(normalizeStatementEntry)
     .filter((entry): entry is AuthenticatedMockUser["statementEntries"][number] => entry !== null);
+  const statementEntries = ensureMinimumStatementEntries(normalizedEntries);
 
   if (
     typeof value.user.id !== "string" ||

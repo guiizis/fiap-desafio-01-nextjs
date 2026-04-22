@@ -14,15 +14,19 @@ function triggerButtonClickHandler(element: HTMLElement) {
   reactProps.onClick?.();
 }
 
-describe("StatementPanel", () => {
-  it("renderiza titulo e lancamentos do extrato, habilita acoes, edita e exclui item selecionado", () => {
-    const onDeleteEntry = vi.fn();
-    const onEditEntry = vi.fn();
+function getEntryByDate(date: string) {
+  const entry = screen.getByText(date).closest("li");
+  if (!entry) {
+    throw new Error(`Lancamento nao encontrado para data ${date}`);
+  }
 
+  return entry;
+}
+
+describe("StatementPanel", () => {
+  it("renderiza titulo e lancamentos do extrato e habilita acoes ao selecionar item", () => {
     render(
       <StatementPanel
-        onDeleteEntry={onDeleteEntry}
-        onEditEntry={onEditEntry}
         entries={[
           { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
           { id: "2", month: "Novembro", type: "Transferencia", amountInCents: -50000, date: "21/11/2022" },
@@ -34,33 +38,94 @@ describe("StatementPanel", () => {
     const deleteButton = screen.getByRole("button", { name: "Excluir extrato" });
 
     expect(screen.getByRole("heading", { name: "Extrato", level: 2 })).toBeInTheDocument();
-    expect(editButton).toBeInTheDocument();
-    expect(deleteButton).toBeInTheDocument();
     expect(editButton).toBeDisabled();
     expect(deleteButton).toBeDisabled();
     expect(screen.getAllByText("Novembro")).toHaveLength(2);
-    expect(screen.getByText("Deposito")).toBeInTheDocument();
-    expect(screen.getByText("Transferencia")).toBeInTheDocument();
+    expect(screen.getByText(/Dep/i)).toBeInTheDocument();
+    expect(screen.getByText(/Transfer/i)).toBeInTheDocument();
 
-    const firstEntry = screen.getByText("Deposito").closest("li");
-    if (!firstEntry) {
-      throw new Error("Lancamento nao encontrado");
-    }
-
-    fireEvent.click(firstEntry);
-
+    fireEvent.click(getEntryByDate("18/11/2022"));
     expect(editButton).toBeEnabled();
     expect(deleteButton).toBeEnabled();
+  });
 
-    fireEvent.click(editButton);
+  it("renderiza tipo sem mapeamento e oculta botoes quando showActions e falso", () => {
+    render(
+      <StatementPanel
+        showActions={false}
+        entries={[{ id: "1", month: "Abril", type: "Pix", amountInCents: 1000, date: "21/04/2026" }]}
+      />
+    );
 
-    const editInput = screen.getByRole("textbox", { name: "Valor do lancamento" });
-    fireEvent.change(editInput, { target: { value: "25000" } });
-    fireEvent.keyDown(editInput, { key: "Enter" });
-    expect(onEditEntry).toHaveBeenCalledWith("1", 25000);
+    expect(screen.getByText("Pix")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Editar extrato" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Excluir extrato" })).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(deleteButton);
-    expect(onDeleteEntry).toHaveBeenCalledWith("1");
+  it("abre modal de edicao e envia payload completo de tipo, valor e data", () => {
+    const onEditEntry = vi.fn(() => ({ ok: true as const }));
+
+    render(
+      <StatementPanel
+        onEditEntry={onEditEntry}
+        entries={[
+          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+        ]}
+      />
+    );
+
+    fireEvent.click(getEntryByDate("18/11/2022"));
+    fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
+
+    expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /Tipo de trans/i })).toHaveValue("deposito");
+    expect(screen.getByRole("textbox", { name: "Valor" })).toHaveValue("150,00");
+
+    fireEvent.change(screen.getByRole("combobox", { name: /Tipo de trans/i }), {
+      target: { value: "transferencia" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: "Valor" }), {
+      target: { value: "70000" },
+    });
+    fireEvent.change(screen.getByLabelText("Data"), {
+      target: { value: "2026-04-22" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Salvar edi/i }));
+
+    expect(onEditEntry).toHaveBeenCalledWith({
+      entryId: "1",
+      type: "transferencia",
+      amountInCents: 70000,
+      transactionDate: "2026-04-22",
+    });
+    expect(screen.queryByRole("heading", { name: /Editar trans/i })).not.toBeInTheDocument();
+  });
+
+  it("mantem modal aberto e mostra alerta quando a edicao retorna erro", () => {
+    const onEditEntry = vi.fn(() => ({
+      ok: false as const,
+      message: "Saldo insuficiente para concluir a transferencia.",
+    }));
+
+    render(
+      <StatementPanel
+        onEditEntry={onEditEntry}
+        entries={[
+          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+        ]}
+      />
+    );
+
+    fireEvent.click(getEntryByDate("18/11/2022"));
+    fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
+    fireEvent.change(screen.getByLabelText("Data"), {
+      target: { value: "2026-04-21" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Salvar edi/i }));
+
+    expect(onEditEntry).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("alert")).toHaveTextContent("Saldo insuficiente");
+    expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
   });
 
   it("deseleciona lancamento ao clicar fora do painel e bloqueia botoes novamente", () => {
@@ -74,26 +139,17 @@ describe("StatementPanel", () => {
 
     const editButton = screen.getByRole("button", { name: "Editar extrato" });
     const deleteButton = screen.getByRole("button", { name: "Excluir extrato" });
-    const entry = screen.getByText("Deposito").closest("li");
 
-    if (!entry) {
-      throw new Error("Lancamento nao encontrado");
-    }
-
-    fireEvent.click(entry);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     expect(editButton).toBeEnabled();
     expect(deleteButton).toBeEnabled();
-
-    fireEvent.click(editButton);
-    expect(screen.getByRole("textbox", { name: "Valor do lancamento" })).toBeInTheDocument();
 
     fireEvent.mouseDown(document.body);
     expect(editButton).toBeDisabled();
     expect(deleteButton).toBeDisabled();
-    expect(screen.queryByRole("textbox", { name: "Valor do lancamento" })).not.toBeInTheDocument();
   });
 
-  it("mantem selecao ao clicar dentro do painel e ignora evento com target nao DOM Node", () => {
+  it("ignora evento global quando target nao eh um Node", () => {
     render(
       <StatementPanel
         entries={[
@@ -102,23 +158,32 @@ describe("StatementPanel", () => {
       />
     );
 
-    const panel = screen.getByLabelText("Extrato da conta");
+    const event = new MouseEvent("mousedown", { bubbles: true });
+    Object.defineProperty(event, "target", {
+      value: { arbitrary: true },
+      configurable: true,
+    });
+
+    document.dispatchEvent(event);
+
+    expect(screen.getByRole("button", { name: "Editar extrato" })).toBeDisabled();
+  });
+
+  it("mantem selecao quando o clique acontece dentro do painel", () => {
+    render(
+      <StatementPanel
+        entries={[
+          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+        ]}
+      />
+    );
+
     const editButton = screen.getByRole("button", { name: "Editar extrato" });
-    const entry = screen.getByText("Deposito").closest("li");
 
-    if (!entry) {
-      throw new Error("Lancamento nao encontrado");
-    }
-
-    fireEvent.click(entry);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     expect(editButton).toBeEnabled();
 
-    fireEvent.mouseDown(panel);
-    expect(editButton).toBeEnabled();
-
-    const invalidTargetEvent = new MouseEvent("mousedown", { bubbles: true });
-    Object.defineProperty(invalidTargetEvent, "target", { value: {}, configurable: true });
-    document.dispatchEvent(invalidTargetEvent);
+    fireEvent.mouseDown(screen.getByLabelText("Extrato da conta"));
     expect(editButton).toBeEnabled();
   });
 
@@ -146,44 +211,26 @@ describe("StatementPanel", () => {
     expect(onDeleteEntry).not.toHaveBeenCalled();
   });
 
-  it("cancela edicao com Escape, bloqueia valor invalido e encerra edicao ao excluir item", () => {
-    const onEditEntry = vi.fn();
+  it("fecha modal com Escape e exclui item selecionado", () => {
     const onDeleteEntry = vi.fn();
 
     render(
       <StatementPanel
         onDeleteEntry={onDeleteEntry}
-        onEditEntry={onEditEntry}
         entries={[
           { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
 
-    const editButton = screen.getByRole("button", { name: "Editar extrato" });
-    const deleteButton = screen.getByRole("button", { name: "Excluir extrato" });
-    const entry = screen.getByText("Deposito").closest("li");
+    fireEvent.click(getEntryByDate("18/11/2022"));
+    fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
+    expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
 
-    if (!entry) {
-      throw new Error("Lancamento nao encontrado");
-    }
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("heading", { name: /Editar trans/i })).not.toBeInTheDocument();
 
-    fireEvent.click(entry);
-    fireEvent.click(editButton);
-
-    const firstInput = screen.getByRole("textbox", { name: "Valor do lancamento" });
-    fireEvent.keyDown(firstInput, { key: "Escape" });
-    expect(screen.queryByRole("textbox", { name: "Valor do lancamento" })).not.toBeInTheDocument();
-
-    fireEvent.click(editButton);
-    const secondInput = screen.getByRole("textbox", { name: "Valor do lancamento" });
-    fireEvent.change(secondInput, { target: { value: "0" } });
-    fireEvent.keyDown(secondInput, { key: "Enter" });
-    expect(onEditEntry).not.toHaveBeenCalled();
-    expect(screen.getByRole("textbox", { name: "Valor do lancamento" })).toBeInTheDocument();
-
-    fireEvent.click(deleteButton);
+    fireEvent.click(screen.getByRole("button", { name: "Excluir extrato" }));
     expect(onDeleteEntry).toHaveBeenCalledWith("1");
-    expect(screen.queryByRole("textbox", { name: "Valor do lancamento" })).not.toBeInTheDocument();
   });
 });

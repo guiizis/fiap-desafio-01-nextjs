@@ -1,6 +1,6 @@
 export type DashboardTabKey =
   | 'inicio'
-  | 'transferencias'
+  | 'transacoes'
   | 'investimentos'
   | 'outros-servicos'
   | 'meus-cartoes';

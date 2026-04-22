@@ -51,7 +51,7 @@ describe('Dashboard invalid date guard', () => {
 
     const result = submitResultSpy.mock.calls[0]?.[0] as { ok: boolean; message: string };
     expect(result.ok).toBe(false);
-    expect(result.message).toContain('Data invalida.');
+    expect(result.message).toMatch(/Data inv[a\u00e1]lida\./i);
     expect(result.message).toContain('01/01/');
     expect(result.message).toContain('31/12/');
   });

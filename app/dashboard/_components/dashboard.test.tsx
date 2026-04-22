@@ -11,7 +11,7 @@ const statementEntries = [
 ] as const;
 
 describe('Dashboard', () => {
-  it('renderiza estrutura base com painel de nova transacao e abas indisponiveis', () => {
+  it('renderiza estrutura base com painel de nova transacao e abas com estados corretos', () => {
     render(
       <Dashboard
         userFirstName="Joana"
@@ -20,11 +20,12 @@ describe('Dashboard', () => {
       />
     );
 
-    expect(screen.getByRole('heading', { name: 'Ola, Joana! :)' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Ol[a\u00e1], Joana! :\)/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Extrato', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Nova transação', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Concluir transação' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Transferencias' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Transações' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Investimentos' })).toBeDisabled();
   });
 
   it('alterna visibilidade do saldo', () => {
@@ -95,7 +96,7 @@ describe('Dashboard', () => {
       expect(statementItems).toHaveLength(5);
       expect(within(statementItems[0]).getByText('Abril')).toBeInTheDocument();
       expect(within(statementItems[0]).getByText('18/04/2026')).toBeInTheDocument();
-      expect(within(statementItems[0]).getByText('Deposito')).toBeInTheDocument();
+      expect(within(statementItems[0]).getByText(/Dep/i)).toBeInTheDocument();
       expect(within(statementItems[0]).getByText(/123,45/)).toBeInTheDocument();
     } finally {
       vi.useRealTimers();
@@ -154,9 +155,14 @@ describe('Dashboard', () => {
     fireEvent.click(depositEntry);
     fireEvent.click(editButton);
 
-    const depositInput = screen.getByRole('textbox', { name: 'Valor do lancamento' });
-    fireEvent.change(depositInput, { target: { value: '20000' } });
-    fireEvent.keyDown(depositInput, { key: 'Enter' });
+    const editDialogAfterDeposit = screen.getByRole('dialog');
+    fireEvent.change(within(editDialogAfterDeposit).getByRole('textbox', { name: 'Valor' }), {
+      target: { value: '20000' },
+    });
+    fireEvent.change(within(editDialogAfterDeposit).getByLabelText('Data'), {
+      target: { value: '2026-04-21' },
+    });
+    fireEvent.click(within(editDialogAfterDeposit).getByRole('button', { name: 'Salvar edição' }));
 
     expect(screen.getByText('R$ 2.550,00')).toBeInTheDocument();
     expect(screen.getByText('R$ 200,00')).toBeInTheDocument();
@@ -169,9 +175,17 @@ describe('Dashboard', () => {
     fireEvent.click(transferEntry);
     fireEvent.click(editButton);
 
-    const transferInput = screen.getByRole('textbox', { name: 'Valor do lancamento' });
-    fireEvent.change(transferInput, { target: { value: '70000' } });
-    fireEvent.keyDown(transferInput, { key: 'Enter' });
+    const editDialogAfterTransfer = screen.getByRole('dialog');
+    fireEvent.change(within(editDialogAfterTransfer).getByRole('textbox', { name: 'Valor' }), {
+      target: { value: '70000' },
+    });
+    fireEvent.change(within(editDialogAfterTransfer).getByRole('combobox', { name: 'Tipo de transação' }), {
+      target: { value: 'transferencia' },
+    });
+    fireEvent.change(within(editDialogAfterTransfer).getByLabelText('Data'), {
+      target: { value: '2026-04-22' },
+    });
+    fireEvent.click(within(editDialogAfterTransfer).getByRole('button', { name: 'Salvar edição' }));
 
     expect(screen.getByText('R$ 2.350,00')).toBeInTheDocument();
     expect(screen.getByText('-R$ 700,00')).toBeInTheDocument();

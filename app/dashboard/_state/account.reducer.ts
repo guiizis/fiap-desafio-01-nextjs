@@ -23,6 +23,9 @@ export type AccountAction =
     type: "edit-statement-entry";
     entryId: string;
     nextAmountInCents: number;
+    nextType: "Deposito" | "Transferencia";
+    nextMonth: string;
+    nextDate: string;
   };
 
 export function createAccountState(
@@ -70,7 +73,7 @@ export function accountReducer(
       }
 
       const normalizedAmountInCents =
-        entryToEdit.type === "Transferencia"
+        action.nextType === "Transferencia"
           ? -Math.abs(action.nextAmountInCents)
           : Math.abs(action.nextAmountInCents);
 
@@ -78,7 +81,15 @@ export function accountReducer(
         currentBalanceInCents:
           state.currentBalanceInCents - entryToEdit.amountInCents + normalizedAmountInCents,
         currentStatementEntries: state.currentStatementEntries.map((entry) =>
-          entry.id === action.entryId ? { ...entry, amountInCents: normalizedAmountInCents } : entry
+          entry.id === action.entryId
+            ? {
+              ...entry,
+              type: action.nextType,
+              amountInCents: normalizedAmountInCents,
+              month: action.nextMonth,
+              date: action.nextDate,
+            }
+            : entry
         ),
       };
     }
