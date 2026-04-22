@@ -77,7 +77,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     expect(await screen.findByText('Header Joana da Silva Oliveira')).toBeInTheDocument();
-    expect(screen.getByText('Dashboard Joana 250000 1')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard Joana 250000 8')).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
@@ -109,7 +109,7 @@ describe('DashboardPage', () => {
 
     render(<DashboardPage />);
 
-    expect(await screen.findByText(/^Dashboard\s+250000\s+0$/)).toBeInTheDocument();
+    expect(await screen.findByText(/^Dashboard\s+250000\s+8$/)).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });
 });

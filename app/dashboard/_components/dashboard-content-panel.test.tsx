@@ -11,15 +11,50 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('DashboardContentPanel', () => {
+  it('renderiza painel de nova transacao quando a aba ativa e inicio', () => {
+    render(<DashboardContentPanel activeTab="inicio" />);
+
+    expect(screen.getByText(/nova transa[c\u00e7][a\u00e3]o/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /concluir transa[c\u00e7][a\u00e3]o/i })).toBeInTheDocument();
+  });
+
+  it('renderiza painel de transacoes com dados recebidos', () => {
+    const onDeleteEntry = vi.fn();
+
+    render(
+      <DashboardContentPanel
+        activeTab="transacoes"
+        transactionEntries={[
+          { id: 'entry-1', month: 'Abril', type: 'Deposito', amountInCents: 2500, date: '21/04/2026' },
+        ]}
+        onDeleteEntry={onDeleteEntry}
+      />
+    );
+
+    expect(screen.getByRole('heading', { name: /transa[c\u00e7][o\u00f5]es/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/painel de transa[c\u00e7][o\u00f5]es/i)).toBeInTheDocument();
+
+    const selectedEntry = screen.getByText('21/04/2026').closest('li');
+    if (!selectedEntry) {
+      throw new Error('Lancamento nao encontrado');
+    }
+
+    fireEvent.click(selectedEntry);
+    fireEvent.click(screen.getByRole('button', { name: /excluir extrato/i }));
+    expect(onDeleteEntry).toHaveBeenCalledWith('entry-1');
+  });
+
   it('renderiza conteudo correspondente da aba ativa', () => {
     render(<DashboardContentPanel activeTab="meus-cartoes" />);
 
     expect(
       screen.getByText(/gerencie seus cart[o\u00f5]es f[i\u00ed]sico e digital com rapidez\./i)
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /abrir aviso do servico empr/i })).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /abrir aviso do servico meus cart/i })
+      screen.getByRole('button', { name: /abrir aviso do servi[c\u00e7]o empr/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /abrir aviso do servi[c\u00e7]o meus cart/i })
     ).toBeInTheDocument();
   });
 
@@ -29,7 +64,7 @@ describe('DashboardContentPanel', () => {
     render(<DashboardContentPanel activeTab="meus-cartoes" />);
 
     const [openWarningButton] = screen.getAllByRole('button', {
-      name: /abrir aviso do servico/i,
+      name: /abrir aviso do servi[c\u00e7]o/i,
     });
 
     fireEvent.click(openWarningButton);

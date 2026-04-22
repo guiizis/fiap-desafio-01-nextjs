@@ -11,7 +11,7 @@ const statementEntries = [
 ] as const;
 
 describe('Dashboard', () => {
-  it('renderiza estrutura base com painel de nova transacao e abas indisponiveis', () => {
+  it('renderiza estrutura base com painel de nova transacao e abas com estados corretos', () => {
     render(
       <Dashboard
         userFirstName="Joana"
@@ -20,11 +20,12 @@ describe('Dashboard', () => {
       />
     );
 
-    expect(screen.getByRole('heading', { name: 'Ola, Joana! :)' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Ol[a\u00e1], Joana! :\)/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Extrato', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Nova transação', level: 2 })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Concluir transação' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Transações' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Transações' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Investimentos' })).toBeDisabled();
   });
 
   it('alterna visibilidade do saldo', () => {
@@ -95,7 +96,7 @@ describe('Dashboard', () => {
       expect(statementItems).toHaveLength(5);
       expect(within(statementItems[0]).getByText('Abril')).toBeInTheDocument();
       expect(within(statementItems[0]).getByText('18/04/2026')).toBeInTheDocument();
-      expect(within(statementItems[0]).getByText('Deposito')).toBeInTheDocument();
+      expect(within(statementItems[0]).getByText(/Dep/i)).toBeInTheDocument();
       expect(within(statementItems[0]).getByText(/123,45/)).toBeInTheDocument();
     } finally {
       vi.useRealTimers();

@@ -164,4 +164,30 @@ describe("NewTransactionPanel", () => {
     expect(typeSelect).toHaveValue("transferencia");
     expect(amountInput).toHaveValue("3.000,00");
   });
+
+  it("nao envia transacao quando valor ou data sao invalidos", () => {
+    const onSubmitTransaction = vi.fn();
+
+    render(<NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />);
+
+    const submitButton = screen.getByRole("button", { name: "Concluir transação" });
+    const form = submitButton.closest("form");
+    const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
+    const amountInput = screen.getByRole("textbox", { name: "Valor" });
+    const dateInput = screen.getByLabelText("Data");
+
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(amountInput, { target: { value: "0" } });
+    fireEvent.submit(form);
+    expect(onSubmitTransaction).not.toHaveBeenCalled();
+
+    fireEvent.change(amountInput, { target: { value: "100" } });
+    fireEvent.change(dateInput, { target: { value: "275760-04-19" } });
+    fireEvent.submit(form);
+    expect(onSubmitTransaction).not.toHaveBeenCalled();
+  });
 });

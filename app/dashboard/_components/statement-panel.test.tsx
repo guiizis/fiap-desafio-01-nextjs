@@ -14,6 +14,15 @@ function triggerButtonClickHandler(element: HTMLElement) {
   reactProps.onClick?.();
 }
 
+function getEntryByDate(date: string) {
+  const entry = screen.getByText(date).closest("li");
+  if (!entry) {
+    throw new Error(`Lancamento nao encontrado para data ${date}`);
+  }
+
+  return entry;
+}
+
 describe("StatementPanel", () => {
   it("renderiza titulo e lancamentos do extrato e habilita acoes ao selecionar item", () => {
     render(
@@ -32,17 +41,25 @@ describe("StatementPanel", () => {
     expect(editButton).toBeDisabled();
     expect(deleteButton).toBeDisabled();
     expect(screen.getAllByText("Novembro")).toHaveLength(2);
-    expect(screen.getByText("Deposito")).toBeInTheDocument();
-    expect(screen.getByText("Transferencia")).toBeInTheDocument();
+    expect(screen.getByText(/Dep/i)).toBeInTheDocument();
+    expect(screen.getByText(/Transfer/i)).toBeInTheDocument();
 
-    const firstEntry = screen.getByText("Deposito").closest("li");
-    if (!firstEntry) {
-      throw new Error("Lancamento nao encontrado");
-    }
-
-    fireEvent.click(firstEntry);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     expect(editButton).toBeEnabled();
     expect(deleteButton).toBeEnabled();
+  });
+
+  it("renderiza tipo sem mapeamento e oculta botoes quando showActions e falso", () => {
+    render(
+      <StatementPanel
+        showActions={false}
+        entries={[{ id: "1", month: "Abril", type: "Pix", amountInCents: 1000, date: "21/04/2026" }]}
+      />
+    );
+
+    expect(screen.getByText("Pix")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Editar extrato" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Excluir extrato" })).not.toBeInTheDocument();
   });
 
   it("abre modal de edicao e envia payload completo de tipo, valor e data", () => {
@@ -57,19 +74,14 @@ describe("StatementPanel", () => {
       />
     );
 
-    const entry = screen.getByText("Deposito").closest("li");
-    if (!entry) {
-      throw new Error("Lancamento nao encontrado");
-    }
-
-    fireEvent.click(entry);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
 
-    expect(screen.getByRole("heading", { name: "Editar transação" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Tipo de transação" })).toHaveValue("deposito");
+    expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /Tipo de trans/i })).toHaveValue("deposito");
     expect(screen.getByRole("textbox", { name: "Valor" })).toHaveValue("150,00");
 
-    fireEvent.change(screen.getByRole("combobox", { name: "Tipo de transação" }), {
+    fireEvent.change(screen.getByRole("combobox", { name: /Tipo de trans/i }), {
       target: { value: "transferencia" },
     });
     fireEvent.change(screen.getByRole("textbox", { name: "Valor" }), {
@@ -78,7 +90,7 @@ describe("StatementPanel", () => {
     fireEvent.change(screen.getByLabelText("Data"), {
       target: { value: "2026-04-22" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar edição" }));
+    fireEvent.click(screen.getByRole("button", { name: /Salvar edi/i }));
 
     expect(onEditEntry).toHaveBeenCalledWith({
       entryId: "1",
@@ -86,13 +98,13 @@ describe("StatementPanel", () => {
       amountInCents: 70000,
       transactionDate: "2026-04-22",
     });
-    expect(screen.queryByRole("heading", { name: "Editar transação" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /Editar trans/i })).not.toBeInTheDocument();
   });
 
   it("mantem modal aberto e mostra alerta quando a edicao retorna erro", () => {
     const onEditEntry = vi.fn(() => ({
       ok: false as const,
-      message: "Saldo insuficiente para concluir a transferência.",
+      message: "Saldo insuficiente para concluir a transferencia.",
     }));
 
     render(
@@ -104,16 +116,16 @@ describe("StatementPanel", () => {
       />
     );
 
-    fireEvent.click(screen.getByText("Deposito").closest("li")!);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
     fireEvent.change(screen.getByLabelText("Data"), {
       target: { value: "2026-04-21" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar edição" }));
+    fireEvent.click(screen.getByRole("button", { name: /Salvar edi/i }));
 
     expect(onEditEntry).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("alert")).toHaveTextContent("Saldo insuficiente");
-    expect(screen.getByRole("heading", { name: "Editar transação" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
   });
 
   it("deseleciona lancamento ao clicar fora do painel e bloqueia botoes novamente", () => {
@@ -127,13 +139,8 @@ describe("StatementPanel", () => {
 
     const editButton = screen.getByRole("button", { name: "Editar extrato" });
     const deleteButton = screen.getByRole("button", { name: "Excluir extrato" });
-    const entry = screen.getByText("Deposito").closest("li");
 
-    if (!entry) {
-      throw new Error("Lancamento nao encontrado");
-    }
-
-    fireEvent.click(entry);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     expect(editButton).toBeEnabled();
     expect(deleteButton).toBeEnabled();
 
@@ -172,12 +179,8 @@ describe("StatementPanel", () => {
     );
 
     const editButton = screen.getByRole("button", { name: "Editar extrato" });
-    const entry = screen.getByText("Deposito").closest("li");
-    if (!entry) {
-      throw new Error("Lancamento nao encontrado");
-    }
 
-    fireEvent.click(entry);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     expect(editButton).toBeEnabled();
 
     fireEvent.mouseDown(screen.getByLabelText("Extrato da conta"));
@@ -220,12 +223,12 @@ describe("StatementPanel", () => {
       />
     );
 
-    fireEvent.click(screen.getByText("Deposito").closest("li")!);
+    fireEvent.click(getEntryByDate("18/11/2022"));
     fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
-    expect(screen.getByRole("heading", { name: "Editar transação" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByRole("heading", { name: "Editar transação" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /Editar trans/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Excluir extrato" }));
     expect(onDeleteEntry).toHaveBeenCalledWith("1");

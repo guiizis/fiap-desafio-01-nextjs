@@ -16,7 +16,7 @@ describe("AccountSummaryCard", () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Ola, Joana! :)" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Ol[a\u00e1], Joana! :\)/i })).toBeInTheDocument();
     expect(screen.getByText("Quinta-feira, 08/09/2024")).toBeInTheDocument();
     expect(screen.getByText("Saldo")).toBeInTheDocument();
     expect(screen.getByText("Conta corrente")).toBeInTheDocument();
