@@ -12,20 +12,42 @@ import type {
 import { formatCurrencyFromCents } from "../../lib/calc";
 
 type StatementPanelProps = {
+  title?: string;
+  ariaLabel?: string;
+  editableYear?: number | null;
+  showActions?: boolean;
   entries: readonly StatementEntry[];
   onDeleteEntry?: (entryId: string) => void;
   onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
 };
 
-export function StatementPanel({ entries, onDeleteEntry, onEditEntry }: StatementPanelProps) {
+function formatEntryTypeLabel(type: string) {
+  if (type === "Deposito") {
+    return "Depósito";
+  }
+
+  if (type === "Transferencia") {
+    return "Transferência";
+  }
+
+  return type;
+}
+
+export function StatementPanel({
+  title = "Extrato",
+  ariaLabel = "Extrato da conta",
+  showActions = true,
+  entries,
+  onDeleteEntry,
+  onEditEntry,
+}: StatementPanelProps) {
   const panelRef = useRef<HTMLElement | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
 
-  const activeSelectedEntryId = entries.some((entry) => entry.id === selectedEntryId)
-    ? selectedEntryId
-    : null;
-  const hasSelectedEntry = activeSelectedEntryId !== null;
+  const selectedEntry = entries.find((entry) => entry.id === selectedEntryId) ?? null;
+  const activeSelectedEntryId = selectedEntry?.id ?? null;
+  const areEntryActionsEnabled = activeSelectedEntryId !== null;
 
   useEffect(() => {
     const handleOutsidePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -64,11 +86,6 @@ export function StatementPanel({ entries, onDeleteEntry, onEditEntry }: Statemen
       return;
     }
 
-    const selectedEntry = entries.find((entry) => entry.id === activeSelectedEntryId);
-    if (!selectedEntry) {
-      return;
-    }
-
     setEditingEntryId(activeSelectedEntryId);
   };
 
@@ -76,31 +93,33 @@ export function StatementPanel({ entries, onDeleteEntry, onEditEntry }: Statemen
 
   return (
     <>
-      <aside ref={panelRef} className="rounded-md bg-surface px-5 py-5" aria-label="Extrato da conta">
+      <aside ref={panelRef} className="rounded-md bg-surface px-5 py-5" aria-label={ariaLabel}>
         <div className="flex items-center justify-between gap-3 pr-1">
-          <h2 className="text-title-xl font-bold text-black">Extrato</h2>
-          <div className="flex items-center gap-3">
-            <Button
-              aria-label="Editar extrato"
-              variant="solid"
-              tone="primary"
-              className="h-12 w-12 !rounded-full p-0"
-              disabled={!hasSelectedEntry}
-              onClick={handleEditSelectedEntry}
-            >
-              <Image src="/icons/pencil-edit.svg" alt="" width={24} height={24} aria-hidden="true" />
-            </Button>
-            <Button
-              aria-label="Excluir extrato"
-              variant="solid"
-              tone="primary"
-              className="h-12 w-12 !rounded-full p-0"
-              disabled={!hasSelectedEntry}
-              onClick={handleDeleteSelectedEntry}
-            >
-              <Image src="/icons/trash-exclude.svg" alt="" width={24} height={24} aria-hidden="true" />
-            </Button>
-          </div>
+          <h2 className="text-title-xl font-bold text-black">{title}</h2>
+          {showActions ? (
+            <div className="flex items-center gap-3">
+              <Button
+                aria-label="Editar extrato"
+                variant="solid"
+                tone="primary"
+                className="h-12 w-12 !rounded-full p-0"
+                disabled={!areEntryActionsEnabled}
+                onClick={handleEditSelectedEntry}
+              >
+                <Image src="/icons/pencil-edit.svg" alt="" width={24} height={24} aria-hidden="true" />
+              </Button>
+              <Button
+                aria-label="Excluir extrato"
+                variant="solid"
+                tone="primary"
+                className="h-12 w-12 !rounded-full p-0"
+                disabled={!areEntryActionsEnabled}
+                onClick={handleDeleteSelectedEntry}
+              >
+                <Image src="/icons/trash-exclude.svg" alt="" width={24} height={24} aria-hidden="true" />
+              </Button>
+            </div>
+          ) : null}
         </div>
 
         <ul className="mt-3 space-y-3">
@@ -117,7 +136,7 @@ export function StatementPanel({ entries, onDeleteEntry, onEditEntry }: Statemen
                 <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>
                 <span className="text-body-sm text-subtle">{entry.date}</span>
               </div>
-              <p className="text-body-md text-heading">{entry.type}</p>
+              <p className="text-body-md text-heading">{formatEntryTypeLabel(entry.type)}</p>
               <p className="text-title-lg font-semibold text-black">
                 {formatCurrencyFromCents(entry.amountInCents)}
               </p>

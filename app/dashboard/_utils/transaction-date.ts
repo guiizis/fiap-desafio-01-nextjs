@@ -1,6 +1,7 @@
 export const TRANSACTION_DATE_TIME_ZONE = "America/Sao_Paulo";
 
 const isoDateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
+const ptBrDateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
 
 export type TransactionDateRange = {
   minDate: string;
@@ -32,6 +33,37 @@ function parseIsoDate(value: string) {
   return isValidDate ? { year, month, day } : null;
 }
 
+function parsePtBrDate(value: string) {
+  const matches = ptBrDateRegex.exec(value);
+  if (!matches) {
+    return null;
+  }
+
+  const [, dayLabel, monthLabel, yearLabel] = matches;
+  const year = Number(yearLabel);
+  const month = Number(monthLabel);
+  const day = Number(dayLabel);
+
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  const isValidDate = date.getUTCFullYear() === year
+    && date.getUTCMonth() + 1 === month
+    && date.getUTCDate() === day;
+
+  return isValidDate ? { year, month, day } : null;
+}
+
+export function getCurrentYearInTimeZone(
+  referenceDate: Date = new Date(),
+  timeZone: string = TRANSACTION_DATE_TIME_ZONE
+) {
+  const yearLabel = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    timeZone,
+  }).format(referenceDate);
+
+  return Number(yearLabel);
+}
+
 export function formatIsoDateToPtBr(value: string) {
   const parsed = parseIsoDate(value);
   if (!parsed) {
@@ -48,11 +80,7 @@ export function getTransactionDateRange(
   referenceDate: Date = new Date(),
   timeZone: string = TRANSACTION_DATE_TIME_ZONE
 ): TransactionDateRange {
-  const yearLabel = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    timeZone,
-  }).format(referenceDate);
-  const currentYear = Number(yearLabel);
+  const currentYear = getCurrentYearInTimeZone(referenceDate, timeZone);
 
   return {
     minDate: `${currentYear - 1}-01-01`,
@@ -76,6 +104,20 @@ export function getDefaultTransactionDate(
   const day = dateParts.find((part) => part.type === "day")?.value ?? "01";
 
   return `${year}-${month}-${day}`;
+}
+
+export function getYearFromPtBrDate(value: string) {
+  const parsed = parsePtBrDate(value);
+  return parsed?.year ?? null;
+}
+
+export function getTimestampFromPtBrDate(value: string) {
+  const parsed = parsePtBrDate(value);
+  if (!parsed) {
+    return null;
+  }
+
+  return Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12);
 }
 
 export function isTransactionDateWithinRange(value: string, range: TransactionDateRange) {

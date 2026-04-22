@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import { formatCurrencyFromCents } from '../../lib/calc';
 
 type AccountSummaryCardProps = {
@@ -46,7 +46,7 @@ export function AccountSummaryCard({
 
       <div className="relative z-10 grid grid-cols-[minmax(0,1fr)_minmax(0,270px)] items-start gap-6 mobile:grid-cols-1 desktop:grid-cols-[1fr_340px]">
         <div className="space-y-2">
-          <h1 className="text-title-xl font-bold text-surface">Ola, {name}! :)</h1>
+          <h1 className="text-title-xl font-bold text-surface">Olá, {name}! :)</h1>
           <p className="text-body-sm text-menu-hover">{dateLabel}</p>
         </div>
 

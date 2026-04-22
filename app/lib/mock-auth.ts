@@ -1,4 +1,4 @@
-export type MockUser = {
+﻿export type MockUser = {
   id: string;
   name: string;
   email: string;
@@ -66,48 +66,80 @@ function createMockToken(userId: string) {
   return `mock-token-${userId}`;
 }
 
-function getDefaultStatementYear(referenceDate: Date = new Date()) {
+const DEFAULT_STATEMENT_TIME_ZONE = "America/Sao_Paulo";
+
+function getCurrentStatementYear(referenceDate: Date = new Date()) {
   const yearLabel = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
-    timeZone: "America/Sao_Paulo",
+    timeZone: DEFAULT_STATEMENT_TIME_ZONE,
   }).format(referenceDate);
 
-  return Number(yearLabel) - 1;
+  return Number(yearLabel);
+}
+
+function formatStatementDateLabel(referenceDate: Date) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: DEFAULT_STATEMENT_TIME_ZONE,
+  }).format(referenceDate);
+}
+
+function formatStatementMonthLabel(referenceDate: Date) {
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    timeZone: DEFAULT_STATEMENT_TIME_ZONE,
+  }).format(referenceDate);
+
+  return `${monthLabel.charAt(0).toUpperCase()}${monthLabel.slice(1)}`;
+}
+
+function createDateFromDaysAgo(daysAgo: number) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - daysAgo);
+  return date;
+}
+
+function createDateInYear(year: number, month: number, day: number) {
+  return new Date(Date.UTC(year, month, day, 12));
+}
+
+function createStatementEntry(referenceDate: Date, type: "Deposito" | "Transferencia", amountInCents: number) {
+  return {
+    id: crypto.randomUUID(),
+    month: formatStatementMonthLabel(referenceDate),
+    type,
+    amountInCents,
+    date: formatStatementDateLabel(referenceDate),
+  } satisfies MockStatementEntry;
 }
 
 function createDefaultStatementEntries() {
-  const statementYear = getDefaultStatementYear();
+  const currentYear = getCurrentStatementYear();
+  const previousYear = currentYear - 1;
 
   return [
-    {
-      id: crypto.randomUUID(),
-      month: "Novembro",
-      type: "Deposito",
-      amountInCents: 15000,
-      date: `18/11/${statementYear}`,
-    },
-    {
-      id: crypto.randomUUID(),
-      month: "Novembro",
-      type: "Deposito",
-      amountInCents: 10000,
-      date: `21/11/${statementYear}`,
-    },
-    {
-      id: crypto.randomUUID(),
-      month: "Novembro",
-      type: "Deposito",
-      amountInCents: 5000,
-      date: `21/11/${statementYear}`,
-    },
-    {
-      id: crypto.randomUUID(),
-      month: "Novembro",
-      type: "Transferencia",
-      amountInCents: -50000,
-      date: `21/11/${statementYear}`,
-    },
+    createStatementEntry(createDateFromDaysAgo(1), "Deposito", 18000),
+    createStatementEntry(createDateFromDaysAgo(3), "Transferencia", -7200),
+    createStatementEntry(createDateFromDaysAgo(7), "Deposito", 9500),
+    createStatementEntry(createDateFromDaysAgo(11), "Transferencia", -18500),
+    createStatementEntry(createDateFromDaysAgo(16), "Deposito", 24000),
+    createStatementEntry(createDateFromDaysAgo(24), "Deposito", 12500),
+    createStatementEntry(createDateInYear(previousYear, 10, 21), "Deposito", 10000),
+    createStatementEntry(createDateInYear(previousYear, 10, 18), "Deposito", 5000),
+    createStatementEntry(createDateInYear(previousYear, 9, 12), "Transferencia", -50000),
+    createStatementEntry(createDateInYear(previousYear, 8, 2), "Deposito", 15000),
   ] satisfies MockStatementEntry[];
+}
+
+function ensureUserHasDefaultEntries(user: MockUser) {
+  if (user.statementEntries.length >= 8) {
+    return;
+  }
+
+  user.statementEntries = createDefaultStatementEntries();
 }
 
 export function registerMockUser({
@@ -161,6 +193,8 @@ export function loginMockUser({
       error: "INVALID_CREDENTIALS",
     };
   }
+
+  ensureUserHasDefaultEntries(user);
 
   return {
     ok: true,
