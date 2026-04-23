@@ -1,22 +1,22 @@
-import { useEffect, useRef } from "react";
-import type { ReactNode } from "react";
-import type { AlertClassOptions, AlertProps, AlertVariant } from "./interfaces/alert.interfaces";
+import { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
+import type { AlertClassOptions, AlertProps, AlertVariant } from './interfaces/alert.interfaces';
 
 const baseClasses =
-  "flex w-full items-center gap-3 rounded-md border px-3 py-2 text-body-sm font-semibold shadow-sm";
+  'flex w-full items-center gap-3 rounded-md border px-3 py-2 text-body-sm font-semibold shadow-sm';
 
 const variantClasses: Record<AlertVariant, string> = {
-  info: "border-primary/25 bg-primary/10 text-primary",
-  warning: "border-accent/25 bg-accent/10 text-accent",
-  error: "border-error bg-error text-black",
-  success: "border-success/35 bg-success/20 text-success",
+  info: 'border-primary/25 bg-primary/10 text-primary',
+  warning: 'border-accent/25 bg-accent/10 text-accent',
+  error: 'border-error bg-error text-black',
+  success: 'border-success/35 bg-success/20 text-success',
 };
 
 const closeButtonVariantClasses: Record<AlertVariant, string> = {
-  info: "hover:bg-primary/20 focus-visible:ring-primary",
-  warning: "hover:bg-accent/20 focus-visible:ring-accent",
-  error: "hover:bg-error/20 focus-visible:ring-error",
-  success: "hover:bg-success/20 focus-visible:ring-success",
+  info: 'hover:bg-primary/20 focus-visible:ring-primary',
+  warning: 'hover:bg-accent/20 focus-visible:ring-accent',
+  error: 'hover:bg-error/20 focus-visible:ring-error',
+  success: 'hover:bg-success/20 focus-visible:ring-success',
 };
 
 function InfoIcon() {
@@ -49,12 +49,7 @@ function ErrorIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 flex-none">
       <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M9 9l6 6M15 9l-6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -82,8 +77,8 @@ const iconByVariant: Record<AlertVariant, ReactNode> = {
   success: <SuccessIcon />,
 };
 
-export function alertClasses({ variant = "info", className }: AlertClassOptions = {}) {
-  return [baseClasses, variantClasses[variant], className].filter(Boolean).join(" ");
+export function alertClasses({ variant = 'info', className }: AlertClassOptions = {}) {
+  return [baseClasses, variantClasses[variant], className].filter(Boolean).join(' ');
 }
 
 export function Alert({
@@ -98,12 +93,10 @@ export function Alert({
   style,
   ...props
 }: AlertProps) {
-  const resolvedVariant = variant ?? tone ?? "info";
+  const resolvedVariant = variant ?? tone ?? 'info';
   const resolvedDismissMs = dismissAfterMs ?? autoDismissMs;
   const shouldAutoDismiss =
-    typeof onClose === "function" &&
-    typeof resolvedDismissMs === "number" &&
-    resolvedDismissMs > 0;
+    typeof onClose === 'function' && typeof resolvedDismissMs === 'number' && resolvedDismissMs > 0;
 
   const onCloseRef = useRef(onClose);
 
@@ -127,8 +120,8 @@ export function Alert({
 
   return (
     <div
-      role={resolvedVariant === "error" ? "alert" : "status"}
-      aria-live={resolvedVariant === "error" ? "assertive" : "polite"}
+      role={resolvedVariant === 'error' ? 'alert' : 'status'}
+      aria-live={resolvedVariant === 'error' ? 'assertive' : 'polite'}
       className={alertClasses({
         variant: resolvedVariant,
         className,
@@ -144,10 +137,11 @@ export function Alert({
           aria-label="Fechar alerta"
           onClick={onClose}
           className={[
-            "inline-flex h-6 w-6 flex-none items-center justify-center rounded-sm transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2",
+            'inline-flex h-6 w-6 flex-none items-center justify-center rounded-sm transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2',
+            'cursor-pointer disabled:cursor-not-allowed',
             closeButtonVariantClasses[resolvedVariant],
-          ].join(" ")}
+          ].join(' ')}
         >
           x
         </button>

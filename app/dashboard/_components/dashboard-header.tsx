@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from 'next/image';
 
 type DashboardHeaderProps = {
   userName: string;
@@ -12,7 +12,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
         <button
           type="button"
           aria-label="Perfil do usuario"
-          className="inline-flex h-10 w-10 items-center justify-center"
+          className="inline-flex h-10 w-10 items-center justify-center cursor-pointer disabled:cursor-not-allowed"
         >
           <Image src="/dashboard/avatar.svg" alt="" width={40} height={40} aria-hidden="true" />
         </button>
