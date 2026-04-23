@@ -30,8 +30,8 @@ export function AccountSummaryCard({
       <Image
         src="/dashboard/responsive/squares-top.svg"
         alt=""
-        width={600}
-        height={402}
+        width={180}
+        height={177}
         aria-hidden="true"
         className="pointer-events-none absolute right-0 top-0 z-0 desktop:hidden"
       />
