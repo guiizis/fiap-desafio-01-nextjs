@@ -17,13 +17,12 @@ Este repositório faz parte do **Tech Challenge** da pós-graduação em Fronten
 - Cadastro e login de usuário (mock)
 - Visualização de resumo da conta
 - Consulta de extrato bancário
-- Início de novas transações (fluxo inicial)
+- Efetuar transação
+- Alterar ou excluir uma transação
 
 ### Em construção
 
 - Serviços bancários adicionais (pagamentos, transferências, recarga, etc.)
-- Edição e detalhamento de lançamentos do extrato
-- Funcionalidades completas de transação (finalização, confirmação, etc.)
 
 ---
 
