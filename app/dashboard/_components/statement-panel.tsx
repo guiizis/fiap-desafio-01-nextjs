@@ -1,15 +1,15 @@
-﻿"use client";
+﻿'use client';
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { Button } from "../../../components/ui/button";
-import { EditStatementEntryModal } from "./edit-statement-entry-modal";
+import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { EditStatementEntryModal } from './edit-statement-entry-modal';
 import type {
   EditStatementEntryPayload,
   EditStatementEntryResult,
   StatementEntry,
-} from "./interfaces/statement-panel.interfaces";
-import { formatCurrencyFromCents } from "../../lib/calc";
+} from './interfaces/statement-panel.interfaces';
+import { formatCurrencyFromCents } from '../../lib/calc';
 
 type StatementPanelProps = {
   title?: string;
@@ -22,20 +22,20 @@ type StatementPanelProps = {
 };
 
 function formatEntryTypeLabel(type: string) {
-  if (type === "Deposito") {
-    return "Depósito";
+  if (type === 'Deposito') {
+    return 'Depósito';
   }
 
-  if (type === "Transferencia") {
-    return "Transferência";
+  if (type === 'Transferencia') {
+    return 'Transferência';
   }
 
   return type;
 }
 
 export function StatementPanel({
-  title = "Extrato",
-  ariaLabel = "Extrato da conta",
+  title = 'Extrato',
+  ariaLabel = 'Extrato da conta',
   showActions = true,
   entries,
   onDeleteEntry,
@@ -63,12 +63,12 @@ export function StatementPanel({
       setSelectedEntryId(null);
     };
 
-    document.addEventListener("mousedown", handleOutsidePointerDown);
-    document.addEventListener("touchstart", handleOutsidePointerDown);
+    document.addEventListener('mousedown', handleOutsidePointerDown);
+    document.addEventListener('touchstart', handleOutsidePointerDown);
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsidePointerDown);
-      document.removeEventListener("touchstart", handleOutsidePointerDown);
+      document.removeEventListener('mousedown', handleOutsidePointerDown);
+      document.removeEventListener('touchstart', handleOutsidePointerDown);
     };
   }, []);
 
@@ -106,7 +106,13 @@ export function StatementPanel({
                 disabled={!areEntryActionsEnabled}
                 onClick={handleEditSelectedEntry}
               >
-                <Image src="/icons/pencil-edit.svg" alt="" width={24} height={24} aria-hidden="true" />
+                <Image
+                  src="/icons/pencil-edit.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden="true"
+                />
               </Button>
               <Button
                 aria-label="Excluir extrato"
@@ -116,7 +122,13 @@ export function StatementPanel({
                 disabled={!areEntryActionsEnabled}
                 onClick={handleDeleteSelectedEntry}
               >
-                <Image src="/icons/trash-exclude.svg" alt="" width={24} height={24} aria-hidden="true" />
+                <Image
+                  src="/icons/trash-exclude.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden="true"
+                />
               </Button>
             </div>
           ) : null}
@@ -128,9 +140,9 @@ export function StatementPanel({
               key={entry.id}
               onClick={() => setSelectedEntryId(entry.id)}
               className={[
-                "cursor-pointer border-b border-secondary/35 pb-2 transition-colors",
-                activeSelectedEntryId === entry.id ? "bg-surface-soft" : "",
-              ].join(" ")}
+                'cursor-pointer border-b border-secondary/35 pb-2 transition-colors',
+                activeSelectedEntryId === entry.id ? 'bg-surface-soft' : '',
+              ].join(' ')}
             >
               <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>

@@ -3,10 +3,10 @@
 import type { FormEventHandler } from 'react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import { Alert } from '../../../components/ui/alert';
-import { Button } from '../../../components/ui/button';
-import { CalendarInput } from '../../../components/ui/calendar-input';
-import { Input, Select } from '../../../components/ui/input';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { CalendarInput } from '@/components/ui/calendar-input';
+import { Input, Select } from '@/components/ui/input';
 import type {
   NewTransactionPanelProps,
   TransactionType,

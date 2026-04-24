@@ -1,7 +1,7 @@
-﻿import Link from "next/link";
-import { buttonVariants } from "../../../components/ui/button";
+﻿import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 
-type HomeCtaContext = "header" | "hero-mobile";
+type HomeCtaContext = 'header' | 'hero-mobile';
 
 type HomeCtaButtonsProps = {
   context: HomeCtaContext;
@@ -15,26 +15,26 @@ const ctaByContext: Record<
     primaryClassName: string;
     secondaryLabel: string;
     secondaryClassName: string;
-    tone: "primary" | "secondary";
+    tone: 'primary' | 'secondary';
   }
 > = {
   header: {
-    containerClassName: "flex items-center gap-3",
-    primaryLabel: "Abrir minha conta",
-    primaryClassName: "px-6",
-    secondaryLabel: "Já tenho conta",
-    secondaryClassName: "px-6",
-    tone: "secondary",
+    containerClassName: 'flex items-center gap-3',
+    primaryLabel: 'Abrir minha conta',
+    primaryClassName: 'px-6',
+    secondaryLabel: 'Já tenho conta',
+    secondaryClassName: 'px-6',
+    tone: 'secondary',
   },
-  "hero-mobile": {
-    containerClassName: "flex w-full items-center gap-4",
-    primaryLabel: "Abrir conta",
+  'hero-mobile': {
+    containerClassName: 'flex w-full items-center gap-4',
+    primaryLabel: 'Abrir conta',
     primaryClassName:
-      "h-12 flex-1 justify-center border-black bg-black text-surface hover:bg-black/90 focus-visible:ring-black",
-    secondaryLabel: "Já tenho conta",
+      'h-12 flex-1 justify-center border-black bg-black text-surface hover:bg-black/90 focus-visible:ring-black',
+    secondaryLabel: 'Já tenho conta',
     secondaryClassName:
-      "h-12 flex-1 justify-center border-black text-black hover:bg-black/5 focus-visible:ring-black",
-    tone: "primary",
+      'h-12 flex-1 justify-center border-black text-black hover:bg-black/5 focus-visible:ring-black',
+    tone: 'primary',
   },
 };
 
@@ -47,7 +47,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
         href="/home/cadastro"
         scroll={false}
         className={buttonVariants({
-          variant: "solid",
+          variant: 'solid',
           tone: config.tone,
           className: config.primaryClassName,
         })}
@@ -58,7 +58,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
         href="/home/login"
         scroll={false}
         className={buttonVariants({
-          variant: "outline",
+          variant: 'outline',
           tone: config.tone,
           className: config.secondaryClassName,
         })}
