@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StatementPanel } from "./statement-panel";
+import { StatementEntryType, TransactionType } from "./interfaces/statement-panel.interfaces";
 
 function triggerButtonClickHandler(element: HTMLElement) {
   const reactPropsKey = Object.keys(element).find((key) => key.startsWith("__reactProps$"));
@@ -28,8 +29,8 @@ describe("StatementPanel", () => {
     render(
       <StatementPanel
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
-          { id: "2", month: "Novembro", type: "Transferencia", amountInCents: -50000, date: "21/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
+          { id: "2", month: "Novembro", type: StatementEntryType.TRANSFERENCIA, amountInCents: -50000, date: "21/11/2022" },
         ]}
       />
     );
@@ -49,15 +50,15 @@ describe("StatementPanel", () => {
     expect(deleteButton).toBeEnabled();
   });
 
-  it("renderiza tipo sem mapeamento e oculta botoes quando showActions e falso", () => {
+  it("oculta botoes quando showActions e falso", () => {
     render(
       <StatementPanel
         showActions={false}
-        entries={[{ id: "1", month: "Abril", type: "Pix", amountInCents: 1000, date: "21/04/2026" }]}
+        entries={[{ id: "1", month: "Abril", type: StatementEntryType.DEPOSITO, amountInCents: 1000, date: "21/04/2026" }]}
       />
     );
 
-    expect(screen.getByText("Pix")).toBeInTheDocument();
+    expect(screen.getByText(/Dep/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Editar extrato" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Excluir extrato" })).not.toBeInTheDocument();
   });
@@ -69,7 +70,7 @@ describe("StatementPanel", () => {
       <StatementPanel
         onEditEntry={onEditEntry}
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
@@ -78,11 +79,13 @@ describe("StatementPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Editar extrato" }));
 
     expect(screen.getByRole("heading", { name: /Editar trans/i })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: /Tipo de trans/i })).toHaveValue("deposito");
+    expect(screen.getByRole("combobox", { name: /Tipo de trans/i })).toHaveValue(
+      TransactionType.DEPOSITO
+    );
     expect(screen.getByRole("textbox", { name: "Valor" })).toHaveValue("150,00");
 
     fireEvent.change(screen.getByRole("combobox", { name: /Tipo de trans/i }), {
-      target: { value: "transferencia" },
+      target: { value: TransactionType.TRANSFERENCIA },
     });
     fireEvent.change(screen.getByRole("textbox", { name: "Valor" }), {
       target: { value: "70000" },
@@ -94,7 +97,7 @@ describe("StatementPanel", () => {
 
     expect(onEditEntry).toHaveBeenCalledWith({
       entryId: "1",
-      type: "transferencia",
+      type: TransactionType.TRANSFERENCIA,
       amountInCents: 70000,
       transactionDate: "2026-04-22",
     });
@@ -111,7 +114,7 @@ describe("StatementPanel", () => {
       <StatementPanel
         onEditEntry={onEditEntry}
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
@@ -132,7 +135,7 @@ describe("StatementPanel", () => {
     render(
       <StatementPanel
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
@@ -153,7 +156,7 @@ describe("StatementPanel", () => {
     render(
       <StatementPanel
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
@@ -173,7 +176,7 @@ describe("StatementPanel", () => {
     render(
       <StatementPanel
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
@@ -196,7 +199,7 @@ describe("StatementPanel", () => {
         onDeleteEntry={onDeleteEntry}
         onEditEntry={onEditEntry}
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );
@@ -218,7 +221,7 @@ describe("StatementPanel", () => {
       <StatementPanel
         onDeleteEntry={onDeleteEntry}
         entries={[
-          { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
+          { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
         ]}
       />
     );

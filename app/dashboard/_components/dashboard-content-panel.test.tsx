@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { DashboardContentPanel } from './dashboard-content-panel';
+import { StatementEntryType } from './interfaces/statement-panel.interfaces';
 
 const replaceMock = vi.fn();
 
@@ -30,7 +31,7 @@ describe('DashboardContentPanel', () => {
           {
             id: 'entry-1',
             month: 'Abril',
-            type: 'Deposito',
+            type: StatementEntryType.DEPOSITO,
             amountInCents: 2500,
             date: '21/04/2026',
           },

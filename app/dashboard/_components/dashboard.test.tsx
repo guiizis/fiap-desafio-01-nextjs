@@ -2,12 +2,13 @@
 import { StrictMode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { Dashboard } from './dashboard';
+import { StatementEntryType, TransactionType } from './interfaces/statement-panel.interfaces';
 
 const statementEntries = [
-  { id: '1', month: 'Novembro', type: 'Deposito', amountInCents: 15000, date: '18/11/2022' },
-  { id: '2', month: 'Novembro', type: 'Deposito', amountInCents: 10000, date: '21/11/2022' },
-  { id: '3', month: 'Novembro', type: 'Deposito', amountInCents: 5000, date: '21/11/2022' },
-  { id: '4', month: 'Novembro', type: 'Transferencia', amountInCents: -50000, date: '21/11/2022' },
+  { id: '1', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: '18/11/2022' },
+  { id: '2', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 10000, date: '21/11/2022' },
+  { id: '3', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 5000, date: '21/11/2022' },
+  { id: '4', month: 'Novembro', type: StatementEntryType.TRANSFERENCIA, amountInCents: -50000, date: '21/11/2022' },
 ] as const;
 
 describe('Dashboard', () => {
@@ -57,12 +58,12 @@ describe('Dashboard', () => {
     const typeSelect = screen.getByRole('combobox', { name: 'Tipo de transação' });
     const amountInput = screen.getByRole('textbox', { name: 'Valor' });
 
-    fireEvent.change(typeSelect, { target: { value: 'deposito' } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
     fireEvent.change(amountInput, { target: { value: '10000' } });
     fireEvent.click(submitButton);
     expect(screen.getByText('R$ 2.600,00')).toBeInTheDocument();
 
-    fireEvent.change(typeSelect, { target: { value: 'transferencia' } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.TRANSFERENCIA } });
     fireEvent.change(amountInput, { target: { value: '5000' } });
     fireEvent.click(submitButton);
     expect(screen.getByText('R$ 2.550,00')).toBeInTheDocument();
@@ -88,7 +89,7 @@ describe('Dashboard', () => {
 
       expect(within(statementPanel).getAllByRole('listitem')).toHaveLength(4);
 
-      fireEvent.change(typeSelect, { target: { value: 'deposito' } });
+      fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
       fireEvent.change(amountInput, { target: { value: '12345' } });
       fireEvent.click(submitButton);
 
@@ -180,7 +181,7 @@ describe('Dashboard', () => {
       target: { value: '70000' },
     });
     fireEvent.change(within(editDialogAfterTransfer).getByRole('combobox', { name: 'Tipo de transação' }), {
-      target: { value: 'transferencia' },
+      target: { value: TransactionType.TRANSFERENCIA },
     });
     fireEvent.change(within(editDialogAfterTransfer).getByLabelText('Data'), {
       target: { value: '2026-04-22' },
@@ -204,7 +205,7 @@ describe('Dashboard', () => {
     const typeSelect = screen.getByRole('combobox', { name: 'Tipo de transação' });
     const amountInput = screen.getByRole('textbox', { name: 'Valor' });
 
-    fireEvent.change(typeSelect, { target: { value: 'transferencia' } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.TRANSFERENCIA } });
     fireEvent.change(amountInput, { target: { value: '300000' } });
     fireEvent.click(submitButton);
 
@@ -235,7 +236,7 @@ describe('Dashboard', () => {
       const typeSelect = screen.getByRole('combobox', { name: 'Tipo de transação' });
       const amountInput = screen.getByRole('textbox', { name: 'Valor' });
 
-      fireEvent.change(typeSelect, { target: { value: 'deposito' } });
+      fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
       fireEvent.change(amountInput, { target: { value: '1000' } });
       fireEvent.click(submitButton);
 
@@ -264,7 +265,7 @@ describe('Dashboard', () => {
     const typeSelect = screen.getByRole('combobox', { name: 'Tipo de transação' });
     const amountInput = screen.getByRole('textbox', { name: 'Valor' });
 
-    fireEvent.change(typeSelect, { target: { value: 'transferencia' } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.TRANSFERENCIA } });
     fireEvent.change(amountInput, { target: { value: '7000' } });
     fireEvent.click(submitButton);
 

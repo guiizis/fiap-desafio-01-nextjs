@@ -1,4 +1,6 @@
-export type TransactionType = "deposito" | "transferencia";
+import { TransactionType } from "./transaction.interfaces";
+
+export { TransactionType };
 
 export type NewTransactionPayload = {
   type: TransactionType;

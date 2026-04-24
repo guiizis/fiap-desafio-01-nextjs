@@ -16,7 +16,10 @@ import type {
   EditStatementEntryResult,
   StatementEntry,
 } from './interfaces/statement-panel.interfaces';
-import type { TransactionType } from './interfaces/new-transaction-panel.interfaces';
+import {
+  TransactionType,
+  toTransactionType,
+} from './interfaces/statement-panel.interfaces';
 
 type EditStatementEntryModalProps = {
   entry: StatementEntry;
@@ -60,8 +63,8 @@ function parsePtBrDateToIso(date: string) {
   return isoDate;
 }
 
-function normalizeEntryType(type: string): TransactionType {
-  return type === 'Transferencia' ? 'transferencia' : 'deposito';
+function normalizeEntryType(type: StatementEntry['type']): TransactionType {
+  return toTransactionType(type);
 }
 
 export function EditStatementEntryModal({
@@ -81,8 +84,8 @@ export function EditStatementEntryModal({
   );
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: 'deposito', label: 'Depósito' },
-    { value: 'transferencia', label: 'Transferência' },
+    { value: TransactionType.DEPOSITO, label: 'Depósito' },
+    { value: TransactionType.TRANSFERENCIA, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -169,7 +172,10 @@ export function EditStatementEntryModal({
             onChange={(event) => {
               const value = event.currentTarget.value;
 
-              if (value === 'deposito' || value === 'transferencia') {
+              if (
+                value === TransactionType.DEPOSITO ||
+                value === TransactionType.TRANSFERENCIA
+              ) {
                 setTransactionType(value);
               }
             }}

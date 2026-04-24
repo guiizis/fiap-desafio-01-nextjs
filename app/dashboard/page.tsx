@@ -3,6 +3,10 @@
 import type { AuthSession } from '@/app/lib/auth-session';
 import { Dashboard } from './_components/dashboard';
 import { DashboardHeader } from './_components/dashboard-header';
+import {
+  normalizeStatementEntryType,
+  type StatementEntry,
+} from './_components/interfaces/statement-panel.interfaces';
 import { withAuth } from './_components/with-auth';
 import { useAuthSession } from './_hooks/use-auth-session';
 
@@ -15,6 +19,15 @@ function getUserFirstName(fullName: string) {
   return firstName || fullName;
 }
 
+function normalizeStatementEntries(
+  entries: AuthSession["user"]["statementEntries"]
+): StatementEntry[] {
+  return entries.map((entry) => ({
+    ...entry,
+    type: normalizeStatementEntryType(entry.type),
+  }));
+}
+
 function DashboardPageContent({ session }: DashboardPageContentProps) {
   return (
     <>
@@ -23,7 +36,7 @@ function DashboardPageContent({ session }: DashboardPageContentProps) {
         <Dashboard
           userFirstName={getUserFirstName(session.user.name)}
           balanceInCents={session.user.accountBalanceInCents}
-          statementEntries={session.user.statementEntries}
+          statementEntries={normalizeStatementEntries(session.user.statementEntries)}
         />
       </main>
     </>

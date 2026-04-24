@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { StatementEntryType, TransactionType } from './interfaces/statement-panel.interfaces';
 
 vi.mock('./statement-panel', () => ({
   StatementPanel: ({
@@ -9,7 +10,7 @@ vi.mock('./statement-panel', () => ({
     onDeleteEntry?: (entryId: string) => void;
     onEditEntry?: (payload: {
       entryId: string;
-      type: 'deposito' | 'transferencia';
+      type: TransactionType;
       amountInCents: number;
       transactionDate: string;
     }) => { ok: boolean; message?: string } | void;
@@ -23,7 +24,7 @@ vi.mock('./statement-panel', () => ({
         onClick={() =>
           onEditEntry?.({
             entryId: 'entry-inexistente',
-            type: 'deposito',
+            type: TransactionType.DEPOSITO,
             amountInCents: 12345,
             transactionDate: '2026-04-21',
           })
@@ -36,7 +37,7 @@ vi.mock('./statement-panel', () => ({
         onClick={() =>
           onEditEntry?.({
             entryId: '1',
-            type: 'deposito',
+            type: TransactionType.DEPOSITO,
             amountInCents: 12345,
             transactionDate: '1900-01-01',
           })
@@ -49,7 +50,7 @@ vi.mock('./statement-panel', () => ({
         onClick={() =>
           onEditEntry?.({
             entryId: '1',
-            type: 'transferencia',
+            type: TransactionType.TRANSFERENCIA,
             amountInCents: 999_999_99,
             transactionDate: '2026-04-21',
           })
@@ -64,7 +65,7 @@ vi.mock('./statement-panel', () => ({
 import { Dashboard } from './dashboard';
 
 const statementEntries = [
-  { id: '1', month: 'Novembro', type: 'Deposito', amountInCents: 15000, date: '18/11/2022' },
+  { id: '1', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: '18/11/2022' },
 ] as const;
 
 describe('Dashboard guards', () => {

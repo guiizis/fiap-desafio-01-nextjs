@@ -1,4 +1,14 @@
-import type { StatementEntry } from "../_components/interfaces/statement-panel.interfaces";
+import {
+  StatementEntryType,
+  type StatementEntry,
+} from "../_components/interfaces/statement-panel.interfaces";
+
+export enum AccountActionType {
+  HYDRATE_FROM_PROPS = "hydrate-from-props",
+  APPEND_TRANSACTION_ENTRY = "append-transaction-entry",
+  DELETE_STATEMENT_ENTRY = "delete-statement-entry",
+  EDIT_STATEMENT_ENTRY = "edit-statement-entry",
+}
 
 export type AccountState = {
   currentBalanceInCents: number;
@@ -7,23 +17,23 @@ export type AccountState = {
 
 export type AccountAction =
   | {
-    type: "hydrate-from-props";
+    type: AccountActionType.HYDRATE_FROM_PROPS;
     balanceInCents: number;
     statementEntries: readonly StatementEntry[];
   }
   | {
-    type: "append-transaction-entry";
+    type: AccountActionType.APPEND_TRANSACTION_ENTRY;
     entry: StatementEntry;
   }
   | {
-    type: "delete-statement-entry";
+    type: AccountActionType.DELETE_STATEMENT_ENTRY;
     entryId: string;
   }
   | {
-    type: "edit-statement-entry";
+    type: AccountActionType.EDIT_STATEMENT_ENTRY;
     entryId: string;
     nextAmountInCents: number;
-    nextType: "Deposito" | "Transferencia";
+    nextType: StatementEntryType;
     nextMonth: string;
     nextDate: string;
   };
@@ -43,16 +53,16 @@ export function accountReducer(
   action: AccountAction
 ): AccountState {
   switch (action.type) {
-    case "hydrate-from-props":
+    case AccountActionType.HYDRATE_FROM_PROPS:
       return createAccountState(action.balanceInCents, action.statementEntries);
 
-    case "append-transaction-entry":
+    case AccountActionType.APPEND_TRANSACTION_ENTRY:
       return {
         currentBalanceInCents: state.currentBalanceInCents + action.entry.amountInCents,
         currentStatementEntries: [action.entry, ...state.currentStatementEntries],
       };
 
-    case "delete-statement-entry": {
+    case AccountActionType.DELETE_STATEMENT_ENTRY: {
       const entryToDelete = state.currentStatementEntries.find((entry) => entry.id === action.entryId);
       if (!entryToDelete) {
         return state;
@@ -66,14 +76,14 @@ export function accountReducer(
       };
     }
 
-    case "edit-statement-entry": {
+    case AccountActionType.EDIT_STATEMENT_ENTRY: {
       const entryToEdit = state.currentStatementEntries.find((entry) => entry.id === action.entryId);
       if (!entryToEdit) {
         return state;
       }
 
       const normalizedAmountInCents =
-        action.nextType === "Transferencia"
+        action.nextType === StatementEntryType.TRANSFERENCIA
           ? -Math.abs(action.nextAmountInCents)
           : Math.abs(action.nextAmountInCents);
 
