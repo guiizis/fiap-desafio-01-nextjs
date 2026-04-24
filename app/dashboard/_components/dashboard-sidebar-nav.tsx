@@ -39,7 +39,7 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
           aria-label={isMobileMenuOpen ? 'Fechar menu de serviços' : 'Abrir menu de serviços'}
           aria-expanded={isMobileMenuOpen}
           onClick={() => setIsMobileMenuOpen((current) => !current)}
-          className="inline-flex h-8 w-8 items-center justify-center text-secondary"
+          className="inline-flex h-8 w-8 items-center justify-center text-secondary cursor-pointer disabled:cursor-not-allowed"
         >
           <span aria-hidden="true" className="text-title-lg leading-none">
             {isMobileMenuOpen ? '×' : '☰'}
@@ -52,7 +52,7 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
               type="button"
               aria-label="Fechar menu de serviços"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center text-secondary"
+              className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center text-secondary cursor-pointer disabled:cursor-not-allowed"
             >
               <span aria-hidden="true">×</span>
             </button>
@@ -71,10 +71,10 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
                       className={[
                         'w-full border-b border-border py-2 text-left text-body-sm transition-colors',
                         isActive
-                          ? 'font-semibold text-accent'
+                          ? 'font-semibold text-accent cursor-pointer'
                           : isDisabled
                             ? 'cursor-not-allowed font-normal text-menu-disabled'
-                            : 'font-normal text-heading',
+                            : 'font-normal text-heading cursor-pointer',
                       ].join(' ')}
                     >
                       {item.label}
@@ -104,10 +104,10 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
                 className={[
                   'w-auto border-b border-transparent px-0 py-1 text-left text-body-md transition-colors desktop:w-full desktop:border-0 desktop:py-3',
                   isActive
-                    ? 'font-semibold text-secondary'
+                    ? 'font-semibold text-secondary cursor-pointer'
                     : isDisabled
                       ? 'cursor-not-allowed font-normal text-menu-disabled'
-                      : 'font-normal text-heading hover:text-secondary',
+                      : 'font-normal text-heading hover:text-secondary cursor-pointer',
                 ].join(' ')}
               >
                 {item.label}

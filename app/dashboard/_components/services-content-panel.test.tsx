@@ -15,7 +15,9 @@ describe('ServicesContentPanel (legacy)', () => {
     render(<DashboardContentPanel activeTab="inicio" />);
 
     expect(screen.getByText(/nova transa[c\u00e7][a\u00e3]o/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /concluir transa[c\u00e7][a\u00e3]o/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /concluir transa[c\u00e7][a\u00e3]o/i })
+    ).toBeInTheDocument();
   });
 
   it.each([
@@ -41,7 +43,7 @@ describe('ServicesContentPanel (legacy)', () => {
     fireEvent.click(openWarningButton);
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /voltar para servi[c\u00e7]os/i }));
+    fireEvent.click(screen.getByRole('button', { name: /voltar para o painel/i }));
 
     expect(replaceMock).toHaveBeenCalledWith('/dashboard');
   });

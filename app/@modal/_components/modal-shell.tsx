@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useRouter } from 'next/navigation';
+import type { ReactNode } from 'react';
 
 type ModalShellProps = {
   children: ReactNode;
@@ -10,7 +10,7 @@ type ModalShellProps = {
 export function ModalShell({ children }: ModalShellProps) {
   const router = useRouter();
   const closeModal = () => {
-    router.replace("/home");
+    router.replace('/home');
   };
 
   return (
@@ -33,7 +33,7 @@ export function ModalShell({ children }: ModalShellProps) {
             type="button"
             aria-label="Fechar cadastro"
             onClick={closeModal}
-            className="absolute right-4 top-3 inline-flex h-8 w-8 items-center justify-center rounded-sm text-body hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="absolute right-4 top-3 inline-flex h-8 w-8 items-center justify-center rounded-sm text-body hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer disabled:cursor-not-allowed"
           >
             x
           </button>

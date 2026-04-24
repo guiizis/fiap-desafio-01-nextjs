@@ -50,7 +50,7 @@ describe('ServiceUnderConstructionModal', () => {
     const onClose = vi.fn();
     render(<ServiceUnderConstructionModal serviceLabel="Emprestimo" onClose={onClose} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Voltar para servi/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Voltar para o painel/i }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(replaceMock).toHaveBeenCalledWith('/dashboard');

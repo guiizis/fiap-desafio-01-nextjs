@@ -15,7 +15,9 @@ describe('DashboardContentPanel', () => {
     render(<DashboardContentPanel activeTab="inicio" />);
 
     expect(screen.getByText(/nova transa[c\u00e7][a\u00e3]o/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /concluir transa[c\u00e7][a\u00e3]o/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /concluir transa[c\u00e7][a\u00e3]o/i })
+    ).toBeInTheDocument();
   });
 
   it('renderiza painel de transacoes com dados recebidos', () => {
@@ -25,13 +27,21 @@ describe('DashboardContentPanel', () => {
       <DashboardContentPanel
         activeTab="transacoes"
         transactionEntries={[
-          { id: 'entry-1', month: 'Abril', type: 'Deposito', amountInCents: 2500, date: '21/04/2026' },
+          {
+            id: 'entry-1',
+            month: 'Abril',
+            type: 'Deposito',
+            amountInCents: 2500,
+            date: '21/04/2026',
+          },
         ]}
         onDeleteEntry={onDeleteEntry}
       />
     );
 
-    expect(screen.getByRole('heading', { name: /transa[c\u00e7][o\u00f5]es/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /transa[c\u00e7][o\u00f5]es/i })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/painel de transa[c\u00e7][o\u00f5]es/i)).toBeInTheDocument();
 
     const selectedEntry = screen.getByText('21/04/2026').closest('li');
@@ -72,7 +82,7 @@ describe('DashboardContentPanel', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText(/ainda em constru/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /voltar para servi[c\u00e7]os/i }));
+    fireEvent.click(screen.getByRole('button', { name: /voltar para o painel/i }));
 
     expect(replaceMock).toHaveBeenCalledWith('/dashboard');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
