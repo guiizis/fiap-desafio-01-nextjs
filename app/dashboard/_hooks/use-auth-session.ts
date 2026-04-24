@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from 'react';
 import {
   AUTH_SESSION_CHANGED_EVENT,
   AUTH_SESSION_STORAGE_KEY,
   parseAuthSession,
   setAuthSession,
   type AuthSession,
-} from "../../lib/auth-session";
+} from '@/app/lib/auth-session';
 
-export type AuthSessionStatus = "loading" | "authenticated" | "unauthenticated";
+export type AuthSessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
 type UseAuthSessionResult = {
   session: AuthSession | null;
   status: AuthSessionStatus;
 };
 
-const SERVER_SNAPSHOT = "__server_snapshot__";
-const EMPTY_SNAPSHOT = "__empty_snapshot__";
+const SERVER_SNAPSHOT = '__server_snapshot__';
+const EMPTY_SNAPSHOT = '__empty_snapshot__';
 
 function subscribe(onStoreChange: () => void) {
   const handleStorageChange = (event: StorageEvent) => {
@@ -34,11 +34,11 @@ function subscribe(onStoreChange: () => void) {
 
   const handleSessionChangedEvent = () => onStoreChange();
 
-  window.addEventListener("storage", handleStorageChange);
+  window.addEventListener('storage', handleStorageChange);
   window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleSessionChangedEvent);
 
   return () => {
-    window.removeEventListener("storage", handleStorageChange);
+    window.removeEventListener('storage', handleStorageChange);
     window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, handleSessionChangedEvent);
   };
 }
@@ -74,19 +74,19 @@ export function useAuthSession(): UseAuthSessionResult {
   if (serializedSession === SERVER_SNAPSHOT) {
     return {
       session: null,
-      status: "loading",
+      status: 'loading',
     };
   }
 
   if (serializedSession === EMPTY_SNAPSHOT || !session) {
     return {
       session: null,
-      status: "unauthenticated",
+      status: 'unauthenticated',
     };
   }
 
   return {
     session,
-    status: "authenticated",
+    status: 'authenticated',
   };
 }

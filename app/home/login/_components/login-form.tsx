@@ -8,7 +8,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { loginMockAccount } from '../../_services/auth-service';
-import { setAuthSession } from '../../../lib/auth-session';
+import { setAuthSession } from '@/app/lib/auth-session';
 
 type LoginFormLayout = 'page' | 'modal';
 

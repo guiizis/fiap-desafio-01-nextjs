@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AuthSession } from "../../lib/auth-session";
-import { withAuth } from "./with-auth";
+import { render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AuthSession } from '@/app/lib/auth-session';
+import { withAuth } from './with-auth';
 
 const { replaceMock, routerMock } = vi.hoisted(() => ({
   replaceMock: vi.fn(),
@@ -12,7 +12,7 @@ const { replaceMock, routerMock } = vi.hoisted(() => ({
 
 routerMock.replace = replaceMock;
 
-vi.mock("next/navigation", () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => routerMock,
 }));
 
@@ -32,47 +32,51 @@ function DummyPanel({ title, session }: DummyPanelProps) {
 const GuardedDummyPanel = withAuth(DummyPanel);
 
 const authenticatedSession: AuthSession = {
-  token: "mock-token-user-1",
+  token: 'mock-token-user-1',
   user: {
-    id: "user-1",
-    name: "Joana da Silva Oliveira",
-    email: "joana@mail.com",
-    createdAt: "2026-01-01T00:00:00.000Z",
+    id: 'user-1',
+    name: 'Joana da Silva Oliveira',
+    email: 'joana@mail.com',
+    createdAt: '2026-01-01T00:00:00.000Z',
     accountBalanceInCents: 250000,
-    statementEntries: [{ id: "entry-1", month: "Novembro", type: "Deposito", amountInCents: 5000, date: "21/11/2022" }],
+    statementEntries: [
+      {
+        id: 'entry-1',
+        month: 'Novembro',
+        type: 'Deposito',
+        amountInCents: 5000,
+        date: '21/11/2022',
+      },
+    ],
   },
 };
 
-describe("withAuth", () => {
+describe('withAuth', () => {
   beforeEach(() => {
     replaceMock.mockClear();
   });
 
-  it("nao renderiza componente enquanto estado esta loading", () => {
+  it('nao renderiza componente enquanto estado esta loading', () => {
     render(<GuardedDummyPanel title="Painel" authStatus="loading" session={null} />);
 
     expect(screen.queryByText(/Painel/i)).not.toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it("redireciona para login quando usuario nao autenticado", async () => {
+  it('redireciona para login quando usuario nao autenticado', async () => {
     render(<GuardedDummyPanel title="Painel" authStatus="unauthenticated" session={null} />);
 
     await waitFor(() => {
-      expect(replaceMock).toHaveBeenCalledWith("/home/login");
+      expect(replaceMock).toHaveBeenCalledWith('/home/login');
     });
   });
 
-  it("renderiza componente quando usuario autenticado", () => {
+  it('renderiza componente quando usuario autenticado', () => {
     render(
-      <GuardedDummyPanel
-        title="Painel"
-        authStatus="authenticated"
-        session={authenticatedSession}
-      />
+      <GuardedDummyPanel title="Painel" authStatus="authenticated" session={authenticatedSession} />
     );
 
-    expect(screen.getByText("Painel - Joana da Silva Oliveira")).toBeInTheDocument();
+    expect(screen.getByText('Painel - Joana da Silva Oliveira')).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoginForm } from './login-form';
-import { AUTH_SESSION_STORAGE_KEY } from '../../../lib/auth-session';
+import { AUTH_SESSION_STORAGE_KEY } from '@/app/lib/auth-session';
 
 const { loginMockAccountMock, pushMock } = vi.hoisted(() => ({
   loginMockAccountMock: vi.fn(),

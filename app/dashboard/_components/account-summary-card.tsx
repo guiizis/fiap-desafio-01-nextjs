@@ -1,5 +1,5 @@
 ﻿import Image from 'next/image';
-import { formatCurrencyFromCents } from '../../lib/calc';
+import { formatCurrencyFromCents } from '@/app/lib/calc';
 
 type AccountSummaryCardProps = {
   name: string;

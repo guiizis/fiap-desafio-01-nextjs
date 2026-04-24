@@ -1,6 +1,6 @@
 'use client';
 
-import type { AuthSession } from '../lib/auth-session';
+import type { AuthSession } from '@/app/lib/auth-session';
 import { Dashboard } from './_components/dashboard';
 import { DashboardHeader } from './_components/dashboard-header';
 import { withAuth } from './_components/with-auth';

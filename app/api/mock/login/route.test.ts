@@ -1,18 +1,18 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { registerMockUser, resetMockUsersStore } from "../../../lib/mock-auth";
-import { POST } from "./route";
+import { beforeEach, describe, expect, it } from 'vitest';
+import { registerMockUser, resetMockUsersStore } from '@/app/lib/mock-auth';
+import { POST } from './route';
 
-describe("POST /api/mock/login", () => {
+describe('POST /api/mock/login', () => {
   beforeEach(() => {
     resetMockUsersStore();
   });
 
-  it("retorna 400 quando body tem JSON invalido", async () => {
-    const request = new Request("http://localhost:3000/api/mock/login", {
-      method: "POST",
-      body: "{ email-invalido",
+  it('retorna 400 quando body tem JSON invalido', async () => {
+    const request = new Request('http://localhost:3000/api/mock/login', {
+      method: 'POST',
+      body: '{ email-invalido',
       headers: {
-        "content-type": "application/json",
+        'content-type': 'application/json',
       },
     });
 
@@ -20,15 +20,15 @@ describe("POST /api/mock/login", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(400);
-    expect(payload.message).toContain("JSON invalido");
+    expect(payload.message).toContain('JSON invalido');
   });
 
-  it("retorna 400 quando faltam campos obrigatorios", async () => {
-    const request = new Request("http://localhost:3000/api/mock/login", {
-      method: "POST",
-      body: JSON.stringify({ email: "teste@mail.com" }),
+  it('retorna 400 quando faltam campos obrigatorios', async () => {
+    const request = new Request('http://localhost:3000/api/mock/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: 'teste@mail.com' }),
       headers: {
-        "content-type": "application/json",
+        'content-type': 'application/json',
       },
     });
 
@@ -36,18 +36,18 @@ describe("POST /api/mock/login", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(400);
-    expect(payload.message).toContain("Campos obrigatorios");
+    expect(payload.message).toContain('Campos obrigatorios');
   });
 
-  it("retorna 401 quando credenciais sao invalidas", async () => {
-    const request = new Request("http://localhost:3000/api/mock/login", {
-      method: "POST",
+  it('retorna 401 quando credenciais sao invalidas', async () => {
+    const request = new Request('http://localhost:3000/api/mock/login', {
+      method: 'POST',
       body: JSON.stringify({
-        email: "naoexiste@mail.com",
-        password: "123456",
+        email: 'naoexiste@mail.com',
+        password: '123456',
       }),
       headers: {
-        "content-type": "application/json",
+        'content-type': 'application/json',
       },
     });
 
@@ -55,24 +55,24 @@ describe("POST /api/mock/login", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(401);
-    expect(payload.message).toContain("invalidos");
+    expect(payload.message).toContain('invalidos');
   });
 
-  it("retorna 200 com token e user para credenciais validas", async () => {
+  it('retorna 200 com token e user para credenciais validas', async () => {
     registerMockUser({
-      name: "Bruno Lima",
-      email: "bruno@mail.com",
-      password: "654321",
+      name: 'Bruno Lima',
+      email: 'bruno@mail.com',
+      password: '654321',
     });
 
-    const request = new Request("http://localhost:3000/api/mock/login", {
-      method: "POST",
+    const request = new Request('http://localhost:3000/api/mock/login', {
+      method: 'POST',
       body: JSON.stringify({
-        email: "BRUNO@mail.com",
-        password: "654321",
+        email: 'BRUNO@mail.com',
+        password: '654321',
       }),
       headers: {
-        "content-type": "application/json",
+        'content-type': 'application/json',
       },
     });
 
@@ -80,9 +80,9 @@ describe("POST /api/mock/login", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.message).toBe("Login realizado com sucesso.");
-    expect(payload.user.email).toBe("bruno@mail.com");
+    expect(payload.message).toBe('Login realizado com sucesso.');
+    expect(payload.user.email).toBe('bruno@mail.com');
     expect(payload.user.password).toBeUndefined();
-    expect(payload.token).toContain("mock-token-");
+    expect(payload.token).toContain('mock-token-');
   });
 });

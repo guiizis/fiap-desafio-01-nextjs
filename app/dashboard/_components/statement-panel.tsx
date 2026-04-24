@@ -9,7 +9,7 @@ import type {
   EditStatementEntryResult,
   StatementEntry,
 } from './interfaces/statement-panel.interfaces';
-import { formatCurrencyFromCents } from '../../lib/calc';
+import { formatCurrencyFromCents } from '@/app/lib/calc';
 
 type StatementPanelProps = {
   title?: string;

@@ -1,4 +1,4 @@
-import { listMockUsers, registerMockUser } from "../../../lib/mock-auth";
+import { listMockUsers, registerMockUser } from '@/app/lib/mock-auth';
 
 type RegisterRequestBody = {
   name?: unknown;
@@ -13,12 +13,10 @@ type ValidRegisterRequestBody = {
 };
 
 function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
-function isValidRegisterPayload(
-  payload: RegisterRequestBody
-): payload is ValidRegisterRequestBody {
+function isValidRegisterPayload(payload: RegisterRequestBody): payload is ValidRegisterRequestBody {
   return (
     isNonEmptyString(payload.name) &&
     isNonEmptyString(payload.email) &&
@@ -32,15 +30,12 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as RegisterRequestBody;
   } catch {
-    return Response.json(
-      { message: "JSON invalido no corpo da requisicao." },
-      { status: 400 }
-    );
+    return Response.json({ message: 'JSON invalido no corpo da requisicao.' }, { status: 400 });
   }
 
   if (!isValidRegisterPayload(body)) {
     return Response.json(
-      { message: "Campos obrigatorios: name, email e password." },
+      { message: 'Campos obrigatorios: name, email e password.' },
       { status: 400 }
     );
   }
@@ -53,14 +48,14 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     return Response.json(
-      { message: "Ja existe usuario cadastrado com este email." },
+      { message: 'Ja existe usuario cadastrado com este email.' },
       { status: 409 }
     );
   }
 
   return Response.json(
     {
-      message: "Usuario criado com sucesso.",
+      message: 'Usuario criado com sucesso.',
       user: result.user,
     },
     { status: 201 }
