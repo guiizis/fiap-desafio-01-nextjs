@@ -1,0 +1,90 @@
+<svg width="960" height="600" viewBox="0 0 960 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="600" fill="#E9EEEA"/>
+
+  <rect x="40" y="540" width="880" height="20" fill="#F6C41C" stroke="#1F2937" stroke-width="4"/>
+
+  <g stroke="#1F2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M74 510H98V472"/>
+    <path d="M862 510H886V472"/>
+    <path d="M74 146H98V118"/>
+    <path d="M862 146H886V118"/>
+  </g>
+
+  <g id="crane" stroke="#1F2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="98" y="510" width="96" height="30" fill="#4B5563"/>
+
+    <rect x="134" y="180" width="32" height="330" fill="#F8FAFC"/>
+    <path d="M134 208L166 232M134 256L166 280M134 304L166 328M134 352L166 376M134 400L166 424M134 448L166 472M134 496L166 510"/>
+
+    <rect x="134" y="120" width="32" height="60" fill="#F8FAFC"/>
+    <path d="M134 140H166M134 160H166M134 120L166 140M166 120L134 140M134 140L166 160"/>
+
+    <path d="M150 120L74 176"/>
+    <path d="M150 120L300 120"/>
+    <path d="M228 120L374 176" stroke-dasharray="18 10"/>
+
+    <rect x="74" y="176" width="116" height="32" fill="#F8FAFC"/>
+    <path d="M74 176L102 208M102 176L130 208M130 176L158 208M158 176L186 208"/>
+
+    <rect x="190" y="176" width="422" height="32" fill="#F8FAFC"/>
+    <path d="M190 208L218 176L246 208L274 176L302 208L330 176L358 208L386 176L414 208L442 176L470 208L498 176L526 208L554 176L582 208L612 176"/>
+
+    <rect x="108" y="168" width="24" height="48" fill="#4B5563"/>
+    <rect x="132" y="168" width="24" height="48" fill="#4B5563"/>
+
+    <rect x="190" y="208" width="96" height="22" fill="#4B5563"/>
+    <rect x="562" y="208" width="74" height="22" fill="#4B5563"/>
+
+    <path d="M466 208V288"/>
+    <circle cx="466" cy="288" r="18" fill="#4B5563"/>
+    <circle cx="466" cy="288" r="8" fill="#D1D5DB"/>
+    <path d="M466 306V322C466 332 474 340 484 340C494 340 502 348 502 358C502 368 494 376 484 376C474 376 466 368 466 358"/>
+
+    <path d="M244 122L390 122"/>
+  </g>
+
+  <g id="crane-cabin" stroke="#1F2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M190 146H244L258 180L244 214H190V146Z" fill="#F6C41C"/>
+    <path d="M206 160L232 164L242 181L232 198L206 202V160Z" fill="#CFEAF8"/>
+  </g>
+
+  <g id="monitor" stroke="#1F2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="296" y="286" width="368" height="196" rx="14" fill="#4B5563"/>
+    <rect x="320" y="312" width="320" height="146" fill="#F8FAFC"/>
+
+    <rect x="320" y="312" width="320" height="44" fill="#F16B6B"/>
+    <rect x="336" y="368" width="128" height="62" fill="#63B3D8"/>
+    <rect x="476" y="368" width="128" height="62" fill="#B8D33D"/>
+    <rect x="440" y="338" width="116" height="64" fill="#F6C41C"/>
+
+    <rect x="530" y="368" width="72" height="54" fill="none" stroke-dasharray="10 8"/>
+    <path d="M336 444H418M430 444H512M524 444H606"/>
+
+    <rect x="402" y="482" width="156" height="28" fill="#D1D5DB"/>
+    <path d="M480 510V528M436 540H524L512 530L504 520H456L448 530L436 540Z" fill="#D1D5DB"/>
+
+    <path d="M430 286V258C430 234 448 216 472 216H596"/>
+    <rect x="596" y="198" width="126" height="36" rx="10" fill="#4B5563"/>
+    <circle cx="612" cy="216" r="12" fill="#9CA3AF"/>
+  </g>
+
+  <g id="hanging-block" stroke="#1F2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M484 376L498 360" />
+    <rect x="442" y="338" width="116" height="64" fill="#F6C41C"/>
+  </g>
+
+  <g id="right-sign" stroke="#1F2937" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="670" y="96" width="210" height="104" fill="#111827"/>
+    <rect x="692" y="118" width="166" height="60" fill="#E9EEEA"/>
+    <path d="M678 104H706M722 104H750M766 104H794M810 104H838M854 104H872" stroke="#F6C41C" stroke-width="10"/>
+    <path d="M678 192H706M722 192H750M766 192H794M810 192H838M854 192H872" stroke="#F6C41C" stroke-width="10"/>
+
+    <rect x="768" y="200" width="14" height="340" fill="#D1D5DB"/>
+    <path d="M640 160H670V128"/>
+    <path d="M880 160H910V128"/>
+    <path d="M640 474H670V506"/>
+    <path d="M880 474H910V506"/>
+    <path d="M628 242H676" stroke-dasharray="14 8"/>
+    <path d="M810 404V448" stroke-dasharray="14 8"/>
+  </g>
+</svg>

@@ -1,0 +1,224 @@
+"use client";
+
+import { useEffect, useMemo, useState, type FormEventHandler } from "react";
+import { Alert } from "../../../components/ui/alert";
+import { Button } from "../../../components/ui/button";
+import { CalendarInput } from "../../../components/ui/calendar-input";
+import { Input, Select } from "../../../components/ui/input";
+import { formatCurrencyInput } from "../_utils/currency-mask";
+import {
+  getDefaultTransactionDate,
+  getTransactionDateRange,
+  isTransactionDateWithinRange,
+} from "../_utils/transaction-date";
+import type {
+  EditStatementEntryPayload,
+  EditStatementEntryResult,
+  StatementEntry,
+} from "./interfaces/statement-panel.interfaces";
+import type { TransactionType } from "./interfaces/new-transaction-panel.interfaces";
+
+type EditStatementEntryModalProps = {
+  entry: StatementEntry;
+  onClose: () => void;
+  onSubmit?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
+};
+
+function parseCurrencyInputToCents(value: string) {
+  const normalizedAmount = value.replace(/\./g, "").replace(",", ".");
+  const amountValue = Number(normalizedAmount);
+
+  if (!Number.isFinite(amountValue) || amountValue <= 0) {
+    return 0;
+  }
+
+  return Math.round(amountValue * 100);
+}
+
+function formatCentsToInputValue(amountInCents: number) {
+  const absoluteAmount = Math.abs(amountInCents);
+  const integerPart = Math.floor(absoluteAmount / 100)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const decimalPart = (absoluteAmount % 100).toString().padStart(2, "0");
+  return `${integerPart},${decimalPart}`;
+}
+
+function parsePtBrDateToIso(date: string) {
+  const [day, month, year] = date.split("/");
+  if (!day || !month || !year) {
+    return null;
+  }
+
+  const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  const parsed = new Date(`${isoDate}T00:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return isoDate;
+}
+
+function normalizeEntryType(type: string): TransactionType {
+  return type === "Transferencia" ? "transferencia" : "deposito";
+}
+
+export function EditStatementEntryModal({ entry, onClose, onSubmit }: EditStatementEntryModalProps) {
+  const calendarRange = useMemo(() => getTransactionDateRange(), []);
+  const [transactionType, setTransactionType] = useState<TransactionType>(() =>
+    normalizeEntryType(entry.type)
+  );
+  const [transactionAmount, setTransactionAmount] = useState(() =>
+    formatCentsToInputValue(entry.amountInCents)
+  );
+  const [transactionDate, setTransactionDate] = useState(
+    () => parsePtBrDateToIso(entry.date) ?? getDefaultTransactionDate()
+  );
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const transactionOptions: readonly { value: TransactionType; label: string }[] = [
+    { value: "deposito", label: "Depósito" },
+    { value: "transferencia", label: "Transferência" },
+  ];
+
+  const amountInCents = useMemo(
+    () => parseCurrencyInputToCents(transactionAmount),
+    [transactionAmount]
+  );
+  const isAmountValid = amountInCents > 0;
+  const isDateValid = isTransactionDateWithinRange(transactionDate, calendarRange);
+  const isFormValid = isAmountValid && isDateValid;
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    setFeedback(null);
+
+    if (!isFormValid) {
+      return;
+    }
+
+    const result = onSubmit?.({
+      entryId: entry.id,
+      type: transactionType,
+      amountInCents,
+      transactionDate,
+    });
+
+    if (result && !result.ok) {
+      setFeedback(result.message);
+      return;
+    }
+
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-statement-modal-title"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="mx-auto w-full max-w-[520px] rounded-md bg-surface p-5 shadow-xl md:p-7"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <h3 id="edit-statement-modal-title" className="text-title-xl font-bold text-black">
+            Editar transação
+          </h3>
+          <Button
+            type="button"
+            variant="ghost"
+            tone="secondary"
+            onClick={onClose}
+            aria-label="Fechar edição da transação"
+            className="h-9 px-3"
+          >
+            Fechar
+          </Button>
+        </div>
+
+        <form className="mt-6" onSubmit={handleSubmit} noValidate>
+          <Select
+            label="Tipo de transação"
+            id="edit-transaction-type"
+            name="edit-transaction-type"
+            options={transactionOptions}
+            value={transactionType}
+            onChange={(event) => {
+              const value = event.currentTarget.value;
+
+              if (value === "deposito" || value === "transferencia") {
+                setTransactionType(value);
+              }
+            }}
+            required
+            labelClassName="mb-2 text-body-sm font-semibold text-body"
+            selectClassName="h-12 border-primary bg-surface px-4 pr-11 text-title-lg text-body"
+          />
+
+          <Input
+            label="Valor"
+            id="edit-transaction-amount"
+            name="edit-transaction-amount"
+            type="text"
+            inputMode="numeric"
+            value={transactionAmount}
+            onChange={(event) => setTransactionAmount(formatCurrencyInput(event.currentTarget.value))}
+            required
+            containerClassName="mt-6"
+            labelClassName="mb-2 text-body-sm font-semibold text-body"
+            inputClassName="h-12 border-primary bg-surface text-center text-title-lg text-body"
+            validationKind="none"
+          />
+
+          <CalendarInput
+            label="Data"
+            id="edit-transaction-date"
+            name="edit-transaction-date"
+            value={transactionDate}
+            onChange={setTransactionDate}
+            required
+            minDate={calendarRange.minDate}
+            maxDate={calendarRange.maxDate}
+            containerClassName="mt-6"
+            labelClassName="mb-2 text-body-sm font-semibold text-body"
+            inputClassName="h-12 border-primary bg-surface text-center text-title-lg text-body"
+          />
+
+          {feedback ? (
+            <div className="mt-4">
+              <Alert variant="error" message={feedback} onClose={() => setFeedback(null)} />
+            </div>
+          ) : null}
+
+          <div className="mt-6 flex items-center gap-3">
+            <Button type="submit" variant="solid" tone="primary" disabled={!isFormValid}>
+              Salvar edição
+            </Button>
+            <Button type="button" variant="outline" tone="secondary" onClick={onClose}>
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
