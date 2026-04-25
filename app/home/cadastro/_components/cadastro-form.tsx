@@ -3,9 +3,9 @@
 import Image from "next/image";
 import type { FormEventHandler } from "react";
 import { useState } from "react";
-import { Alert } from "../../../../components/ui/alert";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { registerMockAccount } from "../../_services/auth-service";
 
 type CadastroFormLayout = "page" | "modal";

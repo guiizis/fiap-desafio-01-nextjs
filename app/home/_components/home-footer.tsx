@@ -1,6 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Logo } from "../../../components/ui/logo";
+import Image from 'next/image';
+import Link from 'next/link';
+import { Logo } from '@/components/ui/logo';
 
 export function HomeFooter() {
   return (
@@ -28,13 +28,7 @@ export function HomeFooter() {
           <h2 className="text-body-md font-semibold text-surface">
             Desenvolvido por Mcintosh Bank
           </h2>
-          <Logo
-            size="md"
-            variant="full"
-            tone="light"
-            alt="Mcintosh Bank"
-            className="mt-1"
-          />
+          <Logo size="md" variant="full" tone="light" alt="Mcintosh Bank" className="mt-1" />
 
           <div className="flex items-center gap-4 pt-0.5">
             <Link href="#" aria-label="Instagram da Mcintosh Bank">

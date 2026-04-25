@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AUTH_SESSION_STORAGE_KEY } from '../lib/auth-session';
+import { AUTH_SESSION_STORAGE_KEY } from '@/app/lib/auth-session';
 import DashboardPage from './page';
 
 const { replaceMock, routerMock } = vi.hoisted(() => ({

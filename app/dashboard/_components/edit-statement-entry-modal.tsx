@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useMemo, useState, type FormEventHandler } from "react";
-import { Alert } from "../../../components/ui/alert";
-import { Button } from "../../../components/ui/button";
-import { CalendarInput } from "../../../components/ui/calendar-input";
-import { Input, Select } from "../../../components/ui/input";
-import { formatCurrencyInput } from "../_utils/currency-mask";
+import { useEffect, useMemo, useState, type FormEventHandler } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { CalendarInput } from '@/components/ui/calendar-input';
+import { Input, Select } from '@/components/ui/input';
+import { formatCurrencyInput } from '../_utils/currency-mask';
 import {
   getDefaultTransactionDate,
   getTransactionDateRange,
   isTransactionDateWithinRange,
-} from "../_utils/transaction-date";
+} from '../_utils/transaction-date';
 import type {
   EditStatementEntryPayload,
   EditStatementEntryResult,
   StatementEntry,
-} from "./interfaces/statement-panel.interfaces";
-import type { TransactionType } from "./interfaces/new-transaction-panel.interfaces";
+} from './interfaces/statement-panel.interfaces';
+import type { TransactionType } from './interfaces/new-transaction-panel.interfaces';
 
 type EditStatementEntryModalProps = {
   entry: StatementEntry;
@@ -25,7 +25,7 @@ type EditStatementEntryModalProps = {
 };
 
 function parseCurrencyInputToCents(value: string) {
-  const normalizedAmount = value.replace(/\./g, "").replace(",", ".");
+  const normalizedAmount = value.replace(/\./g, '').replace(',', '.');
   const amountValue = Number(normalizedAmount);
 
   if (!Number.isFinite(amountValue) || amountValue <= 0) {
@@ -39,18 +39,18 @@ function formatCentsToInputValue(amountInCents: number) {
   const absoluteAmount = Math.abs(amountInCents);
   const integerPart = Math.floor(absoluteAmount / 100)
     .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  const decimalPart = (absoluteAmount % 100).toString().padStart(2, "0");
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const decimalPart = (absoluteAmount % 100).toString().padStart(2, '0');
   return `${integerPart},${decimalPart}`;
 }
 
 function parsePtBrDateToIso(date: string) {
-  const [day, month, year] = date.split("/");
+  const [day, month, year] = date.split('/');
   if (!day || !month || !year) {
     return null;
   }
 
-  const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   const parsed = new Date(`${isoDate}T00:00:00`);
 
   if (Number.isNaN(parsed.getTime())) {
@@ -61,10 +61,14 @@ function parsePtBrDateToIso(date: string) {
 }
 
 function normalizeEntryType(type: string): TransactionType {
-  return type === "Transferencia" ? "transferencia" : "deposito";
+  return type === 'Transferencia' ? 'transferencia' : 'deposito';
 }
 
-export function EditStatementEntryModal({ entry, onClose, onSubmit }: EditStatementEntryModalProps) {
+export function EditStatementEntryModal({
+  entry,
+  onClose,
+  onSubmit,
+}: EditStatementEntryModalProps) {
   const calendarRange = useMemo(() => getTransactionDateRange(), []);
   const [transactionType, setTransactionType] = useState<TransactionType>(() =>
     normalizeEntryType(entry.type)
@@ -77,8 +81,8 @@ export function EditStatementEntryModal({ entry, onClose, onSubmit }: EditStatem
   );
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: "deposito", label: "Depósito" },
-    { value: "transferencia", label: "Transferência" },
+    { value: 'deposito', label: 'Depósito' },
+    { value: 'transferencia', label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -91,13 +95,13 @@ export function EditStatementEntryModal({ entry, onClose, onSubmit }: EditStatem
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         onClose();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
@@ -165,7 +169,7 @@ export function EditStatementEntryModal({ entry, onClose, onSubmit }: EditStatem
             onChange={(event) => {
               const value = event.currentTarget.value;
 
-              if (value === "deposito" || value === "transferencia") {
+              if (value === 'deposito' || value === 'transferencia') {
                 setTransactionType(value);
               }
             }}
@@ -181,7 +185,9 @@ export function EditStatementEntryModal({ entry, onClose, onSubmit }: EditStatem
             type="text"
             inputMode="numeric"
             value={transactionAmount}
-            onChange={(event) => setTransactionAmount(formatCurrencyInput(event.currentTarget.value))}
+            onChange={(event) =>
+              setTransactionAmount(formatCurrencyInput(event.currentTarget.value))
+            }
             required
             containerClassName="mt-6"
             labelClassName="mb-2 text-body-sm font-semibold text-body"

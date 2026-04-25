@@ -1,8 +1,8 @@
-import Image from "next/image";
-import Link from "next/link";
-import { buttonVariants } from "../components/ui/button";
-import { HomeFooter } from "./home/_components/home-footer";
-import { HomeHeader } from "./home/_components/home-header";
+import Image from 'next/image';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { HomeFooter } from './home/_components/home-footer';
+import { HomeHeader } from './home/_components/home-header';
 
 export default function NotFound() {
   return (
@@ -22,9 +22,9 @@ export default function NotFound() {
           <Link
             href="/home"
             className={buttonVariants({
-              variant: "solid",
-              tone: "accent",
-              className: "mt-5 px-5",
+              variant: 'solid',
+              tone: 'accent',
+              className: 'mt-5 px-5',
             })}
           >
             Voltar ao início
