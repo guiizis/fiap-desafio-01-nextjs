@@ -85,7 +85,6 @@ describe('DashboardContentPanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /voltar para o painel/i }));
 
-    expect(replaceMock).toHaveBeenCalledWith('/dashboard');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

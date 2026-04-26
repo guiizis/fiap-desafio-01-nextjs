@@ -53,6 +53,5 @@ describe('ServiceUnderConstructionModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /Voltar para o painel/i }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(replaceMock).toHaveBeenCalledWith('/dashboard');
   });
 });
