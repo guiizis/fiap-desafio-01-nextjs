@@ -85,7 +85,7 @@ function createFallbackStatementEntry(index: number): AuthenticatedMockUser["sta
   return {
     id: `fallback-session-entry-${index}-${dateLabel.replace(/\//g, "-")}`,
     month: `${monthLabel.charAt(0).toUpperCase()}${monthLabel.slice(1)}`,
-    type: isTransfer ? "Transferencia" : "Deposito",
+    type: isTransfer ? "Transfer" : "Deposit",
     amountInCents: isTransfer ? -(3500 + index * 300) : 6500 + index * 500,
     date: dateLabel,
   };

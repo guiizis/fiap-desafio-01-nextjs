@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { registerMockAccount } from "../../_services/auth-service";
 
-type CadastroFormLayout = "page" | "modal";
+type RegisterFormLayout = "page" | "modal";
 
-type CadastroFormProps = {
-  layout?: CadastroFormLayout;
+type RegisterFormProps = {
+  layout?: RegisterFormLayout;
 };
 
-export function CadastroForm({ layout = "page" }: CadastroFormProps) {
+export function RegisterForm({ layout = "page" }: RegisterFormProps) {
   const isModal = layout === "modal";
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,15 +41,15 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
     setIsFormValid(isFormElementValid(event.currentTarget));
   };
 
-  const submitCadastro = async (formElement: HTMLFormElement) => {
+  const submitRegister = async (formElement: HTMLFormElement) => {
     setIsSubmitting(true);
     setFeedback(null);
 
     const formData = new FormData(formElement);
     const payload = {
-      name: String(formData.get("nome") ?? ""),
+      name: String(formData.get("name") ?? ""),
       email: String(formData.get("email") ?? ""),
-      password: String(formData.get("senha") ?? ""),
+      password: String(formData.get("password") ?? ""),
     };
 
     const result = await registerMockAccount(payload);
@@ -68,7 +68,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
-    void submitCadastro(event.currentTarget);
+    void submitRegister(event.currentTarget);
   };
 
   const handleAlertClose = () => setFeedback(null);
@@ -99,8 +99,8 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
       >
         <Input
           label="Nome"
-          id="nome"
-          name="nome"
+          id="name"
+          name="name"
           type="text"
           validationKind="name"
           placeholder="Digite seu nome completo"
@@ -117,8 +117,8 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
 
         <Input
           label="Senha"
-          id="senha"
-          name="senha"
+          id="password"
+          name="password"
           type="password"
           validationKind="password"
           placeholder="Digite sua senha"
@@ -128,7 +128,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
         <label className="flex items-start gap-2 pt-1 text-body-sm text-body">
           <input
             type="checkbox"
-            name="consentimento"
+            name="consent"
             required
             className="mt-0.5 h-4 w-4 rounded border-border text-secondary focus:ring-secondary"
           />

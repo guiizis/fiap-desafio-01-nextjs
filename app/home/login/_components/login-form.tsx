@@ -51,7 +51,7 @@ export function LoginForm({ layout = 'page' }: LoginFormProps) {
     const formData = new FormData(formElement);
     const payload = {
       email: String(formData.get('email') ?? ''),
-      password: String(formData.get('senha') ?? ''),
+      password: String(formData.get('password') ?? ''),
     };
 
     const result = await loginMockAccount(payload);
@@ -113,8 +113,8 @@ export function LoginForm({ layout = 'page' }: LoginFormProps) {
 
         <Input
           label="Senha"
-          id="senha"
-          name="senha"
+          id="password"
+          name="password"
           type="password"
           validationKind="password"
           placeholder="Digite sua senha"

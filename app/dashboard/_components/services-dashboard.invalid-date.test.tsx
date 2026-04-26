@@ -18,7 +18,7 @@ vi.mock('./dashboard-content-panel', () => ({
       type="button"
       onClick={() => {
         const result = onSubmitTransaction?.({
-          type: TransactionType.DEPOSITO,
+          type: TransactionType.DEPOSIT,
           amountInCents: 100,
           transactionDate: '275760-04-19',
         });
@@ -33,7 +33,13 @@ vi.mock('./dashboard-content-panel', () => ({
 import { Dashboard } from './dashboard';
 
 const statementEntries = [
-  { id: '1', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: '18/11/2022' },
+  {
+    id: '1',
+    month: 'Novembro',
+    type: StatementEntryType.DEPOSIT,
+    amountInCents: 15000,
+    date: '18/11/2022',
+  },
 ] as const;
 
 describe('Dashboard invalid date guard', () => {

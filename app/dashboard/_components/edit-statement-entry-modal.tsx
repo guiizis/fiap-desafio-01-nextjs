@@ -84,8 +84,8 @@ export function EditStatementEntryModal({
   );
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: TransactionType.DEPOSITO, label: 'Depósito' },
-    { value: TransactionType.TRANSFERENCIA, label: 'Transferência' },
+    { value: TransactionType.DEPOSIT, label: 'Depósito' },
+    { value: TransactionType.TRANSFER, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -173,8 +173,8 @@ export function EditStatementEntryModal({
               const value = event.currentTarget.value;
 
               if (
-                value === TransactionType.DEPOSITO ||
-                value === TransactionType.TRANSFERENCIA
+                value === TransactionType.DEPOSIT ||
+                value === TransactionType.TRANSFER
               ) {
                 setTransactionType(value);
               }

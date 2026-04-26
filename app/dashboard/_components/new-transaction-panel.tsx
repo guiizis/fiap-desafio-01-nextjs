@@ -36,8 +36,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
   const [transactionDate, setTransactionDate] = useState(() => getDefaultTransactionDate());
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: TransactionType.DEPOSITO, label: 'Depósito' },
-    { value: TransactionType.TRANSFERENCIA, label: 'Transferência' },
+    { value: TransactionType.DEPOSIT, label: 'Depósito' },
+    { value: TransactionType.TRANSFER, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -54,8 +54,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
     setFeedback(null);
 
     if (
-      transactionType !== TransactionType.DEPOSITO &&
-      transactionType !== TransactionType.TRANSFERENCIA
+      transactionType !== TransactionType.DEPOSIT &&
+      transactionType !== TransactionType.TRANSFER
     ) {
       return;
     }
@@ -90,7 +90,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       aria-label="Nova transação"
     >
       <Image
-        src="/dashboard/transacoes/square-top.svg"
+        src="/dashboard/transactions/square-top.svg"
         alt=""
         width={178}
         height={180}
@@ -98,7 +98,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute right-0 top-0 z-0 hidden desktop:block"
       />
       <Image
-        src="/dashboard/transacoes/square-bottom.svg"
+        src="/dashboard/transactions/square-bottom.svg"
         alt=""
         width={178}
         height={180}
@@ -146,8 +146,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
               const value = event.currentTarget.value;
 
               if (
-                value === TransactionType.DEPOSITO ||
-                value === TransactionType.TRANSFERENCIA ||
+                value === TransactionType.DEPOSIT ||
+                value === TransactionType.TRANSFER ||
                 value === ''
               ) {
                 setTransactionType(value);

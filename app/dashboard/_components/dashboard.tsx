@@ -29,10 +29,10 @@ import { DashboardSidebarNav, type DashboardTabKey } from './dashboard-sidebar-n
 import { StatementPanel } from './statement-panel';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
-  { key: 'inicio', label: 'Início' },
-  { key: 'transacoes', label: 'Transações' },
-  { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros serviços', disabled: false },
+  { key: 'home', label: 'Início' },
+  { key: 'transactions', label: 'Transações' },
+  { key: 'investments', label: 'Investimentos', disabled: true },
+  { key: 'other-services', label: 'Outros serviços', disabled: false },
 ];
 
 type DashboardProps = {
@@ -70,13 +70,13 @@ function createStatementEntry(
     id,
     month: statementDate.monthLabel,
     type: toStatementEntryType(type),
-    amountInCents: type === TransactionType.DEPOSITO ? amountInCents : -amountInCents,
+    amountInCents: type === TransactionType.DEPOSIT ? amountInCents : -amountInCents,
     date: statementDate.dateLabel,
   };
 }
 
 export function Dashboard({ userFirstName, balanceInCents, statementEntries }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabKey>('inicio');
+  const [activeTab, setActiveTab] = useState<DashboardTabKey>('home');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const [accountState, dispatchAccountAction] = useReducer(
     accountReducer,
@@ -123,7 +123,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     amountInCents,
     transactionDate,
   }: NewTransactionPayload): NewTransactionResult => {
-    if (type === TransactionType.TRANSFERENCIA && amountInCents > accountState.currentBalanceInCents) {
+    if (type === TransactionType.TRANSFER && amountInCents > accountState.currentBalanceInCents) {
       return {
         ok: false,
         message: 'Saldo insuficiente para concluir a transferência.',
@@ -178,7 +178,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     }
 
     const nextSignedAmountInCents =
-      type === TransactionType.DEPOSITO ? amountInCents : -amountInCents;
+      type === TransactionType.DEPOSIT ? amountInCents : -amountInCents;
     const projectedBalanceInCents =
       accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
 
@@ -193,9 +193,9 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
       type: AccountActionType.EDIT_STATEMENT_ENTRY,
       entryId,
       nextAmountInCents: amountInCents,
-      nextType: type === TransactionType.DEPOSITO
-        ? StatementEntryType.DEPOSITO
-        : StatementEntryType.TRANSFERENCIA,
+      nextType: type === TransactionType.DEPOSIT
+        ? StatementEntryType.DEPOSIT
+        : StatementEntryType.TRANSFER,
       nextMonth: statementDate.monthLabel,
       nextDate: statementDate.dateLabel,
     });

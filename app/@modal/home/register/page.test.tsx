@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
-import CadastroModalPage from "./page";
+import RegisterModalPage from "./page";
 
 vi.mock("../../_components/modal-shell", () => ({
   ModalShell: ({ children }: { children: ReactNode }) => (
@@ -9,17 +9,17 @@ vi.mock("../../_components/modal-shell", () => ({
   ),
 }));
 
-vi.mock("../../../home/cadastro/_components/cadastro-form", () => ({
-  CadastroForm: ({ layout }: { layout?: string }) => (
-    <div data-testid="cadastro-form-mock">layout:{layout}</div>
+vi.mock("../../../home/register/_components/register-form", () => ({
+  RegisterForm: ({ layout }: { layout?: string }) => (
+    <div data-testid="register-form-mock">layout:{layout}</div>
   ),
 }));
 
-describe("CadastroModalPage", () => {
+describe("RegisterModalPage", () => {
   it("renderiza formulario de cadastro no slot modal com layout='modal'", () => {
-    render(<CadastroModalPage />);
+    render(<RegisterModalPage />);
 
     expect(screen.getByTestId("modal-shell-mock")).toBeInTheDocument();
-    expect(screen.getByTestId("cadastro-form-mock")).toHaveTextContent("layout:modal");
+    expect(screen.getByTestId("register-form-mock")).toHaveTextContent("layout:modal");
   });
 });

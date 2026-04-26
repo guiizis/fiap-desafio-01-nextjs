@@ -20,32 +20,32 @@ type ServiceOption = {
 };
 
 const serviceOptions: readonly ServiceOption[] = [
-  { id: 'emprestimo', label: 'Empréstimo' },
-  { id: 'meus-cartoes', label: 'Meus cartões' },
-  { id: 'doacoes', label: 'Doações' },
-  { id: 'pix', label: 'Pix' },
-  { id: 'seguros', label: 'Seguros' },
-  { id: 'credito-celular', label: 'Crédito celular' },
+  { id: 'loan', label: 'Empréstimo' },
+  { id: 'my-cards', label: 'Meus cartões' },
+  { id: 'donations', label: 'Doações' },
+  { id: 'instant-payments', label: 'Pix' },
+  { id: 'insurance', label: 'Seguros' },
+  { id: 'mobile-top-up', label: 'Crédito celular' },
 ];
 
 const tabContent: Record<DashboardTabKey, { title: string; description: string }> = {
-  inicio: {
+  home: {
     title: 'Confira os serviços disponíveis',
     description: 'Acesse atalhos do seu banco em um unico lugar.',
   },
-  transacoes: {
+  transactions: {
     title: 'Transações',
     description: 'Consulte e organize suas transferências com facilidade.',
   },
-  investimentos: {
+  investments: {
     title: 'Investimentos',
     description: 'Acompanhe sua carteira e próximos passos de investimento.',
   },
-  'outros-servicos': {
+  'other-services': {
     title: 'Confira os serviços disponíveis',
     description: 'Acesse atalhos do seu banco em um unico lugar.',
   },
-  'meus-cartoes': {
+  'my-cards': {
     title: 'Meus cartões',
     description: 'Gerencie seus cartões físico e digital com rapidez.',
   },
@@ -57,7 +57,7 @@ export function DashboardContentPanel({
 }: DashboardContentPanelProps) {
   const [selectedServiceLabel, setSelectedServiceLabel] = useState<string | null>(null);
 
-  if (activeTab === 'inicio') {
+  if (activeTab === 'home') {
     return <NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />;
   }
 

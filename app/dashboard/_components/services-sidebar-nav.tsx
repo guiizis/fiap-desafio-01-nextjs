@@ -1,9 +1,9 @@
 export type DashboardTabKey =
-  | 'inicio'
-  | 'transacoes'
-  | 'investimentos'
-  | 'outros-servicos'
-  | 'meus-cartoes';
+  | 'home'
+  | 'transactions'
+  | 'investments'
+  | 'other-services'
+  | 'my-cards';
 
 type DashboardSidebarItem = {
   key: DashboardTabKey;

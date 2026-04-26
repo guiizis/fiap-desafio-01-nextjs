@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CadastroForm } from "./cadastro-form";
+import { RegisterForm } from "./register-form";
 
 const { registerMockAccountMock } = vi.hoisted(() => ({
   registerMockAccountMock: vi.fn(),
@@ -10,7 +10,7 @@ vi.mock("../../_services/auth-service", () => ({
   registerMockAccount: registerMockAccountMock,
 }));
 
-describe("CadastroForm", () => {
+describe("RegisterForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -23,7 +23,7 @@ describe("CadastroForm", () => {
   };
 
   it("renderiza campos e botao no layout padrao", () => {
-    render(<CadastroForm />);
+    render(<RegisterForm />);
 
     expect(
       screen.getByRole("heading", {
@@ -37,7 +37,7 @@ describe("CadastroForm", () => {
   });
 
   it("aplica classe de senha especifica no layout modal", () => {
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
 
     const senha = screen.getByLabelText("Senha");
     expect(senha.className).toContain("max-w-[165px]");
@@ -45,7 +45,7 @@ describe("CadastroForm", () => {
   });
 
   it("mostra erro para email invalido no blur", () => {
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
 
     const email = screen.getByLabelText("Email");
     fireEvent.blur(email, { target: { value: "email-invalido" } });
@@ -54,7 +54,7 @@ describe("CadastroForm", () => {
   });
 
   it("remove erro quando o campo volta a ser valido no change", () => {
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
 
     const email = screen.getByLabelText("Email");
     fireEvent.blur(email, { target: { value: "email-invalido" } });
@@ -67,7 +67,7 @@ describe("CadastroForm", () => {
   });
 
   it("nao mostra erro no change se o campo ainda nao estava em erro", () => {
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
 
     const email = screen.getByLabelText("Email");
     fireEvent.change(email, { target: { value: "email-invalido" } });
@@ -76,7 +76,7 @@ describe("CadastroForm", () => {
   });
 
   it("mantem botao desabilitado ate o form ficar valido", () => {
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
 
     const submitButton = screen.getByRole("button", { name: /criar conta/i });
     expect(submitButton).toBeDisabled();
@@ -94,13 +94,13 @@ describe("CadastroForm", () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it("envia cadastro e mostra feedback de sucesso da API", async () => {
+  it("envia register e mostra feedback de sucesso da API", async () => {
     registerMockAccountMock.mockResolvedValue({
       ok: true,
       message: "Usuario criado com sucesso.",
     });
 
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
     fillValidForm();
 
     const submitButton = screen.getByRole("button", { name: /criar conta/i });
@@ -123,7 +123,7 @@ describe("CadastroForm", () => {
       message: "Dados obrigatorios ausentes.",
     });
 
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
     const formDataGetSpy = vi.spyOn(FormData.prototype, "get").mockReturnValue(null);
 
     const form = screen
@@ -148,7 +148,7 @@ describe("CadastroForm", () => {
       message: "Ja existe usuario cadastrado com este email.",
     });
 
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
     fillValidForm();
 
     fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
@@ -164,7 +164,7 @@ describe("CadastroForm", () => {
       message: "Erro ao cadastrar",
     });
 
-    render(<CadastroForm layout="modal" />);
+    render(<RegisterForm layout="modal" />);
     fillValidForm();
 
     fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));

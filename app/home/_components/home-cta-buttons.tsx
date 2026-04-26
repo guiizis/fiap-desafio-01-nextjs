@@ -44,7 +44,7 @@ export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
   return (
     <div className={config.containerClassName}>
       <Link
-        href="/home/cadastro"
+        href="/home/register"
         scroll={false}
         className={buttonVariants({
           variant: 'solid',
