@@ -7,7 +7,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { CalendarInput } from '@/components/ui/calendar-input';
 import { Input, Select } from '@/components/ui/input';
-import type {
+import {
   NewTransactionPanelProps,
   TransactionType,
 } from './interfaces/new-transaction-panel.interfaces';
@@ -36,8 +36,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
   const [transactionDate, setTransactionDate] = useState(() => getDefaultTransactionDate());
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: 'deposito', label: 'Depósito' },
-    { value: 'transferencia', label: 'Transferência' },
+    { value: TransactionType.DEPOSITO, label: 'Depósito' },
+    { value: TransactionType.TRANSFERENCIA, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -53,7 +53,10 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
     event.preventDefault();
     setFeedback(null);
 
-    if (transactionType !== 'deposito' && transactionType !== 'transferencia') {
+    if (
+      transactionType !== TransactionType.DEPOSITO &&
+      transactionType !== TransactionType.TRANSFERENCIA
+    ) {
       return;
     }
 
@@ -142,7 +145,11 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
             onChange={(event) => {
               const value = event.currentTarget.value;
 
-              if (value === 'deposito' || value === 'transferencia' || value === '') {
+              if (
+                value === TransactionType.DEPOSITO ||
+                value === TransactionType.TRANSFERENCIA ||
+                value === ''
+              ) {
                 setTransactionType(value);
               }
             }}

@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { EditStatementEntryModal } from "./edit-statement-entry-modal";
+import { StatementEntryType, TransactionType } from "./interfaces/statement-panel.interfaces";
 
 const baseEntry = {
   id: "1",
   month: "Novembro",
-  type: "Deposito" as const,
+  type: StatementEntryType.DEPOSITO,
   amountInCents: 15000,
   date: "18/11/2022",
 };
@@ -14,12 +15,19 @@ describe("EditStatementEntryModal", () => {
   it("preenche formulario com valores iniciais do lancamento", () => {
     render(
       <EditStatementEntryModal
-        entry={{ ...baseEntry, type: "Transferencia", amountInCents: -50000, date: "21/11/2022" }}
+        entry={{
+          ...baseEntry,
+          type: StatementEntryType.TRANSFERENCIA,
+          amountInCents: -50000,
+          date: "21/11/2022",
+        }}
         onClose={vi.fn()}
       />
     );
 
-    expect(screen.getByRole("combobox", { name: /Tipo de trans/i })).toHaveValue("transferencia");
+    expect(screen.getByRole("combobox", { name: /Tipo de trans/i })).toHaveValue(
+      TransactionType.TRANSFERENCIA
+    );
     expect(screen.getByRole("textbox", { name: "Valor" })).toHaveValue("500,00");
     expect(screen.getByLabelText("Data")).toHaveValue("2022-11-21");
   });

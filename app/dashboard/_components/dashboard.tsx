@@ -7,7 +7,16 @@ import type {
   NewTransactionResult,
 } from './interfaces/new-transaction-panel.interfaces';
 import type { EditStatementEntryPayload, StatementEntry } from './interfaces/statement-panel.interfaces';
-import { accountReducer, createAccountState } from '../_state/account.reducer';
+import {
+  StatementEntryType,
+  TransactionType,
+  toStatementEntryType,
+} from './interfaces/statement-panel.interfaces';
+import {
+  AccountActionType,
+  accountReducer,
+  createAccountState,
+} from '../_state/account.reducer';
 import {
   formatIsoDateToPtBr,
   getTimestampFromPtBrDate,
@@ -60,8 +69,8 @@ function createStatementEntry(
   return {
     id,
     month: statementDate.monthLabel,
-    type: type === 'deposito' ? 'Deposito' : 'Transferencia',
-    amountInCents: type === 'deposito' ? amountInCents : -amountInCents,
+    type: toStatementEntryType(type),
+    amountInCents: type === TransactionType.DEPOSITO ? amountInCents : -amountInCents,
     date: statementDate.dateLabel,
   };
 }
@@ -78,7 +87,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
 
   useEffect(() => {
     dispatchAccountAction({
-      type: 'hydrate-from-props',
+      type: AccountActionType.HYDRATE_FROM_PROPS,
       balanceInCents,
       statementEntries,
     });
@@ -114,7 +123,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     amountInCents,
     transactionDate,
   }: NewTransactionPayload): NewTransactionResult => {
-    if (type === 'transferencia' && amountInCents > accountState.currentBalanceInCents) {
+    if (type === TransactionType.TRANSFERENCIA && amountInCents > accountState.currentBalanceInCents) {
       return {
         ok: false,
         message: 'Saldo insuficiente para concluir a transferência.',
@@ -130,7 +139,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     }
 
     dispatchAccountAction({
-      type: 'append-transaction-entry',
+      type: AccountActionType.APPEND_TRANSACTION_ENTRY,
       entry: createStatementEntry({ type, amountInCents }, statementDate),
     });
 
@@ -141,7 +150,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
 
   const handleDeleteStatementEntry = (entryId: string) => {
     dispatchAccountAction({
-      type: 'delete-statement-entry',
+      type: AccountActionType.DELETE_STATEMENT_ENTRY,
       entryId,
     });
   };
@@ -168,7 +177,8 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
       };
     }
 
-    const nextSignedAmountInCents = type === 'deposito' ? amountInCents : -amountInCents;
+    const nextSignedAmountInCents =
+      type === TransactionType.DEPOSITO ? amountInCents : -amountInCents;
     const projectedBalanceInCents =
       accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
 
@@ -180,10 +190,12 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     }
 
     dispatchAccountAction({
-      type: 'edit-statement-entry',
+      type: AccountActionType.EDIT_STATEMENT_ENTRY,
       entryId,
       nextAmountInCents: amountInCents,
-      nextType: type === 'deposito' ? 'Deposito' : 'Transferencia',
+      nextType: type === TransactionType.DEPOSITO
+        ? StatementEntryType.DEPOSITO
+        : StatementEntryType.TRANSFERENCIA,
       nextMonth: statementDate.monthLabel,
       nextDate: statementDate.dateLabel,
     });

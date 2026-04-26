@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { StatementEntryType, TransactionType } from './interfaces/statement-panel.interfaces';
 
 const submitResultSpy = vi.fn();
 
@@ -8,7 +9,7 @@ vi.mock('./dashboard-content-panel', () => ({
     onSubmitTransaction,
   }: {
     onSubmitTransaction?: (payload: {
-      type: 'deposito' | 'transferencia';
+      type: TransactionType;
       amountInCents: number;
       transactionDate: string;
     }) => { ok: boolean; message?: string } | void;
@@ -17,7 +18,7 @@ vi.mock('./dashboard-content-panel', () => ({
       type="button"
       onClick={() => {
         const result = onSubmitTransaction?.({
-          type: 'deposito',
+          type: TransactionType.DEPOSITO,
           amountInCents: 100,
           transactionDate: '275760-04-19',
         });
@@ -32,7 +33,7 @@ vi.mock('./dashboard-content-panel', () => ({
 import { Dashboard } from './dashboard';
 
 const statementEntries = [
-  { id: '1', month: 'Novembro', type: 'Deposito', amountInCents: 15000, date: '18/11/2022' },
+  { id: '1', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: '18/11/2022' },
 ] as const;
 
 describe('Dashboard invalid date guard', () => {

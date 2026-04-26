@@ -1,6 +1,7 @@
-﻿import { createEvent, fireEvent, render, screen } from "@testing-library/react";
+import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { NewTransactionPanel } from "./new-transaction-panel";
+import { TransactionType } from "./interfaces/new-transaction-panel.interfaces";
 
 describe("NewTransactionPanel", () => {
   it("renderiza estrutura base do formulario e comeca com botao desabilitado", () => {
@@ -38,7 +39,7 @@ describe("NewTransactionPanel", () => {
     fireEvent.change(amountInput, { target: { value: "0" } });
     expect(submitButton).toBeDisabled();
 
-    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
     expect(submitButton).toBeDisabled();
 
     fireEvent.change(amountInput, { target: { value: "1" } });
@@ -53,7 +54,7 @@ describe("NewTransactionPanel", () => {
     const amountInput = screen.getByRole("textbox", { name: "Valor" });
     const dateInput = screen.getByLabelText("Data");
 
-    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
     fireEvent.change(amountInput, { target: { value: "100" } });
     fireEvent.change(dateInput, { target: { value: "275760-04-19" } });
     fireEvent.blur(dateInput);
@@ -74,7 +75,7 @@ describe("NewTransactionPanel", () => {
       throw new Error("Formulario nao encontrado");
     }
 
-    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
     fireEvent.change(amountInput, { target: { value: "999" } });
 
     const submitEvent = createEvent.submit(form, { cancelable: true });
@@ -111,11 +112,11 @@ describe("NewTransactionPanel", () => {
     invalidOption.textContent = "Pix";
     typeSelect.appendChild(invalidOption);
 
-    fireEvent.change(typeSelect, { target: { value: "deposito" } });
-    expect(typeSelect).toHaveValue("deposito");
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
+    expect(typeSelect).toHaveValue(TransactionType.DEPOSITO);
 
     fireEvent.change(typeSelect, { target: { value: "pix" } });
-    expect(typeSelect).toHaveValue("deposito");
+    expect(typeSelect).toHaveValue(TransactionType.DEPOSITO);
   });
 
   it("envia o valor em centavos e reseta o formulario no submit valido", () => {
@@ -128,13 +129,13 @@ describe("NewTransactionPanel", () => {
     const amountInput = screen.getByRole("textbox", { name: "Valor" });
     const dateInput = screen.getByLabelText("Data");
 
-    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
     fireEvent.change(amountInput, { target: { value: "123456" } });
     fireEvent.change(dateInput, { target: { value: "2026-04-19" } });
     fireEvent.click(submitButton);
 
     expect(onSubmitTransaction).toHaveBeenCalledWith({
-      type: "deposito",
+      type: TransactionType.DEPOSITO,
       amountInCents: 123456,
       transactionDate: "2026-04-19",
     });
@@ -154,14 +155,14 @@ describe("NewTransactionPanel", () => {
     const typeSelect = screen.getByRole("combobox", { name: "Tipo de transação" });
     const amountInput = screen.getByRole("textbox", { name: "Valor" });
 
-    fireEvent.change(typeSelect, { target: { value: "transferencia" } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.TRANSFERENCIA } });
     fireEvent.change(amountInput, { target: { value: "300000" } });
     fireEvent.click(submitButton);
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Saldo insuficiente para concluir a transferência."
     );
-    expect(typeSelect).toHaveValue("transferencia");
+    expect(typeSelect).toHaveValue(TransactionType.TRANSFERENCIA);
     expect(amountInput).toHaveValue("3.000,00");
   });
 
@@ -180,7 +181,7 @@ describe("NewTransactionPanel", () => {
       throw new Error("Formulario nao encontrado");
     }
 
-    fireEvent.change(typeSelect, { target: { value: "deposito" } });
+    fireEvent.change(typeSelect, { target: { value: TransactionType.DEPOSITO } });
     fireEvent.change(amountInput, { target: { value: "0" } });
     fireEvent.submit(form);
     expect(onSubmitTransaction).not.toHaveBeenCalled();

@@ -9,6 +9,7 @@ import type {
   EditStatementEntryResult,
   StatementEntry,
 } from './interfaces/statement-panel.interfaces';
+import { formatStatementEntryTypeLabel } from './interfaces/statement-panel.interfaces';
 import { formatCurrencyFromCents } from '@/app/lib/calc';
 
 type StatementPanelProps = {
@@ -20,18 +21,6 @@ type StatementPanelProps = {
   onDeleteEntry?: (entryId: string) => void;
   onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
 };
-
-function formatEntryTypeLabel(type: string) {
-  if (type === 'Deposito') {
-    return 'Depósito';
-  }
-
-  if (type === 'Transferencia') {
-    return 'Transferência';
-  }
-
-  return type;
-}
 
 export function StatementPanel({
   title = 'Extrato',
@@ -148,7 +137,7 @@ export function StatementPanel({
                 <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>
                 <span className="text-body-sm text-subtle">{entry.date}</span>
               </div>
-              <p className="text-body-md text-heading">{formatEntryTypeLabel(entry.type)}</p>
+              <p className="text-body-md text-heading">{formatStatementEntryTypeLabel(entry.type)}</p>
               <p className="text-title-lg font-semibold text-black">
                 {formatCurrencyFromCents(entry.amountInCents)}
               </p>

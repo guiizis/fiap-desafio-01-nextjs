@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  AccountActionType,
   accountReducer,
   createAccountState,
   type AccountAction,
 } from "./account.reducer";
+import { StatementEntryType } from "../_components/interfaces/statement-panel.interfaces";
 
 const baseEntries = [
-  { id: "1", month: "Novembro", type: "Deposito", amountInCents: 15000, date: "18/11/2022" },
-  { id: "2", month: "Novembro", type: "Transferencia", amountInCents: -5000, date: "21/11/2022" },
+  { id: "1", month: "Novembro", type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: "18/11/2022" },
+  { id: "2", month: "Novembro", type: StatementEntryType.TRANSFERENCIA, amountInCents: -5000, date: "21/11/2022" },
 ] as const;
 
 describe("account.reducer", () => {
@@ -23,7 +25,7 @@ describe("account.reducer", () => {
     const initialState = createAccountState(100, []);
 
     const nextState = accountReducer(initialState, {
-      type: "hydrate-from-props",
+      type: AccountActionType.HYDRATE_FROM_PROPS,
       balanceInCents: 250000,
       statementEntries: baseEntries,
     });
@@ -37,13 +39,13 @@ describe("account.reducer", () => {
     const newEntry = {
       id: "3",
       month: "Novembro",
-      type: "Deposito" as const,
+      type: StatementEntryType.DEPOSITO,
       amountInCents: 7000,
       date: "21/11/2022",
     };
 
     const nextState = accountReducer(initialState, {
-      type: "append-transaction-entry",
+      type: AccountActionType.APPEND_TRANSACTION_ENTRY,
       entry: newEntry,
     });
 
@@ -55,7 +57,7 @@ describe("account.reducer", () => {
     const initialState = createAccountState(250000, baseEntries);
 
     const nextState = accountReducer(initialState, {
-      type: "delete-statement-entry",
+      type: AccountActionType.DELETE_STATEMENT_ENTRY,
       entryId: "2",
     });
 
@@ -68,7 +70,7 @@ describe("account.reducer", () => {
     const initialState = createAccountState(250000, baseEntries);
 
     const nextState = accountReducer(initialState, {
-      type: "delete-statement-entry",
+      type: AccountActionType.DELETE_STATEMENT_ENTRY,
       entryId: "inexistente",
     });
 
@@ -79,10 +81,10 @@ describe("account.reducer", () => {
     const initialState = createAccountState(250000, baseEntries);
 
     const nextState = accountReducer(initialState, {
-      type: "edit-statement-entry",
+      type: AccountActionType.EDIT_STATEMENT_ENTRY,
       entryId: "2",
       nextAmountInCents: 7000,
-      nextType: "Transferencia",
+      nextType: StatementEntryType.TRANSFERENCIA,
       nextMonth: "Dezembro",
       nextDate: "10/12/2022",
     });
@@ -90,7 +92,7 @@ describe("account.reducer", () => {
     expect(nextState.currentBalanceInCents).toBe(248000);
     const editedTransfer = nextState.currentStatementEntries.find((entry) => entry.id === "2");
     expect(editedTransfer?.amountInCents).toBe(-7000);
-    expect(editedTransfer?.type).toBe("Transferencia");
+    expect(editedTransfer?.type).toBe(StatementEntryType.TRANSFERENCIA);
     expect(editedTransfer?.month).toBe("Dezembro");
     expect(editedTransfer?.date).toBe("10/12/2022");
   });
@@ -99,10 +101,10 @@ describe("account.reducer", () => {
     const initialState = createAccountState(250000, baseEntries);
 
     const nextState = accountReducer(initialState, {
-      type: "edit-statement-entry",
+      type: AccountActionType.EDIT_STATEMENT_ENTRY,
       entryId: "1",
       nextAmountInCents: -20000,
-      nextType: "Deposito",
+      nextType: StatementEntryType.DEPOSITO,
       nextMonth: "Janeiro",
       nextDate: "02/01/2023",
     });
@@ -110,7 +112,7 @@ describe("account.reducer", () => {
     expect(nextState.currentBalanceInCents).toBe(255000);
     const editedDeposit = nextState.currentStatementEntries.find((entry) => entry.id === "1");
     expect(editedDeposit?.amountInCents).toBe(20000);
-    expect(editedDeposit?.type).toBe("Deposito");
+    expect(editedDeposit?.type).toBe(StatementEntryType.DEPOSITO);
     expect(editedDeposit?.month).toBe("Janeiro");
     expect(editedDeposit?.date).toBe("02/01/2023");
   });
@@ -119,10 +121,10 @@ describe("account.reducer", () => {
     const initialState = createAccountState(250000, baseEntries);
 
     const nextState = accountReducer(initialState, {
-      type: "edit-statement-entry",
+      type: AccountActionType.EDIT_STATEMENT_ENTRY,
       entryId: "inexistente",
       nextAmountInCents: 100,
-      nextType: "Deposito",
+      nextType: StatementEntryType.DEPOSITO,
       nextMonth: "Novembro",
       nextDate: "18/11/2022",
     });
