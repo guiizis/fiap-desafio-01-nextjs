@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { registerMockAccount } from "../../_services/auth-service";
 
-type CadastroFormLayout = "page" | "modal";
+type RegisterFormLayout = "page" | "modal";
 
-type CadastroFormProps = {
-  layout?: CadastroFormLayout;
+type RegisterFormProps = {
+  layout?: RegisterFormLayout;
 };
 
-export function CadastroForm({ layout = "page" }: CadastroFormProps) {
+export function RegisterForm({ layout = "page" }: RegisterFormProps) {
   const isModal = layout === "modal";
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +41,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
     setIsFormValid(isFormElementValid(event.currentTarget));
   };
 
-  const submitCadastro = async (formElement: HTMLFormElement) => {
+  const submitRegister = async (formElement: HTMLFormElement) => {
     setIsSubmitting(true);
     setFeedback(null);
 
@@ -68,7 +68,7 @@ export function CadastroForm({ layout = "page" }: CadastroFormProps) {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
-    void submitCadastro(event.currentTarget);
+    void submitRegister(event.currentTarget);
   };
 
   const handleAlertClose = () => setFeedback(null);

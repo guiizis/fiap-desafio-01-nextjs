@@ -90,7 +90,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       aria-label="Nova transação"
     >
       <Image
-        src="/dashboard/transacoes/square-top.svg"
+        src="/dashboard/transactions/square-top.svg"
         alt=""
         width={178}
         height={180}
@@ -98,7 +98,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
         className="pointer-events-none absolute right-0 top-0 z-0 hidden desktop:block"
       />
       <Image
-        src="/dashboard/transacoes/square-bottom.svg"
+        src="/dashboard/transactions/square-bottom.svg"
         alt=""
         width={178}
         height={180}
