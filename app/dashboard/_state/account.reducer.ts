@@ -83,7 +83,7 @@ export function accountReducer(
       }
 
       const normalizedAmountInCents =
-        action.nextType === StatementEntryType.TRANSFERENCIA
+        action.nextType === StatementEntryType.TRANSFER
           ? -Math.abs(action.nextAmountInCents)
           : Math.abs(action.nextAmountInCents);
 

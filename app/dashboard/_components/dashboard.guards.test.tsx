@@ -24,7 +24,7 @@ vi.mock('./statement-panel', () => ({
         onClick={() =>
           onEditEntry?.({
             entryId: 'entry-inexistente',
-            type: TransactionType.DEPOSITO,
+            type: TransactionType.DEPOSIT,
             amountInCents: 12345,
             transactionDate: '2026-04-21',
           })
@@ -37,7 +37,7 @@ vi.mock('./statement-panel', () => ({
         onClick={() =>
           onEditEntry?.({
             entryId: '1',
-            type: TransactionType.DEPOSITO,
+            type: TransactionType.DEPOSIT,
             amountInCents: 12345,
             transactionDate: '1900-01-01',
           })
@@ -50,7 +50,7 @@ vi.mock('./statement-panel', () => ({
         onClick={() =>
           onEditEntry?.({
             entryId: '1',
-            type: TransactionType.TRANSFERENCIA,
+            type: TransactionType.TRANSFER,
             amountInCents: 999_999_99,
             transactionDate: '2026-04-21',
           })
@@ -65,7 +65,13 @@ vi.mock('./statement-panel', () => ({
 import { Dashboard } from './dashboard';
 
 const statementEntries = [
-  { id: '1', month: 'Novembro', type: StatementEntryType.DEPOSITO, amountInCents: 15000, date: '18/11/2022' },
+  {
+    id: '1',
+    month: 'Novembro',
+    type: StatementEntryType.DEPOSIT,
+    amountInCents: 15000,
+    date: '18/11/2022',
+  },
 ] as const;
 
 describe('Dashboard guards', () => {

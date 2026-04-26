@@ -106,7 +106,7 @@ function createDateInYear(year: number, month: number, day: number) {
   return new Date(Date.UTC(year, month, day, 12));
 }
 
-function createStatementEntry(referenceDate: Date, type: "Deposito" | "Transferencia", amountInCents: number) {
+function createStatementEntry(referenceDate: Date, type: "Deposit" | "Transfer", amountInCents: number) {
   return {
     id: crypto.randomUUID(),
     month: formatStatementMonthLabel(referenceDate),
@@ -121,16 +121,16 @@ function createDefaultStatementEntries() {
   const previousYear = currentYear - 1;
 
   return [
-    createStatementEntry(createDateFromDaysAgo(1), "Deposito", 18000),
-    createStatementEntry(createDateFromDaysAgo(3), "Transferencia", -7200),
-    createStatementEntry(createDateFromDaysAgo(7), "Deposito", 9500),
-    createStatementEntry(createDateFromDaysAgo(11), "Transferencia", -18500),
-    createStatementEntry(createDateFromDaysAgo(16), "Deposito", 24000),
-    createStatementEntry(createDateFromDaysAgo(24), "Deposito", 12500),
-    createStatementEntry(createDateInYear(previousYear, 10, 21), "Deposito", 10000),
-    createStatementEntry(createDateInYear(previousYear, 10, 18), "Deposito", 5000),
-    createStatementEntry(createDateInYear(previousYear, 9, 12), "Transferencia", -50000),
-    createStatementEntry(createDateInYear(previousYear, 8, 2), "Deposito", 15000),
+    createStatementEntry(createDateFromDaysAgo(1), "Deposit", 18000),
+    createStatementEntry(createDateFromDaysAgo(3), "Transfer", -7200),
+    createStatementEntry(createDateFromDaysAgo(7), "Deposit", 9500),
+    createStatementEntry(createDateFromDaysAgo(11), "Transfer", -18500),
+    createStatementEntry(createDateFromDaysAgo(16), "Deposit", 24000),
+    createStatementEntry(createDateFromDaysAgo(24), "Deposit", 12500),
+    createStatementEntry(createDateInYear(previousYear, 10, 21), "Deposit", 10000),
+    createStatementEntry(createDateInYear(previousYear, 10, 18), "Deposit", 5000),
+    createStatementEntry(createDateInYear(previousYear, 9, 12), "Transfer", -50000),
+    createStatementEntry(createDateInYear(previousYear, 8, 2), "Deposit", 15000),
   ] satisfies MockStatementEntry[];
 }
 

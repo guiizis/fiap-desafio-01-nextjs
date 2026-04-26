@@ -36,8 +36,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
   const [transactionDate, setTransactionDate] = useState(() => getDefaultTransactionDate());
   const [feedback, setFeedback] = useState<string | null>(null);
   const transactionOptions: readonly { value: TransactionType; label: string }[] = [
-    { value: TransactionType.DEPOSITO, label: 'Depósito' },
-    { value: TransactionType.TRANSFERENCIA, label: 'Transferência' },
+    { value: TransactionType.DEPOSIT, label: 'Depósito' },
+    { value: TransactionType.TRANSFER, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -54,8 +54,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
     setFeedback(null);
 
     if (
-      transactionType !== TransactionType.DEPOSITO &&
-      transactionType !== TransactionType.TRANSFERENCIA
+      transactionType !== TransactionType.DEPOSIT &&
+      transactionType !== TransactionType.TRANSFER
     ) {
       return;
     }
@@ -146,8 +146,8 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
               const value = event.currentTarget.value;
 
               if (
-                value === TransactionType.DEPOSITO ||
-                value === TransactionType.TRANSFERENCIA ||
+                value === TransactionType.DEPOSIT ||
+                value === TransactionType.TRANSFER ||
                 value === ''
               ) {
                 setTransactionType(value);

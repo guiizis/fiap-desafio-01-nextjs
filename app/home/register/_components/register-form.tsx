@@ -47,9 +47,9 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
 
     const formData = new FormData(formElement);
     const payload = {
-      name: String(formData.get("nome") ?? ""),
+      name: String(formData.get("name") ?? ""),
       email: String(formData.get("email") ?? ""),
-      password: String(formData.get("senha") ?? ""),
+      password: String(formData.get("password") ?? ""),
     };
 
     const result = await registerMockAccount(payload);
@@ -99,8 +99,8 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
       >
         <Input
           label="Nome"
-          id="nome"
-          name="nome"
+          id="name"
+          name="name"
           type="text"
           validationKind="name"
           placeholder="Digite seu nome completo"
@@ -117,8 +117,8 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
 
         <Input
           label="Senha"
-          id="senha"
-          name="senha"
+          id="password"
+          name="password"
           type="password"
           validationKind="password"
           placeholder="Digite sua senha"
@@ -128,7 +128,7 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
         <label className="flex items-start gap-2 pt-1 text-body-sm text-body">
           <input
             type="checkbox"
-            name="consentimento"
+            name="consent"
             required
             className="mt-0.5 h-4 w-4 rounded border-border text-secondary focus:ring-secondary"
           />
