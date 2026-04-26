@@ -29,7 +29,6 @@ export function ServiceUnderConstructionModal({
 
   const handleBackToServices = () => {
     onClose();
-    router.replace('/dashboard');
   };
 
   return (

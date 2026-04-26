@@ -45,7 +45,5 @@ describe('ServicesContentPanel (legacy)', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /voltar para o painel/i }));
-
-    expect(replaceMock).toHaveBeenCalledWith('/dashboard');
   });
 });
