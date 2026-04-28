@@ -1,13 +1,14 @@
 'use client';
 
-import type { AuthSession } from '@/app/lib/auth-session';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AuthSessionProvider, useAuthSessionContext } from '@/app/lib/auth-session-context';
 import { DashboardHeader } from './_components/dashboard-header';
 import {
   normalizeStatementEntryType,
   type StatementEntry,
 } from './_components/interfaces/statement-panel.interfaces';
-import { withAuth } from './_components/with-auth';
-import { useAuthSession } from './_hooks/use-auth-session';
+import type { AuthSession } from '@/app/lib/auth-session';
 import { ReactNode } from 'react';
 
 type DashboardLayoutProps = {
@@ -38,14 +39,27 @@ function DashboardLayoutContent({ session, children }: DashboardLayoutProps) {
   );
 }
 
-const GuardedDashboardLayoutContent = withAuth(DashboardLayoutContent);
+function AuthGuard({ children }: { children: ReactNode }) {
+  const { session, status } = useAuthSessionContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/home/login');
+    }
+  }, [status, router]);
+
+  if (status !== 'authenticated' || !session) {
+    return null;
+  }
+
+  return <DashboardLayoutContent session={session}>{children}</DashboardLayoutContent>;
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { session, status } = useAuthSession();
-
   return (
-    <GuardedDashboardLayoutContent authStatus={status} session={session}>
-      {children}
-    </GuardedDashboardLayoutContent>
+    <AuthSessionProvider>
+      <AuthGuard>{children}</AuthGuard>
+    </AuthSessionProvider>
   );
 }
