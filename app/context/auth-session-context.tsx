@@ -7,7 +7,7 @@ import {
   parseAuthSession,
   setAuthSession,
   type AuthSession,
-} from './auth-session';
+} from '../lib/auth-session';
 
 export type AuthSessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 

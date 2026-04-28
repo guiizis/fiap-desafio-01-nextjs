@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthSessionProvider, useAuthSessionContext } from '@/app/lib/auth-session-context';
+import { AuthSessionProvider, useAuthSessionContext } from '@/app/context/auth-session-context';
 import { AccountSummaryCard } from './_components/account-summary-card';
 import { DashboardHeader } from './_components/dashboard-header';
 import type {

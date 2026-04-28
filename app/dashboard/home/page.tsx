@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthSessionContext } from '@/app/lib/auth-session-context';
+import { useAuthSessionContext } from '@/app/context/auth-session-context';
 
 export default function HomeDashboardPage() {
   const { session } = useAuthSessionContext();
