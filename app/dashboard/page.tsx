@@ -7,10 +7,7 @@ import {
   normalizeStatementEntryType,
   type StatementEntry,
 } from './_components/interfaces/statement-panel.interfaces';
-
-type DashboardPageContentProps = {
-  session: AuthSession;
-};
+import { useAuthSessionContext } from '../lib/auth-session-context';
 
 function getUserFirstName(fullName: string) {
   const [firstName] = fullName.trim().split(/\s+/);
@@ -26,12 +23,14 @@ function normalizeStatementEntries(
   }));
 }
 
-export default function DashboardPageContent({ session }: DashboardPageContentProps) {
+export default function DashboardPageContent() {
+  const { session } = useAuthSessionContext();
+
   return (
     <Dashboard
-      userFirstName={getUserFirstName(session.user.name)}
-      balanceInCents={session.user.accountBalanceInCents}
-      statementEntries={normalizeStatementEntries(session.user.statementEntries)}
+      userFirstName={getUserFirstName(session!.user.name)}
+      balanceInCents={session!.user.accountBalanceInCents}
+      statementEntries={normalizeStatementEntries(session!.user.statementEntries)}
     />
   );
 }
