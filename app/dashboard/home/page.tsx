@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthSessionContext } from '@/app/context/auth-session-context';
+import { NewTransactionPanel } from '../_components/new-transaction-panel';
 
 export default function HomeDashboardPage() {
   const { session } = useAuthSessionContext();
@@ -9,10 +10,5 @@ export default function HomeDashboardPage() {
     return null;
   }
 
-  return (
-    <main className="flex-1 p-6">
-      <h1 className="text-2xl font-bold">Início</h1>
-      <p className="mt-4 text-muted-foreground">Página inicial do dashboard em desenvolvimento.</p>
-    </main>
-  );
+  return <NewTransactionPanel />;
 }

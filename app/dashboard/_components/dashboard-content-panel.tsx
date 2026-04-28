@@ -1,19 +1,19 @@
-﻿"use client";
+﻿'use client';
 
-import { useState } from "react";
-import { NewTransactionPanel } from "./new-transaction-panel";
+import { useState } from 'react';
+import { NewTransactionPanel } from './new-transaction-panel';
 import type {
   NewTransactionPayload,
   NewTransactionResult,
-} from "./interfaces/new-transaction-panel.interfaces";
+} from './interfaces/new-transaction-panel.interfaces';
 import type {
   EditStatementEntryPayload,
   EditStatementEntryResult,
   StatementEntry,
-} from "./interfaces/statement-panel.interfaces";
-import { ServiceUnderConstructionModal } from "./service-under-construction-modal";
-import type { DashboardTabKey } from "./dashboard-sidebar-nav";
-import { StatementPanel } from "./statement-panel";
+} from './interfaces/statement-panel.interfaces';
+import { ServiceUnderConstructionModal } from './service-under-construction-modal';
+import type { DashboardTabKey } from './dashboard-sidebar-nav';
+import { StatementPanel } from './statement-panel';
 
 type DashboardContentPanelProps = {
   activeTab: DashboardTabKey;
@@ -30,34 +30,34 @@ type ServiceOption = {
 };
 
 const serviceOptions: readonly ServiceOption[] = [
-  { id: "loan", label: "Empréstimo" },
-  { id: "my-cards", label: "Meus cartões" },
-  { id: "donations", label: "Doações" },
-  { id: "instant-payments", label: "Pix" },
-  { id: "insurance", label: "Seguros" },
-  { id: "mobile-top-up", label: "Crédito celular" },
+  { id: 'loan', label: 'Empréstimo' },
+  { id: 'my-cards', label: 'Meus cartões' },
+  { id: 'donations', label: 'Doações' },
+  { id: 'instant-payments', label: 'Pix' },
+  { id: 'insurance', label: 'Seguros' },
+  { id: 'mobile-top-up', label: 'Crédito celular' },
 ];
 
 const tabContent: Record<DashboardTabKey, { title: string; description: string }> = {
   home: {
-    title: "Confira os serviços disponíveis",
-    description: "Acesse atalhos do seu banco em um único lugar.",
+    title: 'Confira os serviços disponíveis',
+    description: 'Acesse atalhos do seu banco em um único lugar.',
   },
   transactions: {
-    title: "Transações",
-    description: "Consulte e organize suas transações com facilidade.",
+    title: 'Transações',
+    description: 'Consulte e organize suas transações com facilidade.',
   },
   investments: {
-    title: "Investimentos",
-    description: "Acompanhe sua carteira e próximos passos de investimento.",
+    title: 'Investimentos',
+    description: 'Acompanhe sua carteira e próximos passos de investimento.',
   },
-  "other-services": {
-    title: "Confira os serviços disponíveis",
-    description: "Acesse atalhos do seu banco em um único lugar.",
+  'other-services': {
+    title: 'Confira os serviços disponíveis',
+    description: 'Acesse atalhos do seu banco em um único lugar.',
   },
-  "my-cards": {
-    title: "Meus cartões",
-    description: "Gerencie seus cartões físico e digital com rapidez.",
+  'my-cards': {
+    title: 'Meus cartões',
+    description: 'Gerencie seus cartões físico e digital com rapidez.',
   },
 };
 
@@ -70,11 +70,11 @@ export function DashboardContentPanel({
 }: DashboardContentPanelProps) {
   const [selectedServiceLabel, setSelectedServiceLabel] = useState<string | null>(null);
 
-  if (activeTab === "home") {
-    return <NewTransactionPanel onSubmitTransaction={onSubmitTransaction} />;
+  if (activeTab === 'home') {
+    return <NewTransactionPanel />;
   }
 
-  if (activeTab === "transactions") {
+  if (activeTab === 'transactions') {
     return (
       <StatementPanel
         title="Transações"
