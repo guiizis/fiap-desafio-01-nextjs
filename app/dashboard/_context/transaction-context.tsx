@@ -15,17 +15,14 @@ import {
   getTransactionDateRange,
   toStatementDate,
 } from '../_utils/transaction-date';
-import {
-  TransactionType,
-  toStatementEntryType,
-} from '../_components/interfaces/statement-panel.interfaces';
+import { StatementEntryType } from '../_components/interfaces/transaction.interfaces';
 
 export type TransactionContextValue = {
   balanceInCents: number;
   statementEntries: readonly StatementEntry[];
   onSubmitTransaction: (payload: NewTransactionPayload) => NewTransactionResult;
-  deleteEntry: (entryId: string) => void;
-  editEntry: (payload: EditStatementEntryPayload) => NewTransactionResult;
+  onDeleteEntry: (entryId: string) => void;
+  onEditEntry: (payload: EditStatementEntryPayload) => NewTransactionResult;
 };
 
 const TransactionContext = createContext<TransactionContextValue | null>(null);
@@ -41,9 +38,9 @@ function createStatementEntry(
 
   return {
     id,
+    type,
     month: statementDate.monthLabel,
-    type: toStatementEntryType(type),
-    amountInCents: type === TransactionType.DEPOSIT ? amountInCents : -amountInCents,
+    amountInCents: type === StatementEntryType.DEPOSIT ? amountInCents : -amountInCents,
     date: statementDate.dateLabel,
   };
 }
@@ -69,7 +66,7 @@ export function TransactionProvider({
   const onSubmitTransaction = useCallback(
     (payload: NewTransactionPayload): NewTransactionResult => {
       if (
-        payload.type === TransactionType.TRANSFER &&
+        payload.type === StatementEntryType.TRANSFER &&
         payload.amountInCents > accountState.currentBalanceInCents
       ) {
         return {
@@ -98,14 +95,14 @@ export function TransactionProvider({
     [accountState.currentBalanceInCents, transactionDateRange]
   );
 
-  const handleDeleteEntry = useCallback((entryId: string) => {
+  const onDeleteEntry = useCallback((entryId: string) => {
     dispatch({
       type: AccountActionType.DELETE_STATEMENT_ENTRY,
       entryId,
     });
   }, []);
 
-  const handleEditEntry = useCallback(
+  const onEditEntry = useCallback(
     (payload: EditStatementEntryPayload): NewTransactionResult => {
       const entryToEdit = accountState.currentStatementEntries.find(
         (entry) => entry.id === payload.entryId
@@ -126,7 +123,9 @@ export function TransactionProvider({
       }
 
       const nextSignedAmountInCents =
-        payload.type === TransactionType.DEPOSIT ? payload.amountInCents : -payload.amountInCents;
+        payload.type === StatementEntryType.DEPOSIT
+          ? payload.amountInCents
+          : -payload.amountInCents;
       const projectedBalanceInCents =
         accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
 
@@ -141,10 +140,7 @@ export function TransactionProvider({
         type: AccountActionType.EDIT_STATEMENT_ENTRY,
         entryId: payload.entryId,
         nextAmountInCents: payload.amountInCents,
-        nextType:
-          payload.type === TransactionType.DEPOSIT
-            ? toStatementEntryType(TransactionType.DEPOSIT)
-            : toStatementEntryType(TransactionType.TRANSFER),
+        nextType: payload.type,
         nextMonth: statementDate.monthLabel,
         nextDate: statementDate.dateLabel,
       });
@@ -161,10 +157,10 @@ export function TransactionProvider({
       balanceInCents: accountState.currentBalanceInCents,
       statementEntries: accountState.currentStatementEntries,
       onSubmitTransaction,
-      deleteEntry: handleDeleteEntry,
-      editEntry: handleEditEntry,
+      onDeleteEntry,
+      onEditEntry,
     }),
-    [accountState, onSubmitTransaction, handleDeleteEntry, handleEditEntry]
+    [accountState, onSubmitTransaction, onDeleteEntry, onEditEntry]
   );
 
   return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>;
