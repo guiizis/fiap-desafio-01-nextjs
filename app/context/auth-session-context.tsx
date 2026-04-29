@@ -44,11 +44,11 @@ export type AuthSessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 type AuthSessionContextValue = {
   session: AuthSession | null;
   status: AuthSessionStatus;
-  handleSubmitTransaction?: (payload: NewTransactionPayload) => NewTransactionResult;
-  handleDeleteStatementEntry?: (entryId: string) => void;
-  handleEditStatementEntry?: (payload: EditStatementEntryPayload) => NewTransactionResult;
-  statementEntries?: StatementEntry[];
-  balanceInCents?: number;
+  statementEntries: StatementEntry[];
+  balanceInCents: number;
+  onSubmitTransaction: (payload: NewTransactionPayload) => NewTransactionResult;
+  onDeleteStatementEntry: (entryId: string) => void;
+  onEditStatementEntry: (payload: EditStatementEntryPayload) => NewTransactionResult;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
@@ -75,7 +75,7 @@ function createStatementEntry(
 }
 
 function subscribe(onStoreChange: () => void) {
-  const handleStorageChange = (event: StorageEvent) => {
+  const onStorageChange = (event: StorageEvent) => {
     if (event.storageArea !== window.sessionStorage) {
       return;
     }
@@ -87,14 +87,14 @@ function subscribe(onStoreChange: () => void) {
     onStoreChange();
   };
 
-  const handleSessionChangedEvent = () => onStoreChange();
+  const onSessionChangedEvent = () => onStoreChange();
 
-  window.addEventListener('storage', handleStorageChange);
-  window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleSessionChangedEvent);
+  window.addEventListener('storage', onStorageChange);
+  window.addEventListener(AUTH_SESSION_CHANGED_EVENT, onSessionChangedEvent);
 
   return () => {
-    window.removeEventListener('storage', handleStorageChange);
-    window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, handleSessionChangedEvent);
+    window.removeEventListener('storage', onStorageChange);
+    window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, onSessionChangedEvent);
   };
 }
 
@@ -137,7 +137,6 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
         ? 'authenticated'
         : 'unauthenticated';
 
-  // Account state management
   const initialBalanceInCents = session?.user.accountBalanceInCents ?? 0;
   const initialStatementEntries = session?.user.statementEntries ?? [];
   const [accountState, dispatchAccountAction] = useReducer(
@@ -145,25 +144,27 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     createAccountState(initialBalanceInCents, initialStatementEntries)
   );
   const transactionDateRange = getTransactionDateRange();
-  const isHydrated = useRef(false);
+  const lastHydratedSnapshotRef = useRef<string | null>(null);
 
-  // Hydrate from session on mount (only once)
   useEffect(() => {
-    if (isHydrated.current) {
+    if (
+      !session ||
+      serializedSession === SERVER_SNAPSHOT ||
+      serializedSession === EMPTY_SNAPSHOT ||
+      lastHydratedSnapshotRef.current === serializedSession
+    ) {
       return;
     }
-    isHydrated.current = true;
 
-    if (session?.user.accountBalanceInCents !== undefined || session?.user.statementEntries) {
-      dispatchAccountAction({
-        type: AccountActionType.HYDRATE_FROM_PROPS,
-        balanceInCents: session?.user.accountBalanceInCents ?? 0,
-        statementEntries: session?.user.statementEntries ?? [],
-      });
-    }
-  }, []); // Empty deps - only run once on mount
+    lastHydratedSnapshotRef.current = serializedSession;
+    dispatchAccountAction({
+      type: AccountActionType.HYDRATE_FROM_PROPS,
+      balanceInCents: session.user.accountBalanceInCents,
+      statementEntries: session.user.statementEntries ?? [],
+    });
+  }, [serializedSession, session]);
 
-  const handleSubmitTransaction = ({
+  const onSubmitTransaction = ({
     type,
     amountInCents,
     transactionDate,
@@ -194,14 +195,14 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     };
   };
 
-  const handleDeleteStatementEntry = (entryId: string) => {
+  const onDeleteStatementEntry = (entryId: string) => {
     dispatchAccountAction({
       type: AccountActionType.DELETE_STATEMENT_ENTRY,
       entryId,
     });
   };
 
-  const handleEditStatementEntry = ({
+  const onEditStatementEntry = ({
     entryId,
     type,
     amountInCents,
@@ -255,9 +256,9 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       value={{
         session,
         status,
-        handleSubmitTransaction,
-        handleDeleteStatementEntry,
-        handleEditStatementEntry,
+        onSubmitTransaction,
+        onDeleteStatementEntry,
+        onEditStatementEntry,
         statementEntries: accountState.currentStatementEntries,
         balanceInCents: accountState.currentBalanceInCents,
       }}

@@ -1,35 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthSessionProvider, useAuthSessionContext } from '@/app/context/auth-session-context';
 import { AccountSummaryCard } from './_components/account-summary-card';
 import { DashboardHeader } from './_components/dashboard-header';
-import type {
-  NewTransactionPayload,
-  NewTransactionResult,
-} from './_components/interfaces/new-transaction-panel.interfaces';
-import type {
-  EditStatementEntryPayload,
-  StatementEntry,
-} from './_components/interfaces/statement-panel.interfaces';
-import {
-  StatementEntryType,
-  TransactionType,
-  toStatementEntryType,
-  toTransactionType,
-} from './_components/interfaces/statement-panel.interfaces';
-import { AccountActionType, accountReducer, createAccountState } from './_state/account.reducer';
-import {
-  formatIsoDateToPtBr,
-  getTimestampFromPtBrDate,
-  getTransactionDateRange,
-  toStatementDate,
-  type TransactionStatementDate,
-} from './_utils/transaction-date';
+import { getTimestampFromPtBrDate } from './_utils/transaction-date';
 import { DashboardSidebarNav, type DashboardTabKey } from './_components/dashboard-sidebar-nav';
 import { StatementPanel } from './_components/statement-panel';
-import type { AuthSession } from '@/app/lib/auth-session';
 import { ReactNode } from 'react';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
@@ -42,18 +20,6 @@ const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: b
 function getUserFirstName(fullName: string) {
   const [firstName] = fullName.trim().split(/\s+/);
   return firstName || fullName;
-}
-
-function normalizeStatementEntries(
-  entries: AuthSession['user']['statementEntries']
-): StatementEntry[] {
-  return entries.map((entry) => ({
-    id: entry.id,
-    month: entry.month,
-    type: entry.type,
-    amountInCents: entry.amountInCents,
-    date: entry.date,
-  }));
 }
 
 function formatCurrentDateLabel() {
@@ -72,46 +38,28 @@ function formatCurrentDateLabel() {
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${date}`;
 }
 
-function createStatementEntry(
-  { type, amountInCents }: Omit<NewTransactionPayload, 'transactionDate'>,
-  statementDate: TransactionStatementDate
-): StatementEntry {
-  const id =
-    typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+function DashboardLayoutContent({ children }: { children: ReactNode }) {
+  const {
+    session,
+    balanceInCents,
+    statementEntries,
+    onDeleteStatementEntry,
+    onEditStatementEntry,
+  } = useAuthSessionContext();
 
-  return {
-    id,
-    month: statementDate.monthLabel,
-    type: toStatementEntryType(type),
-    amountInCents: type === TransactionType.DEPOSIT ? amountInCents : -amountInCents,
-    date: statementDate.dateLabel,
-  };
-}
+  if (!session) {
+    return null;
+  }
 
-function DashboardLayoutContent({
-  session,
-  children,
-}: {
-  session: AuthSession;
-  children: ReactNode;
-}) {
-  const userFirstName = getUserFirstName(session.user.name);
-  const balanceInCents = session.user.accountBalanceInCents;
-  const statementEntries = normalizeStatementEntries(session.user.statementEntries);
+  const { name } = session.user;
+  const userFirstName = getUserFirstName(name);
 
   const [activeTab, setActiveTab] = useState<DashboardTabKey>('home');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const [accountState, dispatchAccountAction] = useReducer(
-    accountReducer,
-    createAccountState(balanceInCents, statementEntries)
-  );
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
-  const transactionDateRange = useMemo(() => getTransactionDateRange(), []);
 
   const orderedStatementEntries = useMemo(() => {
-    return [...accountState.currentStatementEntries].sort((entryA, entryB) => {
+    return [...statementEntries].sort((entryA, entryB) => {
       const timestampA = getTimestampFromPtBrDate(entryA.date);
       const timestampB = getTimestampFromPtBrDate(entryB.date);
 
@@ -129,71 +77,15 @@ function DashboardLayoutContent({
 
       return timestampB - timestampA;
     });
-  }, [accountState.currentStatementEntries]);
+  }, [statementEntries]);
 
   const visibleStatementEntries = useMemo(() => {
     return orderedStatementEntries.slice(0, 6);
   }, [orderedStatementEntries]);
 
-  const handleDeleteStatementEntry = (entryId: string) => {
-    dispatchAccountAction({
-      type: AccountActionType.DELETE_STATEMENT_ENTRY,
-      entryId,
-    });
-  };
-
-  const handleEditStatementEntry = ({
-    entryId,
-    type,
-    amountInCents,
-    transactionDate,
-  }: EditStatementEntryPayload): NewTransactionResult => {
-    const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
-    if (!entryToEdit) {
-      return {
-        ok: false,
-        message: 'Lançamento não encontrado para edição.',
-      };
-    }
-
-    const statementDate = toStatementDate(transactionDate, transactionDateRange);
-    if (!statementDate) {
-      return {
-        ok: false,
-        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
-      };
-    }
-
-    const nextSignedAmountInCents =
-      type === TransactionType.DEPOSIT ? amountInCents : -amountInCents;
-    const projectedBalanceInCents =
-      accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
-
-    if (projectedBalanceInCents < 0) {
-      return {
-        ok: false,
-        message: 'Saldo insuficiente para concluir a transferência.',
-      };
-    }
-
-    dispatchAccountAction({
-      type: AccountActionType.EDIT_STATEMENT_ENTRY,
-      entryId,
-      nextAmountInCents: amountInCents,
-      nextType:
-        type === TransactionType.DEPOSIT ? StatementEntryType.DEPOSIT : StatementEntryType.TRANSFER,
-      nextMonth: statementDate.monthLabel,
-      nextDate: statementDate.dateLabel,
-    });
-
-    return {
-      ok: true,
-    };
-  };
-
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-background">
-      <DashboardHeader userName={session.user.name} />
+      <DashboardHeader userName={name} />
       <main className="flex-1">
         <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
           <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
@@ -211,7 +103,7 @@ function DashboardLayoutContent({
                 dateLabel={currentDateLabel}
                 balanceLabel="Saldo"
                 accountLabel="Conta corrente"
-                balanceInCents={accountState.currentBalanceInCents}
+                balanceInCents={balanceInCents}
                 isBalanceVisible={isBalanceVisible}
                 onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
               />
@@ -222,8 +114,8 @@ function DashboardLayoutContent({
               <StatementPanel
                 title="Extrato"
                 entries={visibleStatementEntries}
-                onDeleteEntry={handleDeleteStatementEntry}
-                onEditEntry={handleEditStatementEntry}
+                onDeleteEntry={onDeleteStatementEntry}
+                onEditEntry={onEditStatementEntry}
               />
             </div>
           </div>
@@ -247,7 +139,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
     return null;
   }
 
-  return <DashboardLayoutContent session={session}>{children}</DashboardLayoutContent>;
+  return <DashboardLayoutContent>{children}</DashboardLayoutContent>;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
