@@ -17,6 +17,7 @@ import {
   StatementEntryType,
   TransactionType,
   toStatementEntryType,
+  toTransactionType,
 } from './_components/interfaces/statement-panel.interfaces';
 import { AccountActionType, accountReducer, createAccountState } from './_state/account.reducer';
 import {
@@ -47,8 +48,11 @@ function normalizeStatementEntries(
   entries: AuthSession['user']['statementEntries']
 ): StatementEntry[] {
   return entries.map((entry) => ({
-    ...entry,
-    type: toStatementEntryType(entry.type as TransactionType),
+    id: entry.id,
+    month: entry.month,
+    type: entry.type,
+    amountInCents: entry.amountInCents,
+    date: entry.date,
   }));
 }
 

@@ -29,7 +29,7 @@ function parseCurrencyInputToCents(value: string) {
   return Math.round(amountValue * 100);
 }
 
-export function NewTransactionPanel() {
+export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanelProps) {
   const calendarRange = useMemo(() => getTransactionDateRange(), []);
   const [transactionType, setTransactionType] = useState<TransactionType | ''>('');
   const [transactionAmount, setTransactionAmount] = useState('00,00');
