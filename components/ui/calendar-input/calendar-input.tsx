@@ -1,16 +1,19 @@
-"use client";
+'use client';
 
-import type { ChangeEvent, FocusEvent } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { CalendarInputProps, CalendarInputRange } from "./interfaces/calendar-input.interfaces";
+import type { ChangeEvent, FocusEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
+  CalendarInputProps,
+  CalendarInputRange,
+} from './interfaces/calendar-input.interfaces';
 
 const baseInputClasses =
-  "w-full rounded-md border border-border bg-surface px-3 py-2 text-body-sm text-body placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60";
+  'w-full rounded-md border border-border bg-surface px-3 py-2 text-body-sm text-body placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60';
 const isoDateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 function getCalendarYear(referenceDate: Date, timeZone: string) {
-  const yearLabel = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
+  const yearLabel = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
     timeZone,
   }).format(referenceDate);
 
@@ -29,9 +32,8 @@ function parseIsoDate(value: string) {
   const day = Number(dayLabel);
 
   const date = new Date(Date.UTC(year, month - 1, day));
-  const isValidDate = date.getUTCFullYear() === year
-    && date.getUTCMonth() + 1 === month
-    && date.getUTCDate() === day;
+  const isValidDate =
+    date.getUTCFullYear() === year && date.getUTCMonth() + 1 === month && date.getUTCDate() === day;
 
   return isValidDate ? { year, month, day } : null;
 }
@@ -42,8 +44,8 @@ function formatIsoDateToPtBr(value: string) {
     return value;
   }
 
-  const day = String(parsed.day).padStart(2, "0");
-  const month = String(parsed.month).padStart(2, "0");
+  const day = String(parsed.day).padStart(2, '0');
+  const month = String(parsed.month).padStart(2, '0');
 
   return `${day}/${month}/${parsed.year}`;
 }
@@ -60,7 +62,7 @@ function getErrorMessage({
   maxDate: string;
 }) {
   if (!value) {
-    return required ? "Campo obrigatorio." : undefined;
+    return required ? 'Campo obrigatório.' : undefined;
   }
 
   if (!isCalendarDateWithinRange(value, minDate, maxDate)) {
@@ -72,7 +74,7 @@ function getErrorMessage({
 
 function getCalendarDateRange(
   referenceDate: Date = new Date(),
-  timeZone: string = "America/Sao_Paulo"
+  timeZone: string = 'America/Sao_Paulo'
 ): CalendarInputRange {
   const currentYear = getCalendarYear(referenceDate, timeZone);
 
@@ -119,12 +121,13 @@ export function CalendarInput({
   const resolvedMaxDate = maxDate ?? defaultRange.maxDate;
 
   const validateValue = useCallback(
-    (nextValue: string) => getErrorMessage({
-      value: nextValue,
-      required,
-      minDate: resolvedMinDate,
-      maxDate: resolvedMaxDate,
-    }),
+    (nextValue: string) =>
+      getErrorMessage({
+        value: nextValue,
+        required,
+        minDate: resolvedMinDate,
+        maxDate: resolvedMaxDate,
+      }),
     [required, resolvedMinDate, resolvedMaxDate]
   );
 
@@ -154,12 +157,12 @@ export function CalendarInput({
   const errorId = hasError ? `${inputId}-error` : undefined;
 
   return (
-    <div className={["space-y-1.5", containerClassName].filter(Boolean).join(" ")}>
+    <div className={['space-y-1.5', containerClassName].filter(Boolean).join(' ')}>
       <label
         htmlFor={inputId}
-        className={["block text-body-sm font-semibold text-heading", labelClassName]
+        className={['block text-body-sm font-semibold text-heading', labelClassName]
           .filter(Boolean)
-          .join(" ")}
+          .join(' ')}
       >
         {label}
       </label>
@@ -176,11 +179,11 @@ export function CalendarInput({
         aria-describedby={errorId}
         className={[
           baseInputClasses,
-          hasError ? "border-error focus-visible:ring-error" : "",
+          hasError ? 'border-error focus-visible:ring-error' : '',
           inputClassName,
         ]
           .filter(Boolean)
-          .join(" ")}
+          .join(' ')}
         onChange={handleChange}
         onBlur={handleBlur}
         {...props}

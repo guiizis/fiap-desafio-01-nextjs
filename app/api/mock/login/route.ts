@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   }
 
   if (!isValidLoginPayload(body)) {
-    return Response.json({ message: 'Campos obrigatorios: email e password.' }, { status: 400 });
+    return Response.json({ message: 'Campos obrigatórios: email e password.' }, { status: 400 });
   }
 
   const result = loginMockUser({

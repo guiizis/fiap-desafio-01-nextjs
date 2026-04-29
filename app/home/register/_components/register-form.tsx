@@ -5,7 +5,7 @@ import type { FormEventHandler } from "react";
 import { useState } from "react";
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input, validateInputValue } from '@/components/ui/input';
 import { registerMockAccount } from "../../_services/auth-service";
 
 type RegisterFormLayout = "page" | "modal";
@@ -24,17 +24,17 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
   } | null>(null);
 
   const isFormElementValid = (formElement: HTMLFormElement) => {
-    return Array.from(formElement.elements).every((element) => {
-      if (
-        element instanceof HTMLInputElement ||
-        element instanceof HTMLSelectElement ||
-        element instanceof HTMLTextAreaElement
-      ) {
-        return !element.willValidate || element.validity.valid;
-      }
+    const formData = new FormData(formElement);
+    const consentElement = formElement.elements.namedItem("consent");
+    const isConsentChecked =
+      consentElement instanceof HTMLInputElement ? consentElement.checked : false;
 
-      return true;
-    });
+    return (
+      validateInputValue("name", String(formData.get("name") ?? "")) === null &&
+      validateInputValue("email", String(formData.get("email") ?? "")) === null &&
+      validateInputValue("password", String(formData.get("password") ?? "")) === null &&
+      isConsentChecked
+    );
   };
 
   const updateFormValidity: FormEventHandler<HTMLFormElement> = (event) => {
@@ -68,7 +68,17 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
-    void submitRegister(event.currentTarget);
+    const formElement = event.currentTarget;
+    const isValid = isFormElementValid(formElement);
+
+    setIsFormValid(isValid);
+
+    if (!isValid) {
+      formElement.reportValidity();
+      return;
+    }
+
+    void submitRegister(formElement);
   };
 
   const handleAlertClose = () => setFeedback(null);

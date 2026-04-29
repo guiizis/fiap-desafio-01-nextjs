@@ -136,7 +136,7 @@ describe('LoginForm', () => {
   it('usa fallback vazio quando FormData retorna null', async () => {
     loginMockAccountMock.mockResolvedValue({
       ok: false,
-      message: 'Dados obrigatorios ausentes.',
+      message: 'Dados obrigatórios ausentes.',
     });
 
     render(<LoginForm layout="modal" />);

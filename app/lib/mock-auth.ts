@@ -31,7 +31,7 @@ type LoginMockUserInput = {
 
 type RegisterMockUserResult =
   | { ok: true; user: PublicMockUser }
-  | { ok: false; error: "EMAIL_ALREADY_EXISTS" };
+  | { ok: false; error: "EMAIL_ALREADY_EXISTS" | "INVALID_PASSWORD" };
 
 type LoginMockUserResult =
   | { ok: true; user: PublicMockUser; token: string }
@@ -49,6 +49,10 @@ function getMockUsersStore() {
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+function isPasswordValid(password: string) {
+  return password.trim().length >= 6;
 }
 
 function toPublicUser(user: MockUser): PublicMockUser {
@@ -147,6 +151,13 @@ export function registerMockUser({
   email,
   password,
 }: RegisterMockUserInput): RegisterMockUserResult {
+  if (!isPasswordValid(password)) {
+    return {
+      ok: false,
+      error: "INVALID_PASSWORD",
+    };
+  }
+
   const users = getMockUsersStore();
   const normalizedEmail = normalizeEmail(email);
   const alreadyExists = users.some((user) => user.email === normalizedEmail);

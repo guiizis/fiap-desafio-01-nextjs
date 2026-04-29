@@ -23,7 +23,7 @@ describe('POST /api/mock/users', () => {
     expect(payload.message).toContain('JSON invalido');
   });
 
-  it('retorna 400 quando faltam campos obrigatorios', async () => {
+  it('retorna 400 quando faltam campos obrigatórios', async () => {
     const request = new Request('http://localhost:3000/api/mock/users', {
       method: 'POST',
       body: JSON.stringify({ name: 'Ana' }),
@@ -36,7 +36,7 @@ describe('POST /api/mock/users', () => {
     const payload = await response.json();
 
     expect(response.status).toBe(400);
-    expect(payload.message).toContain('Campos obrigatorios');
+    expect(payload.message).toContain('Campos obrigatórios');
   });
 
   it('cria usuario com status 201', async () => {
@@ -92,6 +92,26 @@ describe('POST /api/mock/users', () => {
 
     expect(response.status).toBe(409);
     expect(payload.message).toContain('Ja existe usuario');
+  });
+
+  it('retorna 400 quando a senha tem menos de 6 caracteres', async () => {
+    const request = new Request('http://localhost:3000/api/mock/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Ana Souza',
+        email: 'ana@mail.com',
+        password: '123',
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload.message).toBe('A senha deve ter no mínimo 6 caracteres.');
   });
 
   it('retorna lista vazia no GET quando nao ha usuarios', async () => {

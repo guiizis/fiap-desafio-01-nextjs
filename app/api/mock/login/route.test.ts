@@ -23,7 +23,7 @@ describe('POST /api/mock/login', () => {
     expect(payload.message).toContain('JSON invalido');
   });
 
-  it('retorna 400 quando faltam campos obrigatorios', async () => {
+  it('retorna 400 quando faltam campos obrigatórios', async () => {
     const request = new Request('http://localhost:3000/api/mock/login', {
       method: 'POST',
       body: JSON.stringify({ email: 'teste@mail.com' }),
@@ -36,7 +36,7 @@ describe('POST /api/mock/login', () => {
     const payload = await response.json();
 
     expect(response.status).toBe(400);
-    expect(payload.message).toContain('Campos obrigatorios');
+    expect(payload.message).toContain('Campos obrigatórios');
   });
 
   it('retorna 401 quando credenciais sao invalidas', async () => {
