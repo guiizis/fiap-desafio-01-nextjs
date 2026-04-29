@@ -108,7 +108,7 @@ describe('LoginForm', () => {
       });
     });
 
-    expect(pushMock).toHaveBeenCalledWith('/dashboard');
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/home');
 
     const stored = sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
     expect(stored).not.toBeNull();
