@@ -6,15 +6,24 @@ import { AuthSessionProvider, useAuthSessionContext } from '@/app/context/auth-s
 import { AccountSummaryCard } from './_components/account-summary-card';
 import { DashboardHeader } from './_components/dashboard-header';
 import { getTimestampFromPtBrDate } from './_utils/transaction-date';
-import { DashboardSidebarNav, type DashboardTabKey } from './_components/dashboard-sidebar-nav';
+import {
+  DashboardSidebarItem,
+  DashboardSidebarNav,
+  type DashboardTabKey,
+} from './_components/dashboard-sidebar-nav';
 import { StatementPanel } from './_components/statement-panel';
 import { ReactNode } from 'react';
 
-const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
-  { key: 'home', label: 'Início' },
-  { key: 'transactions', label: 'Transações' },
-  { key: 'investments', label: 'Investimentos', disabled: true },
-  { key: 'other-services', label: 'Outros serviços', disabled: false },
+const sidebarItems: readonly DashboardSidebarItem[] = [
+  { key: 'home', label: 'Início', link: '/dashboard' },
+  { key: 'transactions', label: 'Transações', link: '/dashboard/transactions' },
+  { key: 'investments', label: 'Investimentos', link: '/dashboard/investments', disabled: true },
+  {
+    key: 'other-services',
+    label: 'Outros serviços',
+    link: '/dashboard/other-services',
+    disabled: false,
+  },
 ];
 
 function getUserFirstName(fullName: string) {
@@ -39,13 +48,7 @@ function formatCurrentDateLabel() {
 }
 
 function DashboardLayoutContent({ children }: { children: ReactNode }) {
-  const {
-    session,
-    balanceInCents,
-    statementEntries,
-    onDeleteStatementEntry,
-    onEditStatementEntry,
-  } = useAuthSessionContext();
+  const { session, balanceInCents, statementEntries } = useAuthSessionContext();
 
   if (!session) {
     return null;
@@ -111,12 +114,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
             </div>
 
             <div className="desktop:col-start-3 desktop:flex desktop:h-full">
-              <StatementPanel
-                title="Extrato"
-                entries={visibleStatementEntries}
-                onDeleteEntry={onDeleteStatementEntry}
-                onEditEntry={onEditStatementEntry}
-              />
+              <StatementPanel title="Extrato" entries={visibleStatementEntries} />
             </div>
           </div>
         </div>

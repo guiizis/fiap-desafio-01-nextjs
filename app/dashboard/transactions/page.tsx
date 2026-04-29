@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthSessionContext } from '@/app/context/auth-session-context';
+import { StatementPanel } from '../_components/statement-panel';
 
 export default function TransactionsPage() {
   const { session } = useAuthSessionContext();
@@ -9,10 +10,5 @@ export default function TransactionsPage() {
     return null;
   }
 
-  return (
-    <main className="flex-1 p-6">
-      <h1 className="text-2xl font-bold">Transações</h1>
-      <p className="mt-4 text-muted-foreground">Histórico de transações em desenvolvimento.</p>
-    </main>
-  );
+  return <StatementPanel title="Transações" ariaLabel="Painel de transações" />;
 }

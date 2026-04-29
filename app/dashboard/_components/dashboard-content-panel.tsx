@@ -76,15 +76,7 @@ export function DashboardContentPanel({
   }
 
   if (activeTab === 'transactions') {
-    return (
-      <StatementPanel
-        title="Transações"
-        ariaLabel="Painel de transações"
-        entries={transactionEntries}
-        onDeleteEntry={onDeleteEntry}
-        onEditEntry={onEditEntry}
-      />
-    );
+    return <StatementPanel title="Transações" ariaLabel="Painel de transações" />;
   }
 
   const content = tabContent[activeTab];
