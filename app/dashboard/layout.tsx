@@ -30,7 +30,6 @@ import { DashboardSidebarNav, type DashboardTabKey } from './_components/dashboa
 import { StatementPanel } from './_components/statement-panel';
 import type { AuthSession } from '@/app/lib/auth-session';
 import { ReactNode } from 'react';
-import { TransactionProvider } from './_context';
 
 const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
   { key: 'home', label: 'Início' },
@@ -191,47 +190,41 @@ function DashboardLayoutContent({
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-background">
       <DashboardHeader userName={session.user.name} />
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
+          <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
+            <div className="desktop:flex desktop:h-full">
+              <DashboardSidebarNav
+                items={sidebarItems}
+                activeItem={activeTab}
+                onChange={setActiveTab}
+              />
+            </div>
 
-      <TransactionProvider
-        initialBalanceInCents={balanceInCents}
-        initialStatementEntries={statementEntries}
-      >
-        <main className="flex-1">
-          <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
-            <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
-              <div className="desktop:flex desktop:h-full">
-                <DashboardSidebarNav
-                  items={sidebarItems}
-                  activeItem={activeTab}
-                  onChange={setActiveTab}
-                />
-              </div>
+            <div className="space-y-6 desktop:col-start-2 desktop:min-w-0 desktop:space-y-3">
+              <AccountSummaryCard
+                name={userFirstName}
+                dateLabel={currentDateLabel}
+                balanceLabel="Saldo"
+                accountLabel="Conta corrente"
+                balanceInCents={accountState.currentBalanceInCents}
+                isBalanceVisible={isBalanceVisible}
+                onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
+              />
+              {children}
+            </div>
 
-              <div className="space-y-6 desktop:col-start-2 desktop:min-w-0 desktop:space-y-3">
-                <AccountSummaryCard
-                  name={userFirstName}
-                  dateLabel={currentDateLabel}
-                  balanceLabel="Saldo"
-                  accountLabel="Conta corrente"
-                  balanceInCents={accountState.currentBalanceInCents}
-                  isBalanceVisible={isBalanceVisible}
-                  onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
-                />
-                {children}
-              </div>
-
-              <div className="desktop:col-start-3 desktop:flex desktop:h-full">
-                <StatementPanel
-                  title="Extrato"
-                  entries={visibleStatementEntries}
-                  onDeleteEntry={handleDeleteStatementEntry}
-                  onEditEntry={handleEditStatementEntry}
-                />
-              </div>
+            <div className="desktop:col-start-3 desktop:flex desktop:h-full">
+              <StatementPanel
+                title="Extrato"
+                entries={visibleStatementEntries}
+                onDeleteEntry={handleDeleteStatementEntry}
+                onEditEntry={handleEditStatementEntry}
+              />
             </div>
           </div>
-        </main>
-      </TransactionProvider>
+        </div>
+      </main>
     </div>
   );
 }

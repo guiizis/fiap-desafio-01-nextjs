@@ -1,3 +1,5 @@
+import { StatementEntryType } from '@/app/dashboard/_components/interfaces/statement-panel.interfaces';
+
 type ServiceMessageResponse = {
   message?: unknown;
   token?: unknown;
@@ -12,7 +14,7 @@ type ServiceResult = {
 export type AuthStatementEntry = {
   id: string;
   month: string;
-  type: string;
+  type: StatementEntryType;
   amountInCents: number;
   date: string;
 };
@@ -59,7 +61,7 @@ function resolveMessage({
 }) {
   const fallbackMessage = response.ok ? fallbackSuccessMessage : fallbackErrorMessage;
 
-  if (typeof body?.message === "string" && body.message.trim().length > 0) {
+  if (typeof body?.message === 'string' && body.message.trim().length > 0) {
     return body.message;
   }
 
@@ -73,9 +75,9 @@ async function postJson(
 ): Promise<ServiceResult & { body: ServiceMessageResponse | null }> {
   try {
     const response = await fetch(path, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "content-type": "application/json",
+        'content-type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
@@ -95,50 +97,50 @@ async function postJson(
   } catch {
     return {
       ok: false,
-      message: "Erro de conexao. Tente novamente em instantes.",
+      message: 'Erro de conexao. Tente novamente em instantes.',
       body: null,
     };
   }
 }
 
 function isStatementEntry(value: unknown): value is AuthStatementEntry {
-  if (!value || typeof value !== "object") {
+  if (!value || typeof value !== 'object') {
     return false;
   }
 
   const entry = value as Record<string, unknown>;
 
   return (
-    typeof entry.id === "string" &&
-    typeof entry.month === "string" &&
-    typeof entry.type === "string" &&
-    typeof entry.amountInCents === "number" &&
-    typeof entry.date === "string"
+    typeof entry.id === 'string' &&
+    typeof entry.month === 'string' &&
+    typeof entry.type === 'string' &&
+    typeof entry.amountInCents === 'number' &&
+    typeof entry.date === 'string'
   );
 }
 
 function isAuthenticatedMockUser(value: unknown): value is AuthenticatedMockUser {
-  if (!value || typeof value !== "object") {
+  if (!value || typeof value !== 'object') {
     return false;
   }
 
   const user = value as Record<string, unknown>;
 
   return (
-    typeof user.id === "string" &&
-    typeof user.name === "string" &&
-    typeof user.email === "string" &&
-    typeof user.createdAt === "string" &&
-    typeof user.accountBalanceInCents === "number" &&
+    typeof user.id === 'string' &&
+    typeof user.name === 'string' &&
+    typeof user.email === 'string' &&
+    typeof user.createdAt === 'string' &&
+    typeof user.accountBalanceInCents === 'number' &&
     Array.isArray(user.statementEntries) &&
     user.statementEntries.every(isStatementEntry)
   );
 }
 
 export async function registerMockAccount(payload: RegisterMockAccountPayload) {
-  const result = await postJson("/api/mock/users", payload, {
-    fallbackSuccessMessage: "Usuario criado com sucesso.",
-    fallbackErrorMessage: "Nao foi possivel criar a conta. Tente novamente.",
+  const result = await postJson('/api/mock/users', payload, {
+    fallbackSuccessMessage: 'Usuario criado com sucesso.',
+    fallbackErrorMessage: 'Nao foi possivel criar a conta. Tente novamente.',
   });
 
   return {
@@ -148,14 +150,14 @@ export async function registerMockAccount(payload: RegisterMockAccountPayload) {
 }
 
 export async function loginMockAccount(payload: LoginMockAccountPayload) {
-  const result = await postJson("/api/mock/login", payload, {
-    fallbackSuccessMessage: "Login realizado com sucesso.",
-    fallbackErrorMessage: "Nao foi possivel autenticar. Revise seus dados.",
+  const result = await postJson('/api/mock/login', payload, {
+    fallbackSuccessMessage: 'Login realizado com sucesso.',
+    fallbackErrorMessage: 'Nao foi possivel autenticar. Revise seus dados.',
   });
 
   if (
     result.ok &&
-    typeof result.body?.token === "string" &&
+    typeof result.body?.token === 'string' &&
     isAuthenticatedMockUser(result.body.user)
   ) {
     return {

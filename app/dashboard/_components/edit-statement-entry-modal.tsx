@@ -16,13 +16,11 @@ import type {
   EditStatementEntryResult,
   StatementEntry,
 } from './interfaces/statement-panel.interfaces';
-import {
-  TransactionType,
-  toTransactionType,
-} from './interfaces/statement-panel.interfaces';
+import { TransactionType, toTransactionType } from './interfaces/statement-panel.interfaces';
+import { AuthStatementEntry } from '@/app/home/_services/auth-service';
 
 type EditStatementEntryModalProps = {
-  entry: StatementEntry;
+  entry: AuthStatementEntry;
   onClose: () => void;
   onSubmit?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
 };
@@ -172,10 +170,7 @@ export function EditStatementEntryModal({
             onChange={(event) => {
               const value = event.currentTarget.value;
 
-              if (
-                value === TransactionType.DEPOSIT ||
-                value === TransactionType.TRANSFER
-              ) {
+              if (value === TransactionType.DEPOSIT || value === TransactionType.TRANSFER) {
                 setTransactionType(value);
               }
             }}

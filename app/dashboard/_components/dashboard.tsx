@@ -1,7 +1,6 @@
 ﻿'use client';
 
-import { useMemo, useState } from 'react';
-import { TransactionProvider, useTransactionContext } from '../_context';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { AccountSummaryCard } from './account-summary-card';
 import type {
   NewTransactionPayload,
@@ -78,45 +77,23 @@ function createStatementEntry(
 export function Dashboard({ userFirstName, balanceInCents, statementEntries }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabKey>('home');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
-
-  return (
-    <TransactionProvider
-      initialBalanceInCents={balanceInCents}
-      initialStatementEntries={statementEntries}
-    >
-      <DashboardInner
-        userFirstName={userFirstName}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isBalanceVisible={isBalanceVisible}
-        setIsBalanceVisible={setIsBalanceVisible}
-        currentDateLabel={currentDateLabel}
-      />
-    </TransactionProvider>
+  const [accountState, dispatchAccountAction] = useReducer(
+    accountReducer,
+    createAccountState(balanceInCents, statementEntries)
   );
-}
+  const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+  const transactionDateRange = useMemo(() => getTransactionDateRange(), []);
 
-function DashboardInner({
-  userFirstName,
-  activeTab,
-  setActiveTab,
-  isBalanceVisible,
-  setIsBalanceVisible,
-  currentDateLabel,
-}: {
-  userFirstName: string;
-  activeTab: DashboardTabKey;
-  setActiveTab: (tab: DashboardTabKey) => void;
-  isBalanceVisible: boolean;
-  setIsBalanceVisible: (v: boolean | ((v: boolean) => boolean)) => void;
-  currentDateLabel: string;
-}) {
-  const { balanceInCents, statementEntries, onSubmitTransaction, deleteEntry, editEntry } =
-    useTransactionContext();
+  useEffect(() => {
+    dispatchAccountAction({
+      type: AccountActionType.HYDRATE_FROM_PROPS,
+      balanceInCents,
+      statementEntries,
+    });
+  }, [balanceInCents, statementEntries]);
 
   const orderedStatementEntries = useMemo(() => {
-    return [...statementEntries].sort((entryA, entryB) => {
+    return [...accountState.currentStatementEntries].sort((entryA, entryB) => {
       const timestampA = getTimestampFromPtBrDate(entryA.date);
       const timestampB = getTimestampFromPtBrDate(entryB.date);
 
@@ -134,11 +111,97 @@ function DashboardInner({
 
       return timestampB - timestampA;
     });
-  }, [statementEntries]);
+  }, [accountState.currentStatementEntries]);
 
   const visibleStatementEntries = useMemo(() => {
     return orderedStatementEntries.slice(0, 6);
   }, [orderedStatementEntries]);
+
+  const handleSubmitTransaction = ({
+    type,
+    amountInCents,
+    transactionDate,
+  }: NewTransactionPayload): NewTransactionResult => {
+    if (type === TransactionType.TRANSFER && amountInCents > accountState.currentBalanceInCents) {
+      return {
+        ok: false,
+        message: 'Saldo insuficiente para concluir a transferência.',
+      };
+    }
+
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
+    dispatchAccountAction({
+      type: AccountActionType.APPEND_TRANSACTION_ENTRY,
+      entry: createStatementEntry({ type, amountInCents }, statementDate),
+    });
+
+    return {
+      ok: true,
+    };
+  };
+
+  const handleDeleteStatementEntry = (entryId: string) => {
+    dispatchAccountAction({
+      type: AccountActionType.DELETE_STATEMENT_ENTRY,
+      entryId,
+    });
+  };
+
+  const handleEditStatementEntry = ({
+    entryId,
+    type,
+    amountInCents,
+    transactionDate,
+  }: EditStatementEntryPayload): NewTransactionResult => {
+    const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
+    if (!entryToEdit) {
+      return {
+        ok: false,
+        message: 'Lançamento não encontrado para edição.',
+      };
+    }
+
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
+    const nextSignedAmountInCents =
+      type === TransactionType.DEPOSIT ? amountInCents : -amountInCents;
+    const projectedBalanceInCents =
+      accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
+
+    if (projectedBalanceInCents < 0) {
+      return {
+        ok: false,
+        message: 'Saldo insuficiente para concluir a transferência.',
+      };
+    }
+
+    dispatchAccountAction({
+      type: AccountActionType.EDIT_STATEMENT_ENTRY,
+      entryId,
+      nextAmountInCents: amountInCents,
+      nextType:
+        type === TransactionType.DEPOSIT ? StatementEntryType.DEPOSIT : StatementEntryType.TRANSFER,
+      nextMonth: statementDate.monthLabel,
+      nextDate: statementDate.dateLabel,
+    });
+
+    return {
+      ok: true,
+    };
+  };
 
   return (
     <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
@@ -157,16 +220,16 @@ function DashboardInner({
             dateLabel={currentDateLabel}
             balanceLabel="Saldo"
             accountLabel="Conta corrente"
-            balanceInCents={balanceInCents}
+            balanceInCents={accountState.currentBalanceInCents}
             isBalanceVisible={isBalanceVisible}
             onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
           />
           <DashboardContentPanel
             activeTab={activeTab}
-            onSubmitTransaction={onSubmitTransaction}
+            onSubmitTransaction={handleSubmitTransaction}
             transactionEntries={orderedStatementEntries}
-            onDeleteEntry={deleteEntry}
-            onEditEntry={editEntry}
+            onDeleteEntry={handleDeleteStatementEntry}
+            onEditEntry={handleEditStatementEntry}
           />
         </div>
 
@@ -174,8 +237,8 @@ function DashboardInner({
           <StatementPanel
             title="Extrato"
             entries={visibleStatementEntries}
-            onDeleteEntry={deleteEntry}
-            onEditEntry={editEntry}
+            onDeleteEntry={handleDeleteStatementEntry}
+            onEditEntry={handleEditStatementEntry}
           />
         </div>
       </div>

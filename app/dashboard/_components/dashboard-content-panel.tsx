@@ -14,11 +14,12 @@ import type {
 import { ServiceUnderConstructionModal } from './service-under-construction-modal';
 import type { DashboardTabKey } from './dashboard-sidebar-nav';
 import { StatementPanel } from './statement-panel';
+import { AuthStatementEntry } from '@/app/home/_services/auth-service';
 
 type DashboardContentPanelProps = {
   activeTab: DashboardTabKey;
   onSubmitTransaction?: (payload: NewTransactionPayload) => NewTransactionResult | void;
-  transactionEntries?: readonly StatementEntry[];
+  transactionEntries?: readonly AuthStatementEntry[];
   editableYear?: number | null;
   onDeleteEntry?: (entryId: string) => void;
   onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;

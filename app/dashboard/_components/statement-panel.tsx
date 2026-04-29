@@ -7,17 +7,17 @@ import { EditStatementEntryModal } from './edit-statement-entry-modal';
 import type {
   EditStatementEntryPayload,
   EditStatementEntryResult,
-  StatementEntry,
 } from './interfaces/statement-panel.interfaces';
 import { formatStatementEntryTypeLabel } from './interfaces/statement-panel.interfaces';
 import { formatCurrencyFromCents } from '@/app/lib/calc';
+import { AuthStatementEntry } from '@/app/home/_services/auth-service';
 
 type StatementPanelProps = {
   title?: string;
   ariaLabel?: string;
   editableYear?: number | null;
   showActions?: boolean;
-  entries: readonly StatementEntry[];
+  entries: readonly AuthStatementEntry[];
   onDeleteEntry?: (entryId: string) => void;
   onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
 };
@@ -137,7 +137,9 @@ export function StatementPanel({
                 <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>
                 <span className="text-body-sm text-subtle">{entry.date}</span>
               </div>
-              <p className="text-body-md text-heading">{formatStatementEntryTypeLabel(entry.type)}</p>
+              <p className="text-body-md text-heading">
+                {formatStatementEntryTypeLabel(entry.type)}
+              </p>
               <p className="text-title-lg font-semibold text-black">
                 {formatCurrencyFromCents(entry.amountInCents)}
               </p>
