@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthSessionContext } from '@/app/context/auth-session-context';
+import { OtherServicesPanel } from '../_components/other-services-panel';
 
 export default function OtherServicesPage() {
   const { session } = useAuthSessionContext();
@@ -9,10 +10,5 @@ export default function OtherServicesPage() {
     return null;
   }
 
-  return (
-    <main className="flex-1 p-6">
-      <h1 className="text-2xl font-bold">Outros Serviços</h1>
-      <p className="mt-4 text-muted-foreground">Gestão de outros serviços em desenvolvimento.</p>
-    </main>
-  );
+  return <OtherServicesPanel />;
 }

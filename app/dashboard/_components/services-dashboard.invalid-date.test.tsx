@@ -4,8 +4,8 @@ import { StatementEntryType, TransactionType } from './interfaces/statement-pane
 
 const submitResultSpy = vi.fn();
 
-vi.mock('./dashboard-content-panel', () => ({
-  DashboardContentPanel: ({
+vi.mock('./other-services-panel', () => ({
+  OtherServicesPanel: ({
     onSubmitTransaction,
   }: {
     onSubmitTransaction?: (payload: {

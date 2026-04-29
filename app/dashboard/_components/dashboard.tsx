@@ -23,7 +23,7 @@ import {
   toStatementDate,
   type TransactionStatementDate,
 } from '../_utils/transaction-date';
-import { DashboardContentPanel } from './dashboard-content-panel';
+import { OtherServicesPanel } from './other-services-panel';
 import { DashboardSidebarNav, type DashboardTabKey } from './dashboard-sidebar-nav';
 import { StatementPanel } from './statement-panel';
 
@@ -207,11 +207,7 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
     <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
       <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
         <div className="desktop:flex desktop:h-full">
-          <DashboardSidebarNav
-            items={sidebarItems}
-            activeItem={activeTab}
-            onChange={setActiveTab}
-          />
+          <DashboardSidebarNav activeItem={activeTab} onChange={setActiveTab} />
         </div>
 
         <div className="space-y-6 desktop:col-start-2 desktop:min-w-0 desktop:space-y-3">
@@ -224,22 +220,11 @@ export function Dashboard({ userFirstName, balanceInCents, statementEntries }: D
             isBalanceVisible={isBalanceVisible}
             onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
           />
-          <DashboardContentPanel
-            activeTab={activeTab}
-            onSubmitTransaction={handleSubmitTransaction}
-            transactionEntries={orderedStatementEntries}
-            onDeleteEntry={handleDeleteStatementEntry}
-            onEditEntry={handleEditStatementEntry}
-          />
+          <OtherServicesPanel />
         </div>
 
         <div className="desktop:col-start-3 desktop:flex desktop:h-full">
-          <StatementPanel
-            title="Extrato"
-            entries={visibleStatementEntries}
-            onDeleteEntry={handleDeleteStatementEntry}
-            onEditEntry={handleEditStatementEntry}
-          />
+          <StatementPanel title="Extrato" entries={visibleStatementEntries} />
         </div>
       </div>
     </div>
