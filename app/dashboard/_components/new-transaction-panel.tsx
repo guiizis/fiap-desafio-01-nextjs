@@ -8,13 +8,16 @@ import { Button } from '@/components/ui/button';
 import { CalendarInput } from '@/components/ui/calendar-input';
 import { Input, Select } from '@/components/ui/input';
 import {
+  NewTransactionPanelProps,
+  TransactionType,
+} from './interfaces/new-transaction-panel.interfaces';
+import {
   getDefaultTransactionDate,
   getTransactionDateRange,
   isTransactionDateWithinRange,
 } from '../_utils/transaction-date';
 import { formatCurrencyInput } from '../_utils/currency-mask';
 import { useTransactionContext } from '../_context';
-import { StatementEntryType } from './interfaces/transaction.interfaces';
 
 function parseCurrencyInputToCents(value: string) {
   const normalizedAmount = value.replace(/\./g, '').replace(',', '.');
@@ -31,13 +34,13 @@ export function NewTransactionPanel() {
   const { onSubmitTransaction } = useTransactionContext();
 
   const calendarRange = useMemo(() => getTransactionDateRange(), []);
-  const [transactionType, setTransactionType] = useState<StatementEntryType | ''>('');
+  const [transactionType, setTransactionType] = useState<TransactionType | ''>('');
   const [transactionAmount, setTransactionAmount] = useState('00,00');
   const [transactionDate, setTransactionDate] = useState(() => getDefaultTransactionDate());
   const [feedback, setFeedback] = useState<string | null>(null);
-  const transactionOptions: readonly { value: StatementEntryType; label: string }[] = [
-    { value: StatementEntryType.DEPOSIT, label: 'Depósito' },
-    { value: StatementEntryType.TRANSFER, label: 'Transferência' },
+  const transactionOptions: readonly { value: TransactionType; label: string }[] = [
+    { value: TransactionType.DEPOSIT, label: 'Depósito' },
+    { value: TransactionType.TRANSFER, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -54,8 +57,8 @@ export function NewTransactionPanel() {
     setFeedback(null);
 
     if (
-      transactionType !== StatementEntryType.DEPOSIT &&
-      transactionType !== StatementEntryType.TRANSFER
+      transactionType !== TransactionType.DEPOSIT &&
+      transactionType !== TransactionType.TRANSFER
     ) {
       return;
     }
@@ -146,8 +149,8 @@ export function NewTransactionPanel() {
               const value = event.currentTarget.value;
 
               if (
-                value === StatementEntryType.DEPOSIT ||
-                value === StatementEntryType.TRANSFER ||
+                value === TransactionType.DEPOSIT ||
+                value === TransactionType.TRANSFER ||
                 value === ''
               ) {
                 setTransactionType(value);

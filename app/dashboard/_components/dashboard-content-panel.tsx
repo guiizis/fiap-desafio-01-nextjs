@@ -19,6 +19,7 @@ type DashboardContentPanelProps = {
   activeTab: DashboardTabKey;
   onSubmitTransaction?: (payload: NewTransactionPayload) => NewTransactionResult | void;
   transactionEntries?: readonly StatementEntry[];
+  editableYear?: number | null;
   onDeleteEntry?: (entryId: string) => void;
   onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
 };
@@ -62,7 +63,10 @@ const tabContent: Record<DashboardTabKey, { title: string; description: string }
 
 export function DashboardContentPanel({
   activeTab,
+  onSubmitTransaction,
   transactionEntries = [],
+  onDeleteEntry,
+  onEditEntry,
 }: DashboardContentPanelProps) {
   const [selectedServiceLabel, setSelectedServiceLabel] = useState<string | null>(null);
 
@@ -76,6 +80,8 @@ export function DashboardContentPanel({
         title="Transações"
         ariaLabel="Painel de transações"
         entries={transactionEntries}
+        onDeleteEntry={onDeleteEntry}
+        onEditEntry={onEditEntry}
       />
     );
   }

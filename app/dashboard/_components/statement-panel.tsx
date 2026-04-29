@@ -4,26 +4,32 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { EditStatementEntryModal } from './edit-statement-entry-modal';
-import type { StatementEntry } from './interfaces/statement-panel.interfaces';
+import type {
+  EditStatementEntryPayload,
+  EditStatementEntryResult,
+  StatementEntry,
+} from './interfaces/statement-panel.interfaces';
+import { formatStatementEntryTypeLabel } from './interfaces/statement-panel.interfaces';
 import { formatCurrencyFromCents } from '@/app/lib/calc';
-import { useTransactionContext } from '../_context';
-import { formatStatementEntryTypeLabel } from './interfaces/transaction.interfaces';
 
 type StatementPanelProps = {
   title?: string;
   ariaLabel?: string;
+  editableYear?: number | null;
   showActions?: boolean;
-  entries?: readonly StatementEntry[];
+  entries: readonly StatementEntry[];
+  onDeleteEntry?: (entryId: string) => void;
+  onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
 };
 
 export function StatementPanel({
   title = 'Extrato',
   ariaLabel = 'Extrato da conta',
   showActions = true,
-  entries = [],
+  entries,
+  onDeleteEntry,
+  onEditEntry,
 }: StatementPanelProps) {
-  const { onDeleteEntry, onEditEntry } = useTransactionContext();
-
   const panelRef = useRef<HTMLElement | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
@@ -131,9 +137,7 @@ export function StatementPanel({
                 <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>
                 <span className="text-body-sm text-subtle">{entry.date}</span>
               </div>
-              <p className="text-body-md text-heading">
-                {formatStatementEntryTypeLabel(entry.type)}
-              </p>
+              <p className="text-body-md text-heading">{formatStatementEntryTypeLabel(entry.type)}</p>
               <p className="text-title-lg font-semibold text-black">
                 {formatCurrencyFromCents(entry.amountInCents)}
               </p>

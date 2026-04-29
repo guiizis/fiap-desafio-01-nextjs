@@ -1,12 +1,16 @@
-import { StatementEntryType } from './transaction.interfaces';
+import { TransactionType } from "./transaction.interfaces";
+
+export { TransactionType };
 
 export type NewTransactionPayload = {
-  type: StatementEntryType;
+  type: TransactionType;
   amountInCents: number;
   transactionDate: string;
 };
 
-export type NewTransactionResult = { ok: true } | { ok: false; message: string };
+export type NewTransactionResult =
+  | { ok: true }
+  | { ok: false; message: string };
 
 export type NewTransactionPanelProps = {
   onSubmitTransaction?: (payload: NewTransactionPayload) => NewTransactionResult | void;

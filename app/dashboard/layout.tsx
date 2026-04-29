@@ -1,34 +1,42 @@
 'use client';
 
 import { useEffect, useMemo, useReducer, useState } from 'react';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { AuthSessionProvider, useAuthSessionContext } from '@/app/context/auth-session-context';
 import { AccountSummaryCard } from './_components/account-summary-card';
 import { DashboardHeader } from './_components/dashboard-header';
-import type { StatementEntry } from './_components/interfaces/statement-panel.interfaces';
-import { accountReducer, createAccountState } from './_state/account.reducer';
-import { getTimestampFromPtBrDate } from './_utils/transaction-date';
+import type {
+  NewTransactionPayload,
+  NewTransactionResult,
+} from './_components/interfaces/new-transaction-panel.interfaces';
+import type {
+  EditStatementEntryPayload,
+  StatementEntry,
+} from './_components/interfaces/statement-panel.interfaces';
 import {
-  DashboardSidebarItem,
-  DashboardSidebarNav,
-  type DashboardTabKey,
-} from './_components/dashboard-sidebar-nav';
+  StatementEntryType,
+  TransactionType,
+  toStatementEntryType,
+} from './_components/interfaces/statement-panel.interfaces';
+import { AccountActionType, accountReducer, createAccountState } from './_state/account.reducer';
+import {
+  formatIsoDateToPtBr,
+  getTimestampFromPtBrDate,
+  getTransactionDateRange,
+  toStatementDate,
+  type TransactionStatementDate,
+} from './_utils/transaction-date';
+import { DashboardSidebarNav, type DashboardTabKey } from './_components/dashboard-sidebar-nav';
 import { StatementPanel } from './_components/statement-panel';
 import type { AuthSession } from '@/app/lib/auth-session';
 import { ReactNode } from 'react';
 import { TransactionProvider } from './_context';
-import { StatementEntryType } from './_components/interfaces/transaction.interfaces';
 
-const sidebarItems: readonly DashboardSidebarItem[] = [
-  { key: 'home', label: 'Início', link: '/dashboard/home' },
-  { key: 'transactions', label: 'Transações', link: '/dashboard/transactions' },
-  { key: 'investments', label: 'Investimentos', link: '/dashboard/investments', disabled: true },
-  {
-    key: 'other-services',
-    label: 'Outros serviços',
-    link: '/dashboard/other-services',
-    disabled: false,
-  },
+const sidebarItems: readonly { key: DashboardTabKey; label: string; disabled?: boolean }[] = [
+  { key: 'home', label: 'Início' },
+  { key: 'transactions', label: 'Transações' },
+  { key: 'investments', label: 'Investimentos', disabled: true },
+  { key: 'other-services', label: 'Outros serviços', disabled: false },
 ];
 
 function getUserFirstName(fullName: string) {
@@ -41,7 +49,7 @@ function normalizeStatementEntries(
 ): StatementEntry[] {
   return entries.map((entry) => ({
     ...entry,
-    type: entry.type as StatementEntryType,
+    type: toStatementEntryType(entry.type as TransactionType),
   }));
 }
 
@@ -59,6 +67,24 @@ function formatCurrentDateLabel() {
   }).format(now);
 
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${date}`;
+}
+
+function createStatementEntry(
+  { type, amountInCents }: Omit<NewTransactionPayload, 'transactionDate'>,
+  statementDate: TransactionStatementDate
+): StatementEntry {
+  const id =
+    typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  return {
+    id,
+    month: statementDate.monthLabel,
+    type: toStatementEntryType(type),
+    amountInCents: type === TransactionType.DEPOSIT ? amountInCents : -amountInCents,
+    date: statementDate.dateLabel,
+  };
 }
 
 function DashboardLayoutContent({
@@ -79,6 +105,7 @@ function DashboardLayoutContent({
     createAccountState(balanceInCents, statementEntries)
   );
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
+  const transactionDateRange = useMemo(() => getTransactionDateRange(), []);
 
   const orderedStatementEntries = useMemo(() => {
     return [...accountState.currentStatementEntries].sort((entryA, entryB) => {
@@ -105,9 +132,60 @@ function DashboardLayoutContent({
     return orderedStatementEntries.slice(0, 6);
   }, [orderedStatementEntries]);
 
-  const handleTabChange = (item: DashboardSidebarItem) => {
-    setActiveTab(item.key);
-    redirect(item.link);
+  const handleDeleteStatementEntry = (entryId: string) => {
+    dispatchAccountAction({
+      type: AccountActionType.DELETE_STATEMENT_ENTRY,
+      entryId,
+    });
+  };
+
+  const handleEditStatementEntry = ({
+    entryId,
+    type,
+    amountInCents,
+    transactionDate,
+  }: EditStatementEntryPayload): NewTransactionResult => {
+    const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
+    if (!entryToEdit) {
+      return {
+        ok: false,
+        message: 'Lançamento não encontrado para edição.',
+      };
+    }
+
+    const statementDate = toStatementDate(transactionDate, transactionDateRange);
+    if (!statementDate) {
+      return {
+        ok: false,
+        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
+      };
+    }
+
+    const nextSignedAmountInCents =
+      type === TransactionType.DEPOSIT ? amountInCents : -amountInCents;
+    const projectedBalanceInCents =
+      accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
+
+    if (projectedBalanceInCents < 0) {
+      return {
+        ok: false,
+        message: 'Saldo insuficiente para concluir a transferência.',
+      };
+    }
+
+    dispatchAccountAction({
+      type: AccountActionType.EDIT_STATEMENT_ENTRY,
+      entryId,
+      nextAmountInCents: amountInCents,
+      nextType:
+        type === TransactionType.DEPOSIT ? StatementEntryType.DEPOSIT : StatementEntryType.TRANSFER,
+      nextMonth: statementDate.monthLabel,
+      nextDate: statementDate.dateLabel,
+    });
+
+    return {
+      ok: true,
+    };
   };
 
   return (
@@ -125,7 +203,7 @@ function DashboardLayoutContent({
                 <DashboardSidebarNav
                   items={sidebarItems}
                   activeItem={activeTab}
-                  onChange={handleTabChange}
+                  onChange={setActiveTab}
                 />
               </div>
 
@@ -135,7 +213,7 @@ function DashboardLayoutContent({
                   dateLabel={currentDateLabel}
                   balanceLabel="Saldo"
                   accountLabel="Conta corrente"
-                  balanceInCents={balanceInCents}
+                  balanceInCents={accountState.currentBalanceInCents}
                   isBalanceVisible={isBalanceVisible}
                   onToggleBalanceVisibility={() => setIsBalanceVisible((current) => !current)}
                 />
@@ -143,7 +221,12 @@ function DashboardLayoutContent({
               </div>
 
               <div className="desktop:col-start-3 desktop:flex desktop:h-full">
-                <StatementPanel title="Extrato" entries={visibleStatementEntries} />
+                <StatementPanel
+                  title="Extrato"
+                  entries={visibleStatementEntries}
+                  onDeleteEntry={handleDeleteStatementEntry}
+                  onEditEntry={handleEditStatementEntry}
+                />
               </div>
             </div>
           </div>

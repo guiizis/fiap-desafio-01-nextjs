@@ -1,5 +1,21 @@
-import type { NewTransactionResult } from './new-transaction-panel.interfaces';
-import { StatementEntryType } from './transaction.interfaces';
+import type { NewTransactionResult } from "./new-transaction-panel.interfaces";
+import {
+  StatementEntryType,
+  TransactionType,
+  formatStatementEntryTypeLabel,
+  normalizeStatementEntryType,
+  toStatementEntryType,
+  toTransactionType,
+} from "./transaction.interfaces";
+
+export {
+  StatementEntryType,
+  TransactionType,
+  formatStatementEntryTypeLabel,
+  normalizeStatementEntryType,
+  toStatementEntryType,
+  toTransactionType,
+};
 
 export type StatementEntry = {
   id: string;
@@ -11,7 +27,7 @@ export type StatementEntry = {
 
 export type EditStatementEntryPayload = {
   entryId: string;
-  type: StatementEntryType;
+  type: TransactionType;
   amountInCents: number;
   transactionDate: string;
 };

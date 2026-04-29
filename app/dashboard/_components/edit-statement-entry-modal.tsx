@@ -16,7 +16,10 @@ import type {
   EditStatementEntryResult,
   StatementEntry,
 } from './interfaces/statement-panel.interfaces';
-import { StatementEntryType } from './interfaces/transaction.interfaces';
+import {
+  TransactionType,
+  toTransactionType,
+} from './interfaces/statement-panel.interfaces';
 
 type EditStatementEntryModalProps = {
   entry: StatementEntry;
@@ -60,13 +63,19 @@ function parsePtBrDateToIso(date: string) {
   return isoDate;
 }
 
+function normalizeEntryType(type: StatementEntry['type']): TransactionType {
+  return toTransactionType(type);
+}
+
 export function EditStatementEntryModal({
   entry,
   onClose,
   onSubmit,
 }: EditStatementEntryModalProps) {
   const calendarRange = useMemo(() => getTransactionDateRange(), []);
-  const [transactionType, setTransactionType] = useState<StatementEntryType>(entry.type);
+  const [transactionType, setTransactionType] = useState<TransactionType>(() =>
+    normalizeEntryType(entry.type)
+  );
   const [transactionAmount, setTransactionAmount] = useState(() =>
     formatCentsToInputValue(entry.amountInCents)
   );
@@ -74,9 +83,9 @@ export function EditStatementEntryModal({
     () => parsePtBrDateToIso(entry.date) ?? getDefaultTransactionDate()
   );
   const [feedback, setFeedback] = useState<string | null>(null);
-  const transactionOptions: readonly { value: StatementEntryType; label: string }[] = [
-    { value: StatementEntryType.DEPOSIT, label: 'Depósito' },
-    { value: StatementEntryType.TRANSFER, label: 'Transferência' },
+  const transactionOptions: readonly { value: TransactionType; label: string }[] = [
+    { value: TransactionType.DEPOSIT, label: 'Depósito' },
+    { value: TransactionType.TRANSFER, label: 'Transferência' },
   ];
 
   const amountInCents = useMemo(
@@ -163,7 +172,10 @@ export function EditStatementEntryModal({
             onChange={(event) => {
               const value = event.currentTarget.value;
 
-              if (value === StatementEntryType.DEPOSIT || value === StatementEntryType.TRANSFER) {
+              if (
+                value === TransactionType.DEPOSIT ||
+                value === TransactionType.TRANSFER
+              ) {
                 setTransactionType(value);
               }
             }}

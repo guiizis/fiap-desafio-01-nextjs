@@ -7,17 +7,16 @@ export type DashboardTabKey =
   | 'other-services'
   | 'my-cards';
 
-export type DashboardSidebarItem = {
+type DashboardSidebarItem = {
   key: DashboardTabKey;
   label: string;
-  link: string;
   disabled?: boolean;
 };
 
 type DashboardSidebarNavProps = {
   items: readonly DashboardSidebarItem[];
   activeItem: DashboardTabKey;
-  onChange: (item: DashboardSidebarItem) => void;
+  onChange: (key: DashboardTabKey) => void;
 };
 
 export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSidebarNavProps) {
@@ -28,7 +27,7 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
       return;
     }
 
-    onChange(item);
+    onChange(item.key);
     setIsMobileMenuOpen(false);
   };
 

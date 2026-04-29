@@ -1,11 +1,13 @@
-import { type StatementEntry } from '../_components/interfaces/statement-panel.interfaces';
-import { StatementEntryType } from '../_components/interfaces/transaction.interfaces';
+import {
+  StatementEntryType,
+  type StatementEntry,
+} from "../_components/interfaces/statement-panel.interfaces";
 
 export enum AccountActionType {
-  HYDRATE_FROM_PROPS = 'hydrate-from-props',
-  APPEND_TRANSACTION_ENTRY = 'append-transaction-entry',
-  DELETE_STATEMENT_ENTRY = 'delete-statement-entry',
-  EDIT_STATEMENT_ENTRY = 'edit-statement-entry',
+  HYDRATE_FROM_PROPS = "hydrate-from-props",
+  APPEND_TRANSACTION_ENTRY = "append-transaction-entry",
+  DELETE_STATEMENT_ENTRY = "delete-statement-entry",
+  EDIT_STATEMENT_ENTRY = "edit-statement-entry",
 }
 
 export type AccountState = {
@@ -15,26 +17,26 @@ export type AccountState = {
 
 export type AccountAction =
   | {
-      type: AccountActionType.HYDRATE_FROM_PROPS;
-      balanceInCents: number;
-      statementEntries: readonly StatementEntry[];
-    }
+    type: AccountActionType.HYDRATE_FROM_PROPS;
+    balanceInCents: number;
+    statementEntries: readonly StatementEntry[];
+  }
   | {
-      type: AccountActionType.APPEND_TRANSACTION_ENTRY;
-      entry: StatementEntry;
-    }
+    type: AccountActionType.APPEND_TRANSACTION_ENTRY;
+    entry: StatementEntry;
+  }
   | {
-      type: AccountActionType.DELETE_STATEMENT_ENTRY;
-      entryId: string;
-    }
+    type: AccountActionType.DELETE_STATEMENT_ENTRY;
+    entryId: string;
+  }
   | {
-      type: AccountActionType.EDIT_STATEMENT_ENTRY;
-      entryId: string;
-      nextAmountInCents: number;
-      nextType: StatementEntryType;
-      nextMonth: string;
-      nextDate: string;
-    };
+    type: AccountActionType.EDIT_STATEMENT_ENTRY;
+    entryId: string;
+    nextAmountInCents: number;
+    nextType: StatementEntryType;
+    nextMonth: string;
+    nextDate: string;
+  };
 
 export function createAccountState(
   balanceInCents: number,
@@ -46,7 +48,10 @@ export function createAccountState(
   };
 }
 
-export function accountReducer(state: AccountState, action: AccountAction): AccountState {
+export function accountReducer(
+  state: AccountState,
+  action: AccountAction
+): AccountState {
   switch (action.type) {
     case AccountActionType.HYDRATE_FROM_PROPS:
       return createAccountState(action.balanceInCents, action.statementEntries);
@@ -58,9 +63,7 @@ export function accountReducer(state: AccountState, action: AccountAction): Acco
       };
 
     case AccountActionType.DELETE_STATEMENT_ENTRY: {
-      const entryToDelete = state.currentStatementEntries.find(
-        (entry) => entry.id === action.entryId
-      );
+      const entryToDelete = state.currentStatementEntries.find((entry) => entry.id === action.entryId);
       if (!entryToDelete) {
         return state;
       }
@@ -74,9 +77,7 @@ export function accountReducer(state: AccountState, action: AccountAction): Acco
     }
 
     case AccountActionType.EDIT_STATEMENT_ENTRY: {
-      const entryToEdit = state.currentStatementEntries.find(
-        (entry) => entry.id === action.entryId
-      );
+      const entryToEdit = state.currentStatementEntries.find((entry) => entry.id === action.entryId);
       if (!entryToEdit) {
         return state;
       }
@@ -92,12 +93,12 @@ export function accountReducer(state: AccountState, action: AccountAction): Acco
         currentStatementEntries: state.currentStatementEntries.map((entry) =>
           entry.id === action.entryId
             ? {
-                ...entry,
-                type: action.nextType,
-                amountInCents: normalizedAmountInCents,
-                month: action.nextMonth,
-                date: action.nextDate,
-              }
+              ...entry,
+              type: action.nextType,
+              amountInCents: normalizedAmountInCents,
+              month: action.nextMonth,
+              date: action.nextDate,
+            }
             : entry
         ),
       };
