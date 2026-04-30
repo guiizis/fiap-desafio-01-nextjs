@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { useState } from 'react';
 
 export type DashboardTabKey =
@@ -7,9 +8,10 @@ export type DashboardTabKey =
   | 'other-services'
   | 'my-cards';
 
-type DashboardSidebarItem = {
+export type DashboardSidebarItem = {
   key: DashboardTabKey;
   label: string;
+  link: string;
   disabled?: boolean;
 };
 
@@ -29,6 +31,8 @@ export function DashboardSidebarNav({ items, activeItem, onChange }: DashboardSi
 
     onChange(item.key);
     setIsMobileMenuOpen(false);
+
+    redirect(item.link);
   };
 
   return (

@@ -4,37 +4,38 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { EditStatementEntryModal } from './edit-statement-entry-modal';
-import type {
-  EditStatementEntryPayload,
-  EditStatementEntryResult,
+import {
+  formatStatementEntryTypeLabel,
   StatementEntry,
 } from './interfaces/statement-panel.interfaces';
-import { formatStatementEntryTypeLabel } from './interfaces/statement-panel.interfaces';
 import { formatCurrencyFromCents } from '@/app/lib/calc';
+import { useAuthSessionContext } from '@/app/context/auth-session-context';
 
 type StatementPanelProps = {
   title?: string;
   ariaLabel?: string;
   editableYear?: number | null;
   showActions?: boolean;
-  entries: readonly StatementEntry[];
-  onDeleteEntry?: (entryId: string) => void;
-  onEditEntry?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
+  entries?: StatementEntry[];
 };
 
 export function StatementPanel({
   title = 'Extrato',
   ariaLabel = 'Extrato da conta',
   showActions = true,
-  entries,
-  onDeleteEntry,
-  onEditEntry,
+  entries = [],
 }: StatementPanelProps) {
+  const { statementEntries, onDeleteStatementEntry, onEditStatementEntry } =
+    useAuthSessionContext()!;
+
+  const visibleStatementEntries = entries.length > 0 ? entries : statementEntries;
+
   const panelRef = useRef<HTMLElement | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
 
-  const selectedEntry = entries.find((entry) => entry.id === selectedEntryId) ?? null;
+  const selectedEntry =
+    visibleStatementEntries.find((entry) => entry.id === selectedEntryId) ?? null;
   const activeSelectedEntryId = selectedEntry?.id ?? null;
   const areEntryActionsEnabled = activeSelectedEntryId !== null;
 
@@ -66,7 +67,7 @@ export function StatementPanel({
       return;
     }
 
-    onDeleteEntry?.(activeSelectedEntryId);
+    onDeleteStatementEntry(activeSelectedEntryId);
     setEditingEntryId(null);
   };
 
@@ -78,7 +79,7 @@ export function StatementPanel({
     setEditingEntryId(activeSelectedEntryId);
   };
 
-  const editingEntry = entries.find((entry) => entry.id === editingEntryId) ?? null;
+  const editingEntry = visibleStatementEntries.find((entry) => entry.id === editingEntryId) ?? null;
 
   return (
     <>
@@ -124,7 +125,7 @@ export function StatementPanel({
         </div>
 
         <ul className="mt-3 space-y-3">
-          {entries.map((entry) => (
+          {visibleStatementEntries.map((entry) => (
             <li
               key={entry.id}
               onClick={() => setSelectedEntryId(entry.id)}
@@ -137,7 +138,9 @@ export function StatementPanel({
                 <span className="text-body-sm font-semibold text-secondary">{entry.month}</span>
                 <span className="text-body-sm text-subtle">{entry.date}</span>
               </div>
-              <p className="text-body-md text-heading">{formatStatementEntryTypeLabel(entry.type)}</p>
+              <p className="text-body-md text-heading">
+                {formatStatementEntryTypeLabel(entry.type)}
+              </p>
               <p className="text-title-lg font-semibold text-black">
                 {formatCurrencyFromCents(entry.amountInCents)}
               </p>
@@ -150,7 +153,7 @@ export function StatementPanel({
         <EditStatementEntryModal
           entry={editingEntry}
           onClose={() => setEditingEntryId(null)}
-          onSubmit={onEditEntry}
+          onSubmit={onEditStatementEntry}
         />
       ) : null}
     </>

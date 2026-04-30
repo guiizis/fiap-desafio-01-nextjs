@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
   if (!isValidRegisterPayload(body)) {
     return Response.json(
-      { message: 'Campos obrigatorios: name, email e password.' },
+      { message: 'Campos obrigatórios: name, email e password.' },
       { status: 400 }
     );
   }
@@ -47,6 +47,13 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
+    if (result.error === 'INVALID_PASSWORD') {
+      return Response.json(
+        { message: 'A senha deve ter no mínimo 6 caracteres.' },
+        { status: 400 }
+      );
+    }
+
     return Response.json(
       { message: 'Ja existe usuario cadastrado com este email.' },
       { status: 409 }

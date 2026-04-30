@@ -42,6 +42,19 @@ describe("mock-auth", () => {
     });
   });
 
+  it("bloqueia cadastro com senha menor que 6 caracteres", () => {
+    const result = registerMockUser({
+      name: "Maria da Silva",
+      email: "maria@mail.com",
+      password: "123",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      error: "INVALID_PASSWORD",
+    });
+  });
+
   it("faz login com credenciais validas", () => {
     const register = registerMockUser({
       name: "Joao Souza",

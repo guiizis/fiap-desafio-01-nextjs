@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { CalendarInput } from "./calendar-input";
+import { useState } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { CalendarInput } from './calendar-input';
 
-describe("CalendarInput", () => {
-  it("renderiza com range e propaga mudanca", () => {
+describe('CalendarInput', () => {
+  it('renderiza com range e propaga mudanca', () => {
     const onChange = vi.fn();
 
     render(
@@ -18,15 +18,15 @@ describe("CalendarInput", () => {
       />
     );
 
-    const input = screen.getByLabelText("Data");
-    expect(input).toHaveAttribute("min", "2025-01-01");
-    expect(input).toHaveAttribute("max", "2026-12-31");
+    const input = screen.getByLabelText('Data');
+    expect(input).toHaveAttribute('min', '2025-01-01');
+    expect(input).toHaveAttribute('max', '2026-12-31');
 
-    fireEvent.change(input, { target: { value: "2026-04-20" } });
-    expect(onChange).toHaveBeenCalledWith("2026-04-20");
+    fireEvent.change(input, { target: { value: '2026-04-20' } });
+    expect(onChange).toHaveBeenCalledWith('2026-04-20');
   });
 
-  it("mostra erro para data fora do intervalo e notifica validade", () => {
+  it('mostra erro para data fora do intervalo e notifica validade', () => {
     const onValidityChange = vi.fn();
     const onChange = vi.fn();
     const { rerender } = render(
@@ -55,35 +55,30 @@ describe("CalendarInput", () => {
       />
     );
 
-    fireEvent.blur(screen.getByLabelText("Data"));
+    fireEvent.blur(screen.getByLabelText('Data'));
 
     expect(onValidityChange).toHaveBeenLastCalledWith(false);
     expect(screen.getByText(/Informe uma data entre/i)).toBeInTheDocument();
   });
 
-  it("usa range padrao com ano atual e ano anterior quando min/max nao sao informados", () => {
+  it('usa range padrao com ano atual e ano anterior quando min/max nao sao informados', () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-04-19T12:00:00.000Z"));
+    vi.setSystemTime(new Date('2026-04-19T12:00:00.000Z'));
 
     try {
       render(
-        <CalendarInput
-          label="Data"
-          name="transaction-date"
-          value="2026-04-19"
-          onChange={vi.fn()}
-        />
+        <CalendarInput label="Data" name="transaction-date" value="2026-04-19" onChange={vi.fn()} />
       );
 
-      const input = screen.getByLabelText("Data");
-      expect(input).toHaveAttribute("min", "2025-01-01");
-      expect(input).toHaveAttribute("max", "2026-12-31");
+      const input = screen.getByLabelText('Data');
+      expect(input).toHaveAttribute('min', '2025-01-01');
+      expect(input).toHaveAttribute('max', '2026-12-31');
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it("mostra erro de campo obrigatorio e chama onBlur quando valor esta vazio", () => {
+  it('mostra erro de campo obrigatório e chama onBlur quando valor esta vazio', () => {
     const onBlur = vi.fn();
 
     render(
@@ -99,14 +94,14 @@ describe("CalendarInput", () => {
       />
     );
 
-    const input = screen.getByLabelText("Data");
+    const input = screen.getByLabelText('Data');
     fireEvent.blur(input);
 
-    expect(screen.getByText("Campo obrigatorio.")).toBeInTheDocument();
+    expect(screen.getByText('Campo obrigatório.')).toBeInTheDocument();
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
 
-  it("nao exibe erro de obrigatoriedade quando required e falso", () => {
+  it('nao exibe erro de obrigatoriedade quando required e falso', () => {
     render(
       <CalendarInput
         label="Data"
@@ -118,13 +113,13 @@ describe("CalendarInput", () => {
       />
     );
 
-    fireEvent.blur(screen.getByLabelText("Data"));
-    expect(screen.queryByText("Campo obrigatorio.")).not.toBeInTheDocument();
+    fireEvent.blur(screen.getByLabelText('Data'));
+    expect(screen.queryByText('Campo obrigatório.')).not.toBeInTheDocument();
   });
 
-  it("revalida durante onChange apos blur e limpa erro com data valida", () => {
+  it('revalida durante onChange apos blur e limpa erro com data valida', () => {
     function CalendarHarness() {
-      const [value, setValue] = useState("2027-01-01");
+      const [value, setValue] = useState('2027-01-01');
       return (
         <CalendarInput
           label="Data"
@@ -140,15 +135,15 @@ describe("CalendarInput", () => {
 
     render(<CalendarHarness />);
 
-    const input = screen.getByLabelText("Data");
+    const input = screen.getByLabelText('Data');
     fireEvent.blur(input);
     expect(screen.getByText(/Informe uma data entre/i)).toBeInTheDocument();
 
-    fireEvent.change(input, { target: { value: "2026-04-19" } });
+    fireEvent.change(input, { target: { value: '2026-04-19' } });
     expect(screen.queryByText(/Informe uma data entre/i)).not.toBeInTheDocument();
   });
 
-  it("mostra erro quando minDate ou maxDate sao invalidos", () => {
+  it('mostra erro quando minDate ou maxDate sao invalidos', () => {
     render(
       <CalendarInput
         label="Data"
@@ -160,7 +155,7 @@ describe("CalendarInput", () => {
       />
     );
 
-    fireEvent.blur(screen.getByLabelText("Data"));
+    fireEvent.blur(screen.getByLabelText('Data'));
     expect(screen.getByText(/2026-02-31/)).toBeInTheDocument();
   });
 });

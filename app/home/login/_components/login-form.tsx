@@ -62,7 +62,7 @@ export function LoginForm({ layout = 'page' }: LoginFormProps) {
         user: result.user,
       });
       setIsSubmitting(false);
-      router.push('/dashboard');
+      router.push('/dashboard/home');
       return;
     }
 

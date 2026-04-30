@@ -1,19 +1,18 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StatementPanel } from './statement-panel';
 import { StatementEntryType, TransactionType } from './interfaces/statement-panel.interfaces';
 
-function triggerButtonClickHandler(element: HTMLElement) {
-  const reactPropsKey = Object.keys(element).find((key) => key.startsWith('__reactProps$'));
-  if (!reactPropsKey) {
-    throw new Error('Props internas do React nao encontradas');
-  }
+const onDeleteStatementEntryMock = vi.fn();
+const onEditStatementEntryMock = vi.fn();
 
-  const reactProps = (element as Record<string, unknown>)[reactPropsKey] as {
-    onClick?: () => void;
-  };
-  reactProps.onClick?.();
-}
+vi.mock('@/app/context/auth-session-context', () => ({
+  useAuthSessionContext: () => ({
+    statementEntries: [],
+    onDeleteStatementEntry: onDeleteStatementEntryMock,
+    onEditStatementEntry: onEditStatementEntryMock,
+  }),
+}));
 
 function getEntryByDate(date: string) {
   const entry = screen.getByText(date).closest('li');
@@ -25,6 +24,12 @@ function getEntryByDate(date: string) {
 }
 
 describe('StatementPanel', () => {
+  beforeEach(() => {
+    onDeleteStatementEntryMock.mockReset();
+    onEditStatementEntryMock.mockReset();
+    onEditStatementEntryMock.mockReturnValue({ ok: true as const });
+  });
+
   it('renderiza titulo e lancamentos do extrato e habilita acoes ao selecionar item', () => {
     render(
       <StatementPanel
@@ -84,11 +89,8 @@ describe('StatementPanel', () => {
   });
 
   it('abre modal de edicao e envia payload completo de tipo, valor e data', () => {
-    const onEditEntry = vi.fn(() => ({ ok: true as const }));
-
     render(
       <StatementPanel
-        onEditEntry={onEditEntry}
         entries={[
           {
             id: '1',
@@ -121,7 +123,7 @@ describe('StatementPanel', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /Salvar edi/i }));
 
-    expect(onEditEntry).toHaveBeenCalledWith({
+    expect(onEditStatementEntryMock).toHaveBeenCalledWith({
       entryId: '1',
       type: TransactionType.TRANSFER,
       amountInCents: 70000,
@@ -131,14 +133,13 @@ describe('StatementPanel', () => {
   });
 
   it('mantem modal aberto e mostra alerta quando a edicao retorna erro', () => {
-    const onEditEntry = vi.fn(() => ({
+    onEditStatementEntryMock.mockReturnValue({
       ok: false as const,
       message: 'Saldo insuficiente para concluir a transferencia.',
-    }));
+    });
 
     render(
       <StatementPanel
-        onEditEntry={onEditEntry}
         entries={[
           {
             id: '1',
@@ -158,7 +159,7 @@ describe('StatementPanel', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /Salvar edi/i }));
 
-    expect(onEditEntry).toHaveBeenCalledTimes(1);
+    expect(onEditStatementEntryMock).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('alert')).toHaveTextContent('Saldo insuficiente');
     expect(screen.getByRole('heading', { name: /Editar trans/i })).toBeInTheDocument();
   });
@@ -241,13 +242,8 @@ describe('StatementPanel', () => {
   });
 
   it('cobre guards de edit e delete quando nao ha item selecionado', () => {
-    const onDeleteEntry = vi.fn();
-    const onEditEntry = vi.fn();
-
     render(
       <StatementPanel
-        onDeleteEntry={onDeleteEntry}
-        onEditEntry={onEditEntry}
         entries={[
           {
             id: '1',
@@ -260,22 +256,16 @@ describe('StatementPanel', () => {
       />
     );
 
-    const editButton = screen.getByRole('button', { name: 'Editar extrato' });
-    const deleteButton = screen.getByRole('button', { name: 'Excluir extrato' });
+    fireEvent.click(screen.getByRole('button', { name: 'Editar extrato' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Excluir extrato' }));
 
-    triggerButtonClickHandler(editButton);
-    triggerButtonClickHandler(deleteButton);
-
-    expect(onEditEntry).not.toHaveBeenCalled();
-    expect(onDeleteEntry).not.toHaveBeenCalled();
+    expect(onEditStatementEntryMock).not.toHaveBeenCalled();
+    expect(onDeleteStatementEntryMock).not.toHaveBeenCalled();
   });
 
   it('fecha modal com Escape e exclui item selecionado', () => {
-    const onDeleteEntry = vi.fn();
-
     render(
       <StatementPanel
-        onDeleteEntry={onDeleteEntry}
         entries={[
           {
             id: '1',
@@ -296,6 +286,6 @@ describe('StatementPanel', () => {
     expect(screen.queryByRole('heading', { name: /Editar trans/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Excluir extrato' }));
-    expect(onDeleteEntry).toHaveBeenCalledWith('1');
+    expect(onDeleteStatementEntryMock).toHaveBeenCalledWith('1');
   });
 });

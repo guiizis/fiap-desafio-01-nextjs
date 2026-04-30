@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -14,8 +13,6 @@ export function ServiceUnderConstructionModal({
   serviceLabel,
   onClose,
 }: ServiceUnderConstructionModalProps) {
-  const router = useRouter();
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {

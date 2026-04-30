@@ -7,16 +7,14 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { CalendarInput } from '@/components/ui/calendar-input';
 import { Input, Select } from '@/components/ui/input';
-import {
-  NewTransactionPanelProps,
-  TransactionType,
-} from './interfaces/new-transaction-panel.interfaces';
+import { TransactionType } from './interfaces/new-transaction-panel.interfaces';
 import {
   getDefaultTransactionDate,
   getTransactionDateRange,
   isTransactionDateWithinRange,
 } from '../_utils/transaction-date';
 import { formatCurrencyInput } from '../_utils/currency-mask';
+import { useAuthSessionContext } from '@/app/context/auth-session-context';
 
 function parseCurrencyInputToCents(value: string) {
   const normalizedAmount = value.replace(/\./g, '').replace(',', '.');
@@ -29,7 +27,9 @@ function parseCurrencyInputToCents(value: string) {
   return Math.round(amountValue * 100);
 }
 
-export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanelProps) {
+export function NewTransactionPanel() {
+  const { onSubmitTransaction } = useAuthSessionContext()!;
+
   const calendarRange = useMemo(() => getTransactionDateRange(), []);
   const [transactionType, setTransactionType] = useState<TransactionType | ''>('');
   const [transactionAmount, setTransactionAmount] = useState('00,00');
@@ -68,7 +68,7 @@ export function NewTransactionPanel({ onSubmitTransaction }: NewTransactionPanel
       return;
     }
 
-    const result = onSubmitTransaction?.({
+    const result = onSubmitTransaction({
       type: transactionType,
       amountInCents,
       transactionDate,

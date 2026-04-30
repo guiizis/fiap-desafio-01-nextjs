@@ -117,12 +117,27 @@ describe("RegisterForm", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Usuario criado com sucesso.");
   });
 
-  it("usa fallback vazio quando FormData retorna null", async () => {
-    registerMockAccountMock.mockResolvedValue({
-      ok: false,
-      message: "Dados obrigatorios ausentes.",
-    });
+  it("nao envia cadastro quando a senha e invalida mesmo com submit direto no form", async () => {
+    render(<RegisterForm layout="modal" />);
 
+    fireEvent.input(screen.getByLabelText("Nome"), { target: { value: "Maria Silva" } });
+    fireEvent.input(screen.getByLabelText("Email"), { target: { value: "maria@mail.com" } });
+    fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123" } });
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    const form = screen.getByRole("button", { name: /criar conta/i }).closest("form");
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(registerMockAccountMock).not.toHaveBeenCalled();
+    });
+  });
+
+  it("nao envia cadastro quando FormData retorna null e o formulario fica invalido", async () => {
     render(<RegisterForm layout="modal" />);
     const formDataGetSpy = vi.spyOn(FormData.prototype, "get").mockReturnValue(null);
 
@@ -132,11 +147,7 @@ describe("RegisterForm", () => {
     fireEvent.submit(form);
 
     await waitFor(() => {
-      expect(registerMockAccountMock).toHaveBeenCalledWith({
-        name: "",
-        email: "",
-        password: "",
-      });
+      expect(registerMockAccountMock).not.toHaveBeenCalled();
     });
 
     formDataGetSpy.mockRestore();

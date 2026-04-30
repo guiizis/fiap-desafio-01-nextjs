@@ -108,7 +108,7 @@ describe('LoginForm', () => {
       });
     });
 
-    expect(pushMock).toHaveBeenCalledWith('/dashboard');
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/home');
 
     const stored = sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
     expect(stored).not.toBeNull();
@@ -136,7 +136,7 @@ describe('LoginForm', () => {
   it('usa fallback vazio quando FormData retorna null', async () => {
     loginMockAccountMock.mockResolvedValue({
       ok: false,
-      message: 'Dados obrigatorios ausentes.',
+      message: 'Dados obrigatórios ausentes.',
     });
 
     render(<LoginForm layout="modal" />);

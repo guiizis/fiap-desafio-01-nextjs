@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 type ModalShellProps = {
@@ -8,9 +8,8 @@ type ModalShellProps = {
 };
 
 export function ModalShell({ children }: ModalShellProps) {
-  const router = useRouter();
   const closeModal = () => {
-    router.replace('/home');
+    redirect('/home');
   };
 
   return (

@@ -2,12 +2,25 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { DashboardSidebarNav } from './dashboard-sidebar-nav';
 
+const { redirectMock } = vi.hoisted(() => ({
+  redirectMock: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  redirect: redirectMock,
+}));
+
 const items = [
-  { key: 'inicio', label: 'Início' },
-  { key: 'meus-cartoes', label: 'Meus cartões' },
-  { key: 'transacoes', label: 'Transações', disabled: true },
-  { key: 'investimentos', label: 'Investimentos', disabled: true },
-  { key: 'outros-servicos', label: 'Outros serviços', disabled: true },
+  { key: 'home', label: 'Início', link: '/dashboard' },
+  { key: 'my-cards', label: 'Meus cartões', link: '/dashboard/my-cards' },
+  { key: 'transactions', label: 'Transações', link: '/dashboard/transactions', disabled: true },
+  { key: 'investments', label: 'Investimentos', link: '/dashboard/investments', disabled: true },
+  {
+    key: 'other-services',
+    label: 'Outros serviços',
+    link: '/dashboard/other-services',
+    disabled: true,
+  },
 ] as const;
 
 function triggerButtonClickHandler(element: HTMLElement) {
@@ -23,7 +36,7 @@ function triggerButtonClickHandler(element: HTMLElement) {
 }
 
 function getOpenButtons() {
-  return screen.queryAllByRole('button', { name: /fechar menu de servi[c\u00e7]os/i });
+  return screen.queryAllByRole('button', { name: /fechar menu de servi[cç]os/i });
 }
 
 function getMobileMenuPanel() {
@@ -38,11 +51,12 @@ function getMobileMenuPanel() {
 describe('DashboardSidebarNav', () => {
   it('destaca item ativo e respeita itens desabilitados', () => {
     const onChange = vi.fn();
-    render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+    redirectMock.mockClear();
+    render(<DashboardSidebarNav items={items} activeItem="home" onChange={onChange} />);
 
-    const activeButton = screen.getByRole('button', { name: /in[i\u00ed]cio/i });
-    const enabledButton = screen.getByRole('button', { name: /meus cart[o\u00f5]es/i });
-    const disabledButton = screen.getByRole('button', { name: /transa[c\u00e7][o\u00f5]es/i });
+    const activeButton = screen.getByRole('button', { name: /in[ií]cio/i });
+    const enabledButton = screen.getByRole('button', { name: /meus cart[oõ]es/i });
+    const disabledButton = screen.getByRole('button', { name: /transa[cç][oõ]es/i });
 
     expect(activeButton.className).toContain('text-secondary');
     expect(enabledButton.className).toContain('text-heading');
@@ -53,17 +67,19 @@ describe('DashboardSidebarNav', () => {
     fireEvent.click(disabledButton);
 
     expect(onChange).toHaveBeenCalledTimes(2);
-    expect(onChange).toHaveBeenCalledWith('inicio');
-    expect(onChange).toHaveBeenCalledWith('meus-cartoes');
+    expect(onChange).toHaveBeenCalledWith('home');
+    expect(onChange).toHaveBeenCalledWith('my-cards');
+    expect(redirectMock).toHaveBeenNthCalledWith(1, '/dashboard');
+    expect(redirectMock).toHaveBeenNthCalledWith(2, '/dashboard/my-cards');
   });
 
   it('abre e fecha o menu mobile pelo botao de toggle', () => {
     const onChange = vi.fn();
-    render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+    render(<DashboardSidebarNav items={items} activeItem="home" onChange={onChange} />);
 
     expect(getOpenButtons()).toHaveLength(0);
 
-    const toggleButton = screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i });
+    const toggleButton = screen.getByRole('button', { name: /abrir menu de servi[cç]os/i });
     fireEvent.click(toggleButton);
 
     expect(getOpenButtons()).toHaveLength(2);
@@ -76,38 +92,40 @@ describe('DashboardSidebarNav', () => {
 
   it('fecha o menu mobile ao selecionar item habilitado', () => {
     const onChange = vi.fn();
-    render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+    redirectMock.mockClear();
+    render(<DashboardSidebarNav items={items} activeItem="home" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
+    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[cç]os/i }));
 
     const { panel } = getMobileMenuPanel();
-    fireEvent.click(within(panel).getByRole('button', { name: /meus cart[o\u00f5]es/i }));
+    fireEvent.click(within(panel).getByRole('button', { name: /meus cart[oõ]es/i }));
 
-    expect(onChange).toHaveBeenCalledWith('meus-cartoes');
+    expect(onChange).toHaveBeenCalledWith('my-cards');
     expect(getOpenButtons()).toHaveLength(0);
+    expect(redirectMock).toHaveBeenCalledWith('/dashboard/my-cards');
   });
 
   it('mantem menu mobile aberto quando clica em item desabilitado', () => {
     const onChange = vi.fn();
-    render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+    render(<DashboardSidebarNav items={items} activeItem="home" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
+    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[cç]os/i }));
 
     const { panel } = getMobileMenuPanel();
-    const disabledButton = within(panel).getByRole('button', { name: /transa[c\u00e7][o\u00f5]es/i });
+    const disabledButton = within(panel).getByRole('button', { name: /transa[cç][oõ]es/i });
     expect(disabledButton).toBeDisabled();
 
     fireEvent.click(disabledButton);
 
-    expect(onChange).not.toHaveBeenCalledWith('transacoes');
+    expect(onChange).not.toHaveBeenCalledWith('transactions');
     expect(getOpenButtons()).toHaveLength(2);
   });
 
   it('ignora item desabilitado mesmo quando handler onClick e disparado manualmente', () => {
     const onChange = vi.fn();
-    render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+    render(<DashboardSidebarNav items={items} activeItem="home" onChange={onChange} />);
 
-    const disabledDesktopButton = screen.getByRole('button', { name: /transa[c\u00e7][o\u00f5]es/i });
+    const disabledDesktopButton = screen.getByRole('button', { name: /transa[cç][oõ]es/i });
     triggerButtonClickHandler(disabledDesktopButton);
 
     expect(onChange).not.toHaveBeenCalled();
@@ -115,9 +133,9 @@ describe('DashboardSidebarNav', () => {
 
   it('fecha o menu mobile pelo botao interno do painel', () => {
     const onChange = vi.fn();
-    render(<DashboardSidebarNav items={items} activeItem="inicio" onChange={onChange} />);
+    render(<DashboardSidebarNav items={items} activeItem="home" onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[c\u00e7]os/i }));
+    fireEvent.click(screen.getByRole('button', { name: /abrir menu de servi[cç]os/i }));
 
     const { panelCloseButton } = getMobileMenuPanel();
     fireEvent.click(panelCloseButton);
