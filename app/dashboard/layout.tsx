@@ -49,14 +49,6 @@ function formatCurrentDateLabel() {
 
 function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const { session, balanceInCents, statementEntries } = useAuthSessionContext();
-
-  if (!session) {
-    return null;
-  }
-
-  const { name } = session.user;
-  const userFirstName = getUserFirstName(name);
-
   const [activeTab, setActiveTab] = useState<DashboardTabKey>('home');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
@@ -85,6 +77,13 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const visibleStatementEntries = useMemo(() => {
     return orderedStatementEntries.slice(0, 6);
   }, [orderedStatementEntries]);
+
+  if (!session) {
+    return null;
+  }
+
+  const { name } = session.user;
+  const userFirstName = getUserFirstName(name);
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-background">

@@ -2,12 +2,21 @@
 
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 
 type ModalShellProps = {
   children: ReactNode;
+  closeLabel?: string;
+  panelClassName?: string;
+  contentClassName?: string;
 };
 
-export function ModalShell({ children }: ModalShellProps) {
+export function ModalShell({
+  children,
+  closeLabel = 'Fechar cadastro',
+  panelClassName = 'max-w-[470px] bg-[#f3f3f3]',
+  contentClassName = 'px-6 pb-8 pt-4 md:px-10 md:pt-6',
+}: ModalShellProps) {
   const closeModal = () => {
     redirect('/home');
   };
@@ -24,18 +33,20 @@ export function ModalShell({ children }: ModalShellProps) {
       }}
     >
       <div
-        className="mx-auto h-full w-full max-w-[470px] overflow-y-auto bg-[#f3f3f3] shadow-xl"
+        className={`mx-auto h-full w-full overflow-y-auto shadow-xl ${panelClassName}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="relative px-6 pb-8 pt-4 md:px-10 md:pt-6">
-          <button
+        <div className={`relative ${contentClassName}`}>
+          <Button
             type="button"
-            aria-label="Fechar cadastro"
+            variant="ghost"
+            tone="primary"
+            aria-label={closeLabel}
             onClick={closeModal}
-            className="absolute right-4 top-3 inline-flex h-8 w-8 items-center justify-center rounded-sm text-body hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer disabled:cursor-not-allowed"
+            className="absolute right-3 top-3 z-20 h-11 w-11 rounded-sm bg-surface p-0 text-title-lg text-text-heading shadow-sm hover:bg-surface-soft md:right-4 md:h-8 md:w-8 md:text-body"
           >
             x
-          </button>
+          </Button>
           {children}
         </div>
       </div>
