@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { loginMockUser, registerMockUser, resetMockUsersStore } from "./mock-auth";
+import { loginMockUser, registerMockUser, resetMockUsersStore, type MockUser } from "./mock-auth";
 
 describe("mock-auth", () => {
   beforeEach(() => {
@@ -74,6 +74,35 @@ describe("mock-auth", () => {
     if (login.ok) {
       expect(login.user.email).toBe("joao@mail.com");
       expect(login.token).toContain("mock-token-");
+    }
+  });
+
+  it("preenche extrato padrao ao logar usuario legado sem lancamentos", () => {
+    const globalWithMockUsers = globalThis as typeof globalThis & {
+      __mockUsers?: MockUser[];
+    };
+
+    globalWithMockUsers.__mockUsers = [
+      {
+        id: "user-legado",
+        name: "Usuario Legado",
+        email: "legado@mail.com",
+        password: "senha-segura",
+        createdAt: "2026-04-01T12:00:00.000Z",
+        accountBalanceInCents: 250000,
+        statementEntries: [],
+      },
+    ];
+
+    const login = loginMockUser({
+      email: "legado@mail.com",
+      password: "senha-segura",
+    });
+
+    expect(login.ok).toBe(true);
+
+    if (login.ok) {
+      expect(login.user.statementEntries.length).toBeGreaterThanOrEqual(8);
     }
   });
 
