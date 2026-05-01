@@ -44,6 +44,12 @@ describe('EditStatementEntryModal', () => {
       expect(screen.getByLabelText('Data')).toHaveValue('2026-04-21');
 
       rerender(
+        <EditStatementEntryModal entry={{ ...baseEntry, date: '21/04' }} onClose={vi.fn()} />
+      );
+
+      expect(screen.getByLabelText('Data')).toHaveValue('2026-04-21');
+
+      rerender(
         <EditStatementEntryModal entry={{ ...baseEntry, date: '21/04/aaaa' }} onClose={vi.fn()} />
       );
 

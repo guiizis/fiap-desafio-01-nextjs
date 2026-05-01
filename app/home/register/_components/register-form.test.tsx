@@ -137,6 +137,38 @@ describe("RegisterForm", () => {
     });
   });
 
+  it("nao envia cadastro quando email ou senha falham na validacao do submit", async () => {
+    const { rerender } = render(<RegisterForm layout="modal" />);
+
+    fireEvent.input(screen.getByLabelText("Nome"), { target: { value: "Maria Silva" } });
+    fireEvent.input(screen.getByLabelText("Email"), { target: { value: "email-invalido" } });
+    fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123456" } });
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    let form = screen.getByRole("button", { name: /criar conta/i }).closest("form");
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.submit(form);
+    expect(registerMockAccountMock).not.toHaveBeenCalled();
+
+    rerender(<RegisterForm layout="modal" />);
+
+    fireEvent.input(screen.getByLabelText("Nome"), { target: { value: "Maria Silva" } });
+    fireEvent.input(screen.getByLabelText("Email"), { target: { value: "maria@mail.com" } });
+    fireEvent.input(screen.getByLabelText("Senha"), { target: { value: "123" } });
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    form = screen.getByRole("button", { name: /criar conta/i }).closest("form");
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.submit(form);
+    expect(registerMockAccountMock).not.toHaveBeenCalled();
+  });
+
   it("nao envia cadastro quando FormData retorna null e o formulario fica invalido", async () => {
     render(<RegisterForm layout="modal" />);
     const formDataGetSpy = vi.spyOn(FormData.prototype, "get").mockReturnValue(null);
@@ -148,6 +180,92 @@ describe("RegisterForm", () => {
 
     await waitFor(() => {
       expect(registerMockAccountMock).not.toHaveBeenCalled();
+    });
+
+    formDataGetSpy.mockRestore();
+  });
+
+  it("nao envia cadastro quando FormData retorna null para email ou senha", async () => {
+    const { rerender } = render(<RegisterForm layout="modal" />);
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    let formDataGetSpy = vi
+      .spyOn(FormData.prototype, "get")
+      .mockReturnValueOnce("Maria Silva")
+      .mockReturnValueOnce(null);
+
+    let form = screen.getByRole("button", { name: /criar conta/i }).closest("form");
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.submit(form);
+    expect(registerMockAccountMock).not.toHaveBeenCalled();
+    formDataGetSpy.mockRestore();
+
+    rerender(<RegisterForm layout="modal" />);
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    formDataGetSpy = vi
+      .spyOn(FormData.prototype, "get")
+      .mockReturnValueOnce("Maria Silva")
+      .mockReturnValueOnce("maria@mail.com")
+      .mockReturnValueOnce(null);
+
+    form = screen.getByRole("button", { name: /criar conta/i }).closest("form");
+    if (!form) {
+      throw new Error("Formulario nao encontrado");
+    }
+
+    fireEvent.submit(form);
+    expect(registerMockAccountMock).not.toHaveBeenCalled();
+    formDataGetSpy.mockRestore();
+  });
+
+  it("nao envia cadastro quando o campo de consentimento nao existe", async () => {
+    render(<RegisterForm layout="modal" />);
+    fillValidForm();
+
+    screen.getByRole("checkbox").removeAttribute("name");
+
+    const form = screen
+      .getByRole("button", { name: /criar conta/i })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(registerMockAccountMock).not.toHaveBeenCalled();
+    });
+  });
+
+  it("envia strings vazias quando payload valido vira null no submit", async () => {
+    registerMockAccountMock.mockResolvedValue({
+      ok: true,
+      message: "Usuario criado com sucesso.",
+    });
+    render(<RegisterForm layout="modal" />);
+    fireEvent.click(screen.getByRole("checkbox"));
+
+    const formDataGetSpy = vi
+      .spyOn(FormData.prototype, "get")
+      .mockReturnValueOnce("Maria Silva")
+      .mockReturnValueOnce("maria@mail.com")
+      .mockReturnValueOnce("123456")
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce(null);
+
+    const form = screen
+      .getByRole("button", { name: /criar conta/i })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(registerMockAccountMock).toHaveBeenCalledWith({
+        name: "",
+        email: "",
+        password: "",
+      });
     });
 
     formDataGetSpy.mockRestore();

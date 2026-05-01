@@ -34,7 +34,7 @@ export function HomeHeader() {
               <ul className="flex items-center gap-6">
                 <li>
                   <Link
-                    href="/sobre"
+                    href="/about"
                     className="text-body-md font-semibold text-secondary hover:text-menu-hover"
                   >
                     Sobre

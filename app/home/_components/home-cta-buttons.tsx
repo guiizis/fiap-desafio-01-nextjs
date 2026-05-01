@@ -1,4 +1,7 @@
-﻿import Link from 'next/link';
+'use client';
+
+import Link from 'next/link';
+import { useAuthSession } from '@/app/dashboard/_hooks/use-auth-session';
 import { buttonVariants } from '@/components/ui/button';
 
 type HomeCtaContext = 'header' | 'hero-mobile';
@@ -40,6 +43,28 @@ const ctaByContext: Record<
 
 export function HomeCtaButtons({ context }: HomeCtaButtonsProps) {
   const config = ctaByContext[context];
+  const { status } = useAuthSession();
+
+  if (status === 'loading') {
+    return null;
+  }
+
+  if (status === 'authenticated') {
+    return (
+      <div className={config.containerClassName}>
+        <Link
+          href="/dashboard"
+          className={buttonVariants({
+            variant: 'solid',
+            tone: config.tone,
+            className: config.primaryClassName,
+          })}
+        >
+          Acessar minha conta
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className={config.containerClassName}>

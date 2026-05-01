@@ -256,8 +256,16 @@ describe('StatementPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Editar extrato' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Excluir extrato' }));
+    const editButton = screen.getByRole('button', { name: 'Editar extrato' });
+    const deleteButton = screen.getByRole('button', { name: 'Excluir extrato' });
+
+    editButton.removeAttribute('disabled');
+    deleteButton.removeAttribute('disabled');
+    (editButton as HTMLButtonElement).disabled = false;
+    (deleteButton as HTMLButtonElement).disabled = false;
+
+    fireEvent.click(editButton);
+    fireEvent.click(deleteButton);
 
     expect(onEditStatementEntryMock).not.toHaveBeenCalled();
     expect(onDeleteStatementEntryMock).not.toHaveBeenCalled();
