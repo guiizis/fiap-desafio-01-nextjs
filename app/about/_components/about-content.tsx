@@ -27,11 +27,11 @@ export function AboutContent({ variant = 'page' }: AboutContentProps) {
 
         <div className="mt-10 flex-1 space-y-5 text-body-md leading-relaxed text-text-body">
           <p>
-            O McIntosh Bank une uma experiencia digital fluida com a lealdade de quem cuida de
-            cada centavo como se fosse unico.
+            O McIntosh Bank une uma experiência digital fluida com a lealdade de quem cuida de
+            cada centavo como se fosse único.
           </p>
           <p>
-            Criamos fluxos baseados em clareza e autonomia, garantindo que seu patrimonio esteja
+            Criamos fluxos baseados em clareza e autonomia, garantindo que seu patrimônio esteja
             sempre em boas patas.
           </p>
         </div>
@@ -42,9 +42,9 @@ export function AboutContent({ variant = 'page' }: AboutContentProps) {
           </p>
           <p className="mt-3 text-body-md leading-relaxed text-text-body">
             O nome McIntosh Bank nasceu de uma homenagem a fiel companheira de um de nossos
-            fundadores. E, embora a Mcintosh original se assuste ate com a propria sombra, levamos
-            a seguranca do seu patrimonio a serio. Aqui, a lealdade e inspirada por ela, mas a
-            protecao dos seus dados e de gente grande.
+            fundadores. E, embora a Mcintosh original se assuste até com a própria sombra, levamos
+            a segurança do seu patrimônio a sério. Aqui, a lealdade é inspirada por ela, mas a
+            proteção dos seus dados é de gente grande.
           </p>
         </footer>
       </div>

@@ -20,11 +20,15 @@ vi.mock('@/components/ui/button', () => ({
     children,
     disabled: _disabled,
     ...props
-  }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) => (
-    <button type="button" {...props}>
-      {children}
-    </button>
-  ),
+  }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) => {
+    void _disabled;
+
+    return (
+      <button type="button" {...props}>
+        {children}
+      </button>
+    );
+  },
 }));
 
 describe('StatementPanel guards', () => {
