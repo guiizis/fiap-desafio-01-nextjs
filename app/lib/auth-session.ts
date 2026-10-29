@@ -1,4 +1,4 @@
-import { StatementEntryType } from '../dashboard/_components/interfaces/statement-panel.interfaces';
+import { StatementEntryType } from '../dashboard/_domain/transaction.types';
 import type { AuthenticatedMockUser } from '../home/_services/auth-service';
 
 export const AUTH_SESSION_STORAGE_KEY = 'mcintosh-bank:auth-session';

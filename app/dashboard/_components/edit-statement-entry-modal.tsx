@@ -7,22 +7,23 @@ import { CalendarInput } from '@/components/ui/calendar-input';
 import { Input, Select } from '@/components/ui/input';
 import { formatCurrencyInput } from '../_utils/currency-mask';
 import {
-  getDefaultTransactionDate,
   getTransactionDateRange,
   isTransactionDateWithinRange,
-} from '../_utils/transaction-date';
+} from '../_domain/transaction-date-policy';
+import { getDefaultTransactionDate } from '../_utils/date';
 import type {
   EditStatementEntryPayload,
-  EditStatementEntryResult,
   StatementEntry,
-} from './interfaces/statement-panel.interfaces';
-import { TransactionType, toTransactionType } from './interfaces/statement-panel.interfaces';
-import { AuthStatementEntry } from '@/app/home/_services/auth-service';
+  TransactionResult,
+} from '../_domain/transaction.types';
+import { TransactionType } from '../_domain/transaction.types';
+import { toTransactionType } from '../_domain/transaction-rules';
+import type { AuthStatementEntry } from '@/app/home/_services/auth-service';
 
 type EditStatementEntryModalProps = {
   entry: AuthStatementEntry;
   onClose: () => void;
-  onSubmit?: (payload: EditStatementEntryPayload) => EditStatementEntryResult | void;
+  onSubmit?: (payload: EditStatementEntryPayload) => TransactionResult | void;
 };
 
 function parseCurrencyInputToCents(value: string) {

@@ -18,26 +18,25 @@ import {
 } from '../lib/auth-session';
 import type {
   NewTransactionPayload,
-  NewTransactionResult,
-} from '../dashboard/_components/interfaces/new-transaction-panel.interfaces';
-import type { EditStatementEntryPayload } from '../dashboard/_components/interfaces/statement-panel.interfaces';
-import type { StatementEntry } from '../dashboard/_components/interfaces/statement-panel.interfaces';
+  TransactionResult,
+  EditStatementEntryPayload,
+  StatementEntry,
+} from '../dashboard/_domain/transaction.types';
 import {
   AccountActionType,
   accountReducer,
   createAccountState,
 } from '../dashboard/_state/account.reducer';
+import { getTransactionDateRange } from '../dashboard/_domain/transaction-date-policy';
+import { formatIsoDateToPtBr } from '../dashboard/_utils/date';
+import { toStatementDate, type TransactionStatementDate } from '../dashboard/_utils/statement-date';
 import {
-  formatIsoDateToPtBr,
-  getTransactionDateRange,
-  toStatementDate,
-  type TransactionStatementDate,
-} from '../dashboard/_utils/transaction-date';
-import {
-  StatementEntryType,
-  TransactionType,
+  getProjectedBalanceAfterEdit,
+  getSignedTransactionAmount,
+  hasSufficientBalance,
   toStatementEntryType,
-} from '../dashboard/_components/interfaces/statement-panel.interfaces';
+} from '../dashboard/_domain/transaction-rules';
+import { StatementEntryType, TransactionType } from '../dashboard/_domain/transaction.types';
 
 export type AuthSessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -46,9 +45,9 @@ type AuthSessionContextValue = {
   status: AuthSessionStatus;
   statementEntries: StatementEntry[];
   balanceInCents: number;
-  onSubmitTransaction: (payload: NewTransactionPayload) => NewTransactionResult;
+  onSubmitTransaction: (payload: NewTransactionPayload) => TransactionResult;
   onDeleteStatementEntry: (entryId: string) => void;
-  onEditStatementEntry: (payload: EditStatementEntryPayload) => NewTransactionResult;
+  onEditStatementEntry: (payload: EditStatementEntryPayload) => TransactionResult;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
@@ -69,7 +68,7 @@ function createStatementEntry(
     id,
     month: statementDate.monthLabel,
     type: toStatementEntryType(type),
-    amountInCents: type === TransactionType.DEPOSIT ? amountInCents : -amountInCents,
+    amountInCents: getSignedTransactionAmount(type, amountInCents),
     date: statementDate.dateLabel,
   };
 }
@@ -168,8 +167,9 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     type,
     amountInCents,
     transactionDate,
-  }: NewTransactionPayload): NewTransactionResult => {
-    if (type === TransactionType.TRANSFER && amountInCents > accountState.currentBalanceInCents) {
+  }: NewTransactionPayload): TransactionResult => {
+    const signedAmountInCents = getSignedTransactionAmount(type, amountInCents);
+    if (!hasSufficientBalance(accountState.currentBalanceInCents, signedAmountInCents)) {
       return {
         ok: false,
         message: 'Saldo insuficiente para concluir a transferência.',
@@ -207,7 +207,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     type,
     amountInCents,
     transactionDate,
-  }: EditStatementEntryPayload): NewTransactionResult => {
+  }: EditStatementEntryPayload): TransactionResult => {
     const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
     if (!entryToEdit) {
       return {
@@ -224,10 +224,12 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       };
     }
 
-    const nextSignedAmountInCents =
-      type === TransactionType.DEPOSIT ? amountInCents : -amountInCents;
-    const projectedBalanceInCents =
-      accountState.currentBalanceInCents - entryToEdit.amountInCents + nextSignedAmountInCents;
+    const projectedBalanceInCents = getProjectedBalanceAfterEdit(
+      accountState.currentBalanceInCents,
+      entryToEdit.amountInCents,
+      type,
+      amountInCents
+    );
 
     if (projectedBalanceInCents < 0) {
       return {

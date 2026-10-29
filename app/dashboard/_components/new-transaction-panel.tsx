@@ -7,12 +7,12 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { CalendarInput } from '@/components/ui/calendar-input';
 import { Input, Select } from '@/components/ui/input';
-import { TransactionType } from './interfaces/new-transaction-panel.interfaces';
+import { TransactionType } from '../_domain/transaction.types';
 import {
-  getDefaultTransactionDate,
   getTransactionDateRange,
   isTransactionDateWithinRange,
-} from '../_utils/transaction-date';
+} from '../_domain/transaction-date-policy';
+import { getDefaultTransactionDate } from '../_utils/date';
 import { formatCurrencyInput } from '../_utils/currency-mask';
 import { useAuthSessionContext } from '@/app/context/auth-session-context';
 

@@ -72,6 +72,47 @@ Regras para preservar os limites:
 5. Otimizações e medição final.
 6. Documentação e vídeo de entrega.
 
+### Arquitetura após o Épico 2
+
+```text
+Apresentação
+  app/**/_components
+        |
+        +-- usa tipos e regras --> app/dashboard/_domain
+        |
+        +-- dispara operações --> contexto/estado atual
+
+Domínio
+  app/dashboard/_domain
+        +-- transaction.types.ts
+        +-- transaction-rules.ts
+        +-- transaction-date-policy.ts
+        +-- sem React, Next.js, fetch ou storage
+
+Utilitários locais
+  app/dashboard/_utils
+        +-- date.ts
+        +-- statement-date.ts
+        +-- transaction-label.ts
+        +-- conversão e formatação sem regra financeira
+
+Infraestrutura
+  app/home/_services
+        +-- comunicação HTTP e validação das respostas
+  app/api/mock
+        +-- armazenamento e autenticação mock atuais
+```
+
+Foram centralizados no domínio os tipos e contratos financeiros, a normalização do sinal de
+depósitos e transferências, a verificação de saldo, o saldo projetado em edições e a política que
+determina o intervalo permitido para datas de transação. Tipos e implementações permanecem em
+arquivos distintos.
+
+O reducer continua em `_state` porque representa gerenciamento do estado da aplicação. Formatação
+de campos, parsing e conversão de datas continuam em `_utils` por não serem regras financeiras. A comunicação HTTP
+permanece em `_services`, tratada como infraestrutura da feature. Não foram adicionados
+repositories, classes, injeção de dependência ou use cases sem necessidade real.
+
 ## Status
 
 ### Épico 1 — concluído
@@ -82,3 +123,13 @@ Regras para preservar os limites:
 - Método de comparação antes/depois definido.
 - README e instruções do repositório atualizados.
 - Achados de acessibilidade do login corrigidos e validados pelo Lighthouse.
+
+### Épico 2 — concluído
+
+- Domínio financeiro criado em `app/dashboard/_domain`.
+- Apresentação desacoplada das antigas interfaces localizadas dentro de `_components`.
+- Serviços HTTP identificados como fronteira de infraestrutura.
+- Reducer passou a reutilizar as regras de sinal do domínio.
+- Contexto passou a reutilizar as regras de saldo e saldo projetado do domínio.
+- Testes de domínio adicionados sem renderização ou DOM.
+- Suíte completa aprovada com cobertura global acima de 99%.

@@ -1,15 +1,19 @@
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NewTransactionPanel } from './new-transaction-panel';
-import { TransactionType, type NewTransactionResult } from './interfaces/new-transaction-panel.interfaces';
+import {
+  TransactionType,
+  type TransactionResult as NewTransactionResult,
+} from '../_domain/transaction.types';
 
-const onSubmitTransactionMock = vi.fn<
-  (payload: {
-    type: TransactionType;
-    amountInCents: number;
-    transactionDate: string;
-  }) => NewTransactionResult
->();
+const onSubmitTransactionMock =
+  vi.fn<
+    (payload: {
+      type: TransactionType;
+      amountInCents: number;
+      transactionDate: string;
+    }) => NewTransactionResult
+  >();
 
 vi.mock('@/app/context/auth-session-context', () => ({
   useAuthSessionContext: () => ({
@@ -26,8 +30,12 @@ describe('NewTransactionPanel', () => {
   it('renderiza estrutura base do formulario e comeca com botao desabilitado', () => {
     render(<NewTransactionPanel />);
 
-    expect(screen.getByRole('heading', { name: 'Nova transa\u00e7\u00e3o', level: 2 })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Tipo de transa\u00e7\u00e3o' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Nova transa\u00e7\u00e3o', level: 2 })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: 'Tipo de transa\u00e7\u00e3o' })
+    ).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Valor' })).toHaveValue('00,00');
     expect(screen.getByLabelText('Data')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Concluir transa\u00e7\u00e3o' })).toBeDisabled();

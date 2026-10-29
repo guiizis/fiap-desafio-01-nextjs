@@ -4,10 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { EditStatementEntryModal } from './edit-statement-entry-modal';
-import {
-  formatStatementEntryTypeLabel,
-  StatementEntry,
-} from './interfaces/statement-panel.interfaces';
+import type { StatementEntry } from '../_domain/transaction.types';
+import { formatStatementEntryTypeLabel } from '../_utils/transaction-label';
 import { formatCurrencyFromCents } from '@/app/lib/calc';
 import { useAuthSessionContext } from '@/app/context/auth-session-context';
 

@@ -5,7 +5,7 @@ import {
   createAccountState,
   type AccountAction,
 } from './account.reducer';
-import { StatementEntryType } from '../_components/interfaces/statement-panel.interfaces';
+import { StatementEntryType } from '../_domain/transaction.types';
 
 const baseEntries = [
   {

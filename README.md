@@ -85,3 +85,7 @@ npm run test
 
 - [Plano, matriz de requisitos e arquitetura proposta](docs/tech-challenge.md)
 - [Baseline e metodologia de performance](docs/performance/README.md)
+
+As regras financeiras ficam em `app/dashboard/_domain`, sem dependência de React ou Next.js. Os
+componentes permanecem responsáveis pela apresentação, enquanto `_services` e os Route Handlers
+concentram a comunicação e a infraestrutura mock da aplicação.

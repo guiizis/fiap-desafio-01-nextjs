@@ -1,7 +1,5 @@
-import {
-  StatementEntryType,
-  type StatementEntry,
-} from '../_components/interfaces/statement-panel.interfaces';
+import { getSignedTransactionAmount } from '../_domain/transaction-rules';
+import { StatementEntryType, type StatementEntry } from '../_domain/transaction.types';
 
 export enum AccountActionType {
   HYDRATE_FROM_PROPS = 'hydrate-from-props',
@@ -83,10 +81,10 @@ export function accountReducer(state: AccountState, action: AccountAction): Acco
         return state;
       }
 
-      const normalizedAmountInCents =
-        action.nextType === StatementEntryType.TRANSFER
-          ? -Math.abs(action.nextAmountInCents)
-          : Math.abs(action.nextAmountInCents);
+      const normalizedAmountInCents = getSignedTransactionAmount(
+        action.nextType,
+        action.nextAmountInCents
+      );
 
       return {
         currentBalanceInCents:

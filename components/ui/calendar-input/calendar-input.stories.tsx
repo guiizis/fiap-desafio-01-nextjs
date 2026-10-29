@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import {
-  getDefaultTransactionDate,
-  getTransactionDateRange,
-} from '../../../app/dashboard/_utils/transaction-date';
+import { getTransactionDateRange } from '../../../app/dashboard/_domain/transaction-date-policy';
+import { getDefaultTransactionDate } from '../../../app/dashboard/_utils/date';
 import { CalendarInput } from './calendar-input';
 
 const calendarRange = getTransactionDateRange();
