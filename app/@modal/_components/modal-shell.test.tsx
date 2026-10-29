@@ -17,18 +17,18 @@ describe('ModalShell', () => {
 
   it('renderiza container de dialogo com conteudo', () => {
     render(
-      <ModalShell>
+      <ModalShell dialogLabel="Modal de teste">
         <div>Conteudo do modal</div>
       </ModalShell>
     );
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Modal de teste' })).toBeInTheDocument();
     expect(screen.getByText('Conteudo do modal')).toBeInTheDocument();
   });
 
   it("fecha modal chamando redirect('/home')", () => {
     render(
-      <ModalShell>
+      <ModalShell dialogLabel="Modal de teste">
         <div>Conteudo</div>
       </ModalShell>
     );
@@ -39,7 +39,7 @@ describe('ModalShell', () => {
 
   it('fecha modal ao clicar no backdrop', () => {
     render(
-      <ModalShell>
+      <ModalShell dialogLabel="Modal de teste">
         <div>Conteudo do modal</div>
       </ModalShell>
     );
@@ -50,7 +50,7 @@ describe('ModalShell', () => {
 
   it('nao fecha modal ao clicar dentro do conteudo', () => {
     render(
-      <ModalShell>
+      <ModalShell dialogLabel="Modal de teste">
         <div>Conteudo interno</div>
       </ModalShell>
     );

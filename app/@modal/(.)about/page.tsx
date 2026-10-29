@@ -4,6 +4,7 @@ import { AboutContent } from '../../about/_components/about-content';
 export default function AboutModalPage() {
   return (
     <ModalShell
+      dialogLabel="Sobre o Mcintosh Bank"
       closeLabel="Fechar sobre"
       panelClassName="max-w-3xl bg-surface"
       contentClassName="p-0"

@@ -122,7 +122,7 @@ export function LoginForm({ layout = 'page' }: LoginFormProps) {
 
         <a
           href="#"
-          className="inline-block text-body-xs font-semibold text-secondary underline hover:text-menu-hover"
+          className="inline-block text-body-xs font-semibold text-primary underline hover:text-primary-hover"
         >
           Esqueci a senha!
         </a>

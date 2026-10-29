@@ -44,6 +44,7 @@
     "eslint-config-next": "16.2.1",
     "husky": "^9",
     "jsdom": "^22.1.0",
+    "lighthouse": "^12.8.2",
     "prettier": "^3",
     "storybook": "^10.3.0",
     "tailwindcss": "^4",
