@@ -146,3 +146,16 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Reducer manual anterior removido para evitar duas fontes de verdade.
 - RTK Query e cache remoto serão integrados junto aos endpoints de sessão e transações do Express no
   Épico 4. Antes disso, não existe consulta remota de transações que justifique cache e invalidação.
+
+### Épico 4 — backend seguro em implementação
+
+- API Express criada fora da árvore do Next.js e encaminhada por `/backend/*` com `rewrites`.
+- Senhas protegidas com `scrypt` e salt aleatório de 16 bytes.
+- Sessões mantidas no servidor com cookie `HttpOnly`, `SameSite=Lax` e duração de uma hora.
+- Cookie marcado como `Secure` quando `NODE_ENV=production`.
+- Helmet, limite de payload e rate limit no login configurados.
+- Cadastro, login, logout e consulta de sessão implementados.
+- CRUD de transações protegido por sessão e autorização por usuário implementado.
+- Saldo recalculado no servidor e transferências sem saldo rejeitadas.
+- Armazenamento em memória mantido intencionalmente para o escopo acadêmico.
+- Integração do frontend e cache RTK Query ainda pendentes antes da conclusão do épico.
