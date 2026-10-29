@@ -13,6 +13,7 @@ import {
 } from './_components/dashboard-sidebar-nav';
 import { StatementPanel } from './_components/statement-panel';
 import { ReactNode } from 'react';
+import { DashboardStoreProvider } from './_state/store-provider';
 
 const sidebarItems: readonly DashboardSidebarItem[] = [
   { key: 'home', label: 'Início', link: '/dashboard' },
@@ -141,8 +142,10 @@ function AuthGuard({ children }: { children: ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthSessionProvider>
-      <AuthGuard>{children}</AuthGuard>
-    </AuthSessionProvider>
+    <DashboardStoreProvider>
+      <AuthSessionProvider>
+        <AuthGuard>{children}</AuthGuard>
+      </AuthSessionProvider>
+    </DashboardStoreProvider>
   );
 }
