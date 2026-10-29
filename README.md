@@ -57,6 +57,14 @@ npm run dev
 
 Acesse: http://localhost:3000
 
+Para iniciar simultaneamente o Next.js e a API Express acadêmica:
+
+```bash
+npm run dev:full
+```
+
+A API utiliza a porta `3001` e é acessada pelo frontend através de `/backend/*`.
+
 ### 4. Rodando o Storybook
 
 ```bash
