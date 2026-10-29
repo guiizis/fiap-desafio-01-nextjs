@@ -78,3 +78,10 @@ npm run test
 - O projeto utiliza **TypeScript** em modo estrito e segue padrões de organização e colocation recomendados para projetos Next.js modernos.
 - Todos os componentes de interface são próprios, desenvolvidos internamente no projeto. A documentação e exemplos de uso desses componentes podem ser consultados no **Storybook**.
 - Para detalhes sobre arquitetura, convenções e padrões, consulte o arquivo `AGENTS.md`.
+
+---
+
+## Evolução do Tech Challenge
+
+- [Plano, matriz de requisitos e arquitetura proposta](docs/tech-challenge.md)
+- [Baseline e metodologia de performance](docs/performance/README.md)

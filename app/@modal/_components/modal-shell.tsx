@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 type ModalShellProps = {
   children: ReactNode;
+  dialogLabel: string;
   closeLabel?: string;
   panelClassName?: string;
   contentClassName?: string;
@@ -13,6 +14,7 @@ type ModalShellProps = {
 
 export function ModalShell({
   children,
+  dialogLabel,
   closeLabel = 'Fechar cadastro',
   panelClassName = 'max-w-[470px] bg-[#f3f3f3]',
   contentClassName = 'px-6 pb-8 pt-4 md:px-10 md:pt-6',
@@ -26,6 +28,7 @@ export function ModalShell({
       className="fixed inset-0 z-50 bg-black/60 px-4 py-6"
       role="dialog"
       aria-modal="true"
+      aria-label={dialogLabel}
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           closeModal();
