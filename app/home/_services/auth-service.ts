@@ -1,4 +1,4 @@
-import { StatementEntryType } from '@/app/dashboard/_components/interfaces/statement-panel.interfaces';
+import type { StatementEntry } from '@/app/dashboard/_domain/transaction.types';
 
 type ServiceMessageResponse = {
   message?: unknown;
@@ -11,13 +11,7 @@ type ServiceResult = {
   message: string;
 };
 
-export type AuthStatementEntry = {
-  id: string;
-  month: string;
-  type: StatementEntryType;
-  amountInCents: number;
-  date: string;
-};
+export type AuthStatementEntry = StatementEntry;
 
 export type AuthenticatedMockUser = {
   id: string;

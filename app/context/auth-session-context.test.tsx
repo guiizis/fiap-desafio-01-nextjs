@@ -12,11 +12,8 @@ import {
   AUTH_SESSION_STORAGE_KEY,
   type AuthSession,
 } from '../lib/auth-session';
-import {
-  StatementEntryType,
-  TransactionType,
-} from '../dashboard/_components/interfaces/statement-panel.interfaces';
-import { getTransactionDateRange } from '../dashboard/_utils/transaction-date';
+import { StatementEntryType, TransactionType } from '../dashboard/_domain/transaction.types';
+import { getTransactionDateRange } from '../dashboard/_domain/transaction-date-policy';
 
 type CapturedContext = ReturnType<typeof useAuthSessionContext>;
 

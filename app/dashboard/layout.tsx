@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AuthSessionProvider, useAuthSessionContext } from '@/app/context/auth-session-context';
 import { AccountSummaryCard } from './_components/account-summary-card';
 import { DashboardHeader } from './_components/dashboard-header';
-import { getTimestampFromPtBrDate } from './_utils/transaction-date';
+import { getTimestampFromPtBrDate } from './_utils/date';
 import {
   DashboardSidebarItem,
   DashboardSidebarNav,

@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StatementPanel } from './statement-panel';
-import { StatementEntryType } from './interfaces/statement-panel.interfaces';
+import { StatementEntryType } from '../_domain/transaction.types';
 
 const onDeleteStatementEntryMock = vi.fn();
 const onEditStatementEntryMock = vi.fn();

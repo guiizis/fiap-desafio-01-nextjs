@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { EditStatementEntryModal } from './edit-statement-entry-modal';
-import { StatementEntryType, TransactionType } from './interfaces/statement-panel.interfaces';
+import { StatementEntryType, TransactionType } from '../_domain/transaction.types';
 
 const baseEntry = {
   id: '1',

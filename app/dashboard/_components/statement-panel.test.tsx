@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StatementPanel } from './statement-panel';
-import { StatementEntryType, TransactionType } from './interfaces/statement-panel.interfaces';
+import { StatementEntryType, TransactionType } from '../_domain/transaction.types';
 
 const onDeleteStatementEntryMock = vi.fn();
 const onEditStatementEntryMock = vi.fn();
