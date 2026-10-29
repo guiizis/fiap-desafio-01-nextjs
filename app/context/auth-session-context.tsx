@@ -4,7 +4,6 @@ import {
   createContext,
   useContext,
   useEffect,
-  useReducer,
   useRef,
   useSyncExternalStore,
   type ReactNode,
@@ -23,10 +22,12 @@ import type {
   StatementEntry,
 } from '../dashboard/_domain/transaction.types';
 import {
-  AccountActionType,
-  accountReducer,
-  createAccountState,
-} from '../dashboard/_state/account.reducer';
+  accountHydrated,
+  statementEntryDeleted,
+  statementEntryEdited,
+  transactionAppended,
+} from '../dashboard/_state/account.slice';
+import { useAppDispatch, useAppSelector } from '../dashboard/_state/hooks';
 import { getTransactionDateRange } from '../dashboard/_domain/transaction-date-policy';
 import { formatIsoDateToPtBr } from '../dashboard/_utils/date';
 import { toStatementDate, type TransactionStatementDate } from '../dashboard/_utils/statement-date';
@@ -110,6 +111,8 @@ type AuthSessionProviderProps = {
 };
 
 export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
+  const dispatch = useAppDispatch();
+  const accountState = useAppSelector((state) => state.account);
   const serializedSession = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
   const session =
@@ -136,12 +139,6 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
         ? 'authenticated'
         : 'unauthenticated';
 
-  const initialBalanceInCents = session?.user.accountBalanceInCents ?? 0;
-  const initialStatementEntries = session?.user.statementEntries ?? [];
-  const [accountState, dispatchAccountAction] = useReducer(
-    accountReducer,
-    createAccountState(initialBalanceInCents, initialStatementEntries)
-  );
   const transactionDateRange = getTransactionDateRange();
   const lastHydratedSnapshotRef = useRef<string | null>(null);
 
@@ -156,12 +153,13 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     }
 
     lastHydratedSnapshotRef.current = serializedSession;
-    dispatchAccountAction({
-      type: AccountActionType.HYDRATE_FROM_PROPS,
-      balanceInCents: session.user.accountBalanceInCents,
-      statementEntries: session.user.statementEntries ?? [],
-    });
-  }, [serializedSession, session]);
+    dispatch(
+      accountHydrated({
+        balanceInCents: session.user.accountBalanceInCents,
+        statementEntries: session.user.statementEntries ?? [],
+      })
+    );
+  }, [serializedSession, session, dispatch]);
 
   const onSubmitTransaction = ({
     type,
@@ -185,10 +183,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     }
 
     const entry = createStatementEntry({ type, amountInCents }, statementDate);
-    dispatchAccountAction({
-      type: AccountActionType.APPEND_TRANSACTION_ENTRY,
-      entry,
-    });
+    dispatch(transactionAppended(entry));
 
     return {
       ok: true,
@@ -196,10 +191,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
   };
 
   const onDeleteStatementEntry = (entryId: string) => {
-    dispatchAccountAction({
-      type: AccountActionType.DELETE_STATEMENT_ENTRY,
-      entryId,
-    });
+    dispatch(statementEntryDeleted(entryId));
   };
 
   const onEditStatementEntry = ({
@@ -238,15 +230,18 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       };
     }
 
-    dispatchAccountAction({
-      type: AccountActionType.EDIT_STATEMENT_ENTRY,
-      entryId,
-      nextAmountInCents: amountInCents,
-      nextType:
-        type === TransactionType.DEPOSIT ? StatementEntryType.DEPOSIT : StatementEntryType.TRANSFER,
-      nextMonth: statementDate.monthLabel,
-      nextDate: statementDate.dateLabel,
-    });
+    dispatch(
+      statementEntryEdited({
+        entryId,
+        nextAmountInCents: amountInCents,
+        nextType:
+          type === TransactionType.DEPOSIT
+            ? StatementEntryType.DEPOSIT
+            : StatementEntryType.TRANSFER,
+        nextMonth: statementDate.monthLabel,
+        nextDate: statementDate.dateLabel,
+      })
+    );
 
     return {
       ok: true,

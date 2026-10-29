@@ -14,6 +14,7 @@ import {
 } from '../lib/auth-session';
 import { StatementEntryType, TransactionType } from '../dashboard/_domain/transaction.types';
 import { getTransactionDateRange } from '../dashboard/_domain/transaction-date-policy';
+import { DashboardStoreProvider } from '../dashboard/_state/store-provider';
 
 type CapturedContext = ReturnType<typeof useAuthSessionContext>;
 
@@ -63,9 +64,11 @@ function Consumer({ onValue }: { onValue: (value: CapturedContext) => void }) {
 
 function renderProvider(onValue = vi.fn()) {
   render(
-    <AuthSessionProvider>
-      <Consumer onValue={onValue} />
-    </AuthSessionProvider>
+    <DashboardStoreProvider>
+      <AuthSessionProvider>
+        <Consumer onValue={onValue} />
+      </AuthSessionProvider>
+    </DashboardStoreProvider>
   );
 
   return onValue;
@@ -79,9 +82,11 @@ function RerenderingProvider({ onValue }: { onValue: (value: CapturedContext) =>
       <button type="button" onClick={() => setRenderCount((current) => current + 1)}>
         Renderizar novamente {renderCount}
       </button>
-      <AuthSessionProvider>
-        <Consumer onValue={onValue} />
-      </AuthSessionProvider>
+      <DashboardStoreProvider>
+        <AuthSessionProvider>
+          <Consumer onValue={onValue} />
+        </AuthSessionProvider>
+      </DashboardStoreProvider>
     </div>
   );
 }
@@ -107,9 +112,11 @@ describe('AuthSessionProvider', () => {
 
   it('expoe loading durante renderizacao no servidor', () => {
     const html = renderToString(
-      <AuthSessionProvider>
-        <Consumer onValue={vi.fn()} />
-      </AuthSessionProvider>
+      <DashboardStoreProvider>
+        <AuthSessionProvider>
+          <Consumer onValue={vi.fn()} />
+        </AuthSessionProvider>
+      </DashboardStoreProvider>
     );
 
     expect(html).toContain('loading');

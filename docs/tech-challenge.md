@@ -133,3 +133,16 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Contexto passou a reutilizar as regras de saldo e saldo projetado do domínio.
 - Testes de domínio adicionados sem renderização ou DOM.
 - Suíte completa aprovada com cobertura global acima de 99%.
+
+### Épico 3 — estado global e reatividade concluídos; cache remoto pendente
+
+- Redux Toolkit e React-Redux adicionados seguindo o padrão oficial para App Router.
+- Store criado por instância do `DashboardStoreProvider`, sem singleton global compartilhado.
+- Provider limitado ao dashboard para não aumentar o JavaScript das rotas públicas.
+- Saldo e extrato migrados do `useReducer` para `accountSlice`.
+- Hidratação, criação, edição e exclusão modeladas como ações explícitas.
+- Componentes reagem às alterações por seletores tipados do React-Redux.
+- Formulários, seleção de itens, menus e modais continuam como estado local.
+- Reducer manual anterior removido para evitar duas fontes de verdade.
+- RTK Query e cache remoto serão integrados junto aos endpoints de sessão e transações do Express no
+  Épico 4. Antes disso, não existe consulta remota de transações que justifique cache e invalidação.
