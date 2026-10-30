@@ -93,7 +93,7 @@ describe('EditStatementEntryModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('exibe alerta de erro e permite fechar o alerta', () => {
+  it('exibe alerta de erro e permite fechar o alerta', async () => {
     const onSubmit = vi.fn(() => ({
       ok: false as const,
       message: 'Saldo insuficiente para concluir a transferência.',
@@ -106,7 +106,7 @@ describe('EditStatementEntryModal', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /Salvar/i }));
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Saldo insuficiente');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Saldo insuficiente');
     fireEvent.click(screen.getByRole('button', { name: 'Fechar alerta' }));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });

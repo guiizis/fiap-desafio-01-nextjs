@@ -1,239 +1,115 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { loginMockAccount, registerMockAccount } from "./auth-service";
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getAuthSession, loginAccount, logoutAccount, registerAccount } from './auth-service';
 
-describe("auth-service", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
+const user = {
+  id: 'user-1',
+  name: 'Maria Silva',
+  email: 'maria@mail.com',
+  createdAt: '2026-10-29T10:00:00.000Z',
+  accountBalanceInCents: 0,
+};
+
+function response(body: unknown, init: ResponseInit = {}) {
+  return new Response(body === null ? null : JSON.stringify(body), {
+    status: 200,
+    headers: { 'content-type': 'application/json' },
+    ...init,
   });
+}
 
-  it("envia cadastro para /api/mock/users e usa mensagem da API", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({ message: "Usuario criado com sucesso." }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
+describe('auth-service', () => {
+  afterEach(() => vi.restoreAllMocks());
 
-    const result = await registerMockAccount({
-      name: "Maria",
-      email: "maria@mail.com",
-      password: "123456",
-    });
+  it('cadastra pelo backend e preserva a mensagem do servidor', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(response({ message: 'Usuário criado com sucesso.' }, { status: 201 }));
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/mock/users", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        name: "Maria",
-        email: "maria@mail.com",
-        password: "123456",
-      }),
-    });
-    expect(result).toEqual({
-      ok: true,
-      message: "Usuario criado com sucesso.",
-    });
-  });
-
-  it("usa fallback de sucesso quando response.json falha", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockRejectedValue(new Error("sem json")),
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const result = await registerMockAccount({
-      name: "Maria",
-      email: "maria@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: true,
-      message: "Usuario criado com sucesso.",
+    await expect(
+      registerAccount({ name: user.name, email: user.email, password: 'senha-segura' })
+    ).resolves.toEqual({ ok: true, message: 'Usuário criado com sucesso.' });
+    expect(fetchMock).toHaveBeenCalledWith('/backend/auth/register', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: user.name, email: user.email, password: 'senha-segura' }),
     });
   });
 
-  it("usa fallback de erro quando API nao manda mensagem", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+  it('usa mensagens fallback em respostas sem JSON válido', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('inválido', { status: 201 }))
+      .mockResolvedValueOnce(new Response(null, { status: 400 }));
+
+    await expect(
+      registerAccount({ name: user.name, email: user.email, password: 'senha-segura' })
+    ).resolves.toEqual({ ok: true, message: 'Operação realizada com sucesso.' });
+    await expect(
+      registerAccount({ name: user.name, email: user.email, password: 'senha-segura' })
+    ).resolves.toEqual({ ok: false, message: 'Não foi possível concluir a operação.' });
+  });
+
+  it('autentica somente quando o usuário retornado possui o contrato esperado', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(response({ message: 'Login realizado.', user }))
+      .mockResolvedValueOnce(response({ message: 'Payload inválido.', user: { id: 1 } }));
+
+    await expect(loginAccount({ email: user.email, password: 'senha-segura' })).resolves.toEqual({
+      ok: true,
+      message: 'Login realizado.',
+      user,
+    });
+    await expect(loginAccount({ email: user.email, password: 'senha-segura' })).resolves.toEqual({
       ok: false,
-      json: vi.fn().mockResolvedValue({}),
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const result = await registerMockAccount({
-      name: "Maria",
-      email: "maria@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: false,
-      message: "Nao foi possivel criar a conta. Tente novamente.",
+      message: 'Payload inválido.',
     });
   });
 
-  it("ignora mensagem vazia da API no login e usa fallback", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: false,
-      json: vi.fn().mockResolvedValue({ message: "   " }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
+  it('trata falha de rede no cadastro e no login', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
+    const expected = { ok: false, message: 'Erro de conexão. Tente novamente em instantes.' };
 
-    const result = await loginMockAccount({
-      email: "maria@mail.com",
-      password: "123456",
-    });
+    await expect(
+      registerAccount({ name: user.name, email: user.email, password: 'senha-segura' })
+    ).resolves.toEqual(expected);
+    await expect(loginAccount({ email: user.email, password: 'senha-segura' })).resolves.toEqual(
+      expected
+    );
+  });
 
-    expect(result).toEqual({
-      ok: false,
-      message: "Nao foi possivel autenticar. Revise seus dados.",
+  it('encerra a sessão sem enviar payload', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    await expect(logoutAccount()).resolves.toEqual({ ok: true, message: 'Sessão encerrada.' });
+    expect(fetchMock).toHaveBeenCalledWith('/backend/auth/logout', {
+      method: 'POST',
+      headers: undefined,
+      body: undefined,
     });
   });
 
-  it("retorna token e usuario quando login vem valido da API", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        message: "Login realizado com sucesso.",
-        token: "mock-token-user-1",
-        user: {
-          id: "user-1",
-          name: "Joana",
-          email: "joana@mail.com",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          accountBalanceInCents: 250000,
-          statementEntries: [
-            {
-              id: "entry-1",
-              month: "Novembro",
-              type: "Deposito",
-              amountInCents: 10000,
-              date: "21/11/2022",
-            },
-          ],
-        },
-      }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const result = await loginMockAccount({
-      email: "joana@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: true,
-      message: "Login realizado com sucesso.",
-      token: "mock-token-user-1",
-      user: {
-        id: "user-1",
-        name: "Joana",
-        email: "joana@mail.com",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        accountBalanceInCents: 250000,
-        statementEntries: [
-          {
-            id: "entry-1",
-            month: "Novembro",
-            type: "Deposito",
-            amountInCents: 10000,
-            date: "21/11/2022",
-          },
-        ],
-      },
+  it('retorna erro do servidor ao encerrar a sessão', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      response({ message: 'Não foi possível sair.' }, { status: 500 })
+    );
+    await expect(logoutAccount()).resolves.toEqual({
+      ok: false,
+      message: 'Não foi possível sair.',
     });
   });
 
-  it("retorna falha quando login 200 nao traz payload esperado", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        message: "Login realizado com sucesso.",
-        token: "mock-token-user-1",
-        user: {
-          id: "user-1",
-        },
-      }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
+  it('consulta a sessão com no-store e valida o usuário', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(response({ user }));
+    await expect(getAuthSession()).resolves.toEqual({ ok: true, user });
+    expect(fetchMock).toHaveBeenCalledWith('/backend/auth/session', { cache: 'no-store' });
 
-    const result = await loginMockAccount({
-      email: "joana@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: false,
-      message: "Login realizado com sucesso.",
-    });
+    fetchMock.mockResolvedValue(response({ user: null }, { status: 401 }));
+    await expect(getAuthSession()).resolves.toEqual({ ok: false });
   });
 
-  it("retorna falha quando login vem sem usuario em formato de objeto", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        message: "Login realizado com sucesso.",
-        token: "mock-token-user-1",
-        user: null,
-      }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const result = await loginMockAccount({
-      email: "joana@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: false,
-      message: "Login realizado com sucesso.",
-    });
-  });
-
-  it("retorna falha quando extrato contem item invalido", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        message: "Login realizado com sucesso.",
-        token: "mock-token-user-1",
-        user: {
-          id: "user-1",
-          name: "Joana",
-          email: "joana@mail.com",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          accountBalanceInCents: 250000,
-          statementEntries: [123],
-        },
-      }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const result = await loginMockAccount({
-      email: "joana@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: false,
-      message: "Login realizado com sucesso.",
-    });
-  });
-
-  it("retorna erro de conexao quando fetch falha", async () => {
-    const fetchMock = vi.fn().mockRejectedValue(new Error("network error"));
-    vi.stubGlobal("fetch", fetchMock);
-
-    const result = await loginMockAccount({
-      email: "maria@mail.com",
-      password: "123456",
-    });
-
-    expect(result).toEqual({
-      ok: false,
-      message: "Erro de conexao. Tente novamente em instantes.",
-    });
+  it('considera a sessão ausente quando a consulta falha', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
+    await expect(getAuthSession()).resolves.toEqual({ ok: false });
   });
 });

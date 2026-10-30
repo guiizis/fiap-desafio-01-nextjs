@@ -18,12 +18,13 @@ import type {
 } from '../_domain/transaction.types';
 import { TransactionType } from '../_domain/transaction.types';
 import { toTransactionType } from '../_domain/transaction-rules';
-import type { AuthStatementEntry } from '@/app/home/_services/auth-service';
 
 type EditStatementEntryModalProps = {
-  entry: AuthStatementEntry;
+  entry: StatementEntry;
   onClose: () => void;
-  onSubmit?: (payload: EditStatementEntryPayload) => TransactionResult | void;
+  onSubmit?: (
+    payload: EditStatementEntryPayload
+  ) => TransactionResult | Promise<TransactionResult> | void;
 };
 
 function parseCurrencyInputToCents(value: string) {
@@ -106,7 +107,7 @@ export function EditStatementEntryModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
     setFeedback(null);
 
@@ -114,7 +115,7 @@ export function EditStatementEntryModal({
       return;
     }
 
-    const result = onSubmit?.({
+    const result = await onSubmit?.({
       entryId: entry.id,
       type: transactionType,
       amountInCents,

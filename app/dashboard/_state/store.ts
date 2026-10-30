@@ -1,11 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { accountReducer } from './account.slice';
+import { bankApi } from './bank-api';
 
 export function makeStore() {
   return configureStore({
     reducer: {
-      account: accountReducer,
+      [bankApi.reducerPath]: bankApi.reducer,
     },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(bankApi.middleware),
   });
 }
 

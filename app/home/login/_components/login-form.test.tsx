@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoginForm } from './login-form';
-import { AUTH_SESSION_STORAGE_KEY } from '@/app/lib/auth-session';
 
 const { loginMockAccountMock, pushMock } = vi.hoisted(() => ({
   loginMockAccountMock: vi.fn(),
@@ -15,7 +14,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('../../_services/auth-service', () => ({
-  loginMockAccount: loginMockAccountMock,
+  loginAccount: loginMockAccountMock,
 }));
 
 describe('LoginForm', () => {
@@ -73,7 +72,7 @@ describe('LoginForm', () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it('envia login, salva sessao e redireciona quando sucesso', async () => {
+  it('envia login sem expor sessao no storage e redireciona quando sucesso', async () => {
     loginMockAccountMock.mockResolvedValue({
       ok: true,
       message: 'Login realizado com sucesso.',
@@ -110,27 +109,7 @@ describe('LoginForm', () => {
 
     expect(pushMock).toHaveBeenCalledWith('/dashboard/home');
 
-    const stored = sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-    expect(stored).not.toBeNull();
-    expect(stored ? JSON.parse(stored) : null).toEqual({
-      token: 'mock-token-user-1',
-      user: {
-        id: 'user-1',
-        name: 'Joana da Silva Oliveira',
-        email: 'joana@mail.com',
-        createdAt: '2026-01-01T00:00:00.000Z',
-        accountBalanceInCents: 250000,
-        statementEntries: [
-          {
-            id: 'entry-1',
-            month: 'Novembro',
-            type: 'Deposito',
-            amountInCents: 5000,
-            date: '21/11/2022',
-          },
-        ],
-      },
-    });
+    expect(sessionStorage).toHaveLength(0);
   });
 
   it('usa fallback vazio quando FormData retorna null', async () => {

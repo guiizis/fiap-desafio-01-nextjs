@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StatementPanel } from './statement-panel';
 import { StatementEntryType, TransactionType } from '../_domain/transaction.types';
@@ -129,7 +129,9 @@ describe('StatementPanel', () => {
       amountInCents: 70000,
       transactionDate: '2026-04-22',
     });
-    expect(screen.queryByRole('heading', { name: /Editar trans/i })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: /Editar trans/i })).not.toBeInTheDocument()
+    );
   });
 
   it('mantem modal aberto e mostra alerta quando a edicao retorna erro', async () => {
@@ -161,7 +163,7 @@ describe('StatementPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: /Salvar edi/i }));
 
     expect(onEditStatementEntryMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('alert')).toHaveTextContent('Saldo insuficiente');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Saldo insuficiente');
     expect(screen.getByRole('heading', { name: /Editar trans/i })).toBeInTheDocument();
   });
 

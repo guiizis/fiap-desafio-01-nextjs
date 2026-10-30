@@ -1,12 +1,13 @@
 import { createRequire } from 'node:module';
 import request from 'supertest';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const { createApp, resetStore } = require('./app');
 
 describe('Express API', () => {
   beforeEach(() => resetStore());
+  afterEach(() => resetStore());
 
   it('protege rotas privadas sem sessao', async () => {
     const response = await request(createApp()).get('/transactions');

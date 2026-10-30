@@ -1,17 +1,31 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DashboardLayout from './layout';
 
-const { replaceMock, useAuthSessionContextMock } = vi.hoisted(() => ({
-  replaceMock: vi.fn(),
-  useAuthSessionContextMock: vi.fn(),
+const { replaceMock, refreshMock, logoutAccountMock, useAuthSessionContextMock, dispatchMock } =
+  vi.hoisted(() => ({
+    replaceMock: vi.fn(),
+    refreshMock: vi.fn(),
+    logoutAccountMock: vi.fn(),
+    useAuthSessionContextMock: vi.fn(),
+    dispatchMock: vi.fn(),
+  }));
+
+vi.mock('./_state/hooks', () => ({ useAppDispatch: () => dispatchMock }));
+vi.mock('./_state/bank-api', () => ({
+  bankApi: { util: { resetApiState: () => ({ type: 'bankApi/reset' }) } },
 }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     replace: replaceMock,
+    refresh: refreshMock,
   }),
+}));
+
+vi.mock('@/app/home/_services/auth-service', () => ({
+  logoutAccount: logoutAccountMock,
 }));
 
 vi.mock('@/app/context/auth-session-context', () => ({
@@ -64,7 +78,25 @@ function authenticatedContext(name = 'Joana da Silva Oliveira') {
 describe('DashboardLayout', () => {
   beforeEach(() => {
     replaceMock.mockClear();
+    refreshMock.mockClear();
+    logoutAccountMock.mockReset();
+    dispatchMock.mockClear();
+    logoutAccountMock.mockResolvedValue({ ok: true, message: 'Sessão encerrada.' });
     useAuthSessionContextMock.mockReturnValue(authenticatedContext());
+  });
+
+  it('encerra a sessão pelo servidor e volta ao login', async () => {
+    render(
+      <DashboardLayout>
+        <main>Conteúdo protegido</main>
+      </DashboardLayout>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
+    await waitFor(() => expect(logoutAccountMock).toHaveBeenCalledOnce());
+    expect(replaceMock).toHaveBeenCalledWith('/home/login');
+    expect(refreshMock).toHaveBeenCalledOnce();
+    expect(dispatchMock).toHaveBeenCalledWith({ type: 'bankApi/reset' });
   });
 
   it('renderiza container da area de dashboard com children', () => {

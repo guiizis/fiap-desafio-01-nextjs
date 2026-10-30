@@ -71,7 +71,7 @@ export function StatementPanel({
       return;
     }
 
-    onDeleteStatementEntry(activeSelectedEntryId);
+    void onDeleteStatementEntry(activeSelectedEntryId);
     setEditingEntryId(null);
   };
 

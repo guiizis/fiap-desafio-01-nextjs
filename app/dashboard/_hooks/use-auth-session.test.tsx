@@ -1,204 +1,43 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AUTH_SESSION_CHANGED_EVENT, AUTH_SESSION_STORAGE_KEY } from '@/app/lib/auth-session';
+import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAuthSession } from './use-auth-session';
 
+const { useGetSessionQueryMock } = vi.hoisted(() => ({ useGetSessionQueryMock: vi.fn() }));
+
+vi.mock('../_state/bank-api', () => ({ useGetSessionQuery: useGetSessionQueryMock }));
+
+const user = {
+  id: 'user-1',
+  name: 'Maria Silva',
+  email: 'maria@mail.com',
+  createdAt: '2026-10-29T10:00:00.000Z',
+  accountBalanceInCents: 0,
+};
+
 describe('useAuthSession', () => {
-  beforeEach(() => {
-    sessionStorage.clear();
-  });
+  beforeEach(() => useGetSessionQueryMock.mockReset());
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('retorna estado unauthenticated quando sessao nao existe', async () => {
+  it('expõe loading enquanto a consulta ainda não tem dados', () => {
+    useGetSessionQueryMock.mockReturnValue({ isLoading: true, isFetching: true });
     const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('unauthenticated');
-    });
-
-    expect(result.current.session).toBeNull();
+    expect(result.current).toEqual({ session: null, status: 'loading' });
   });
 
-  it('retorna sessao autenticada quando json salvo e valido', async () => {
-    sessionStorage.setItem(
-      AUTH_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        token: 'mock-token-user-1',
-        user: {
-          id: 'user-1',
-          name: 'Joana da Silva Oliveira',
-          email: 'joana@mail.com',
-          createdAt: '2026-01-01T00:00:00.000Z',
-          accountBalanceInCents: 250000,
-          statementEntries: [
-            {
-              id: 'entry-1',
-              month: 'Novembro',
-              type: 'Deposito',
-              amountInCents: 5000,
-              date: '21/11/2022',
-            },
-          ],
-        },
-      })
-    );
-
+  it('expõe a sessão compartilhada pelo cache', () => {
+    useGetSessionQueryMock.mockReturnValue({ data: { user }, isLoading: false, isFetching: false });
     const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('authenticated');
-    });
-
-    expect(result.current.session?.user.name).toBe('Joana da Silva Oliveira');
-    expect(result.current.session?.user.accountBalanceInCents).toBe(250000);
+    expect(result.current).toEqual({ session: { user }, status: 'authenticated' });
   });
 
-  it('retorna unauthenticated quando json salvo esta invalido', async () => {
-    sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, '{json-invalido}');
-
+  it('mantém a sessão durante uma revalidação em segundo plano', () => {
+    useGetSessionQueryMock.mockReturnValue({ data: { user }, isLoading: false, isFetching: true });
     const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('unauthenticated');
-    });
-
-    expect(result.current.session).toBeNull();
+    expect(result.current).toEqual({ session: { user }, status: 'authenticated' });
   });
 
-  it('atualiza estado quando recebe storage event da sessao', async () => {
+  it('expõe estado não autenticado quando a consulta não retorna dados', () => {
+    useGetSessionQueryMock.mockReturnValue({ isLoading: false, isFetching: false });
     const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('unauthenticated');
-    });
-
-    sessionStorage.setItem(
-      AUTH_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        token: 'mock-token-user-1',
-        user: {
-          id: 'user-1',
-          name: 'Joana da Silva Oliveira',
-          email: 'joana@mail.com',
-          createdAt: '2026-01-01T00:00:00.000Z',
-          accountBalanceInCents: 250000,
-          statementEntries: [],
-        },
-      })
-    );
-
-    act(() => {
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: AUTH_SESSION_STORAGE_KEY,
-          storageArea: window.sessionStorage,
-        })
-      );
-    });
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('authenticated');
-    });
-  });
-
-  it('ignora storage event de outra chave e de outro storage', async () => {
-    const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('unauthenticated');
-    });
-
-    act(() => {
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: 'outra-chave',
-          storageArea: window.sessionStorage,
-        })
-      );
-    });
-
-    act(() => {
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: AUTH_SESSION_STORAGE_KEY,
-          storageArea: window.localStorage,
-        })
-      );
-    });
-
-    expect(result.current.status).toBe('unauthenticated');
-  });
-
-  it('atualiza estado quando recebe evento interno de mudanca de sessao', async () => {
-    const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('unauthenticated');
-    });
-
-    sessionStorage.setItem(
-      AUTH_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        token: 'mock-token-user-1',
-        user: {
-          id: 'user-1',
-          name: 'Joana da Silva Oliveira',
-          email: 'joana@mail.com',
-          createdAt: '2026-01-01T00:00:00.000Z',
-          accountBalanceInCents: 250000,
-          statementEntries: [],
-        },
-      })
-    );
-
-    act(() => {
-      window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
-    });
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('authenticated');
-    });
-  });
-
-  it('normaliza sessao legado e persiste no formato atual', async () => {
-    sessionStorage.setItem(
-      AUTH_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        token: 'mock-token-user-1',
-        user: {
-          id: 'user-1',
-          name: 'Joana da Silva Oliveira',
-          email: 'joana@mail.com',
-          createdAt: '2026-01-01T00:00:00.000Z',
-          accountBalance: 'R$ 2.500,00',
-          statementEntries: [
-            {
-              id: 'entry-1',
-              month: 'Novembro',
-              type: 'Deposito',
-              value: 'R$ 50',
-              date: '21/11/2022',
-            },
-          ],
-        },
-      })
-    );
-
-    const { result } = renderHook(() => useAuthSession());
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('authenticated');
-    });
-
-    const normalizedSession = JSON.parse(
-      sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY) ?? '{}'
-    ) as Record<string, unknown>;
-    const normalizedUser = normalizedSession.user as Record<string, unknown>;
-
-    expect(normalizedUser.accountBalanceInCents).toBe(250000);
-    expect(normalizedUser).not.toHaveProperty('accountBalance');
+    expect(result.current).toEqual({ session: null, status: 'unauthenticated' });
   });
 });

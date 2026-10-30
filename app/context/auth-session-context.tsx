@@ -1,263 +1,97 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useSyncExternalStore,
-  type ReactNode,
-} from 'react';
-import {
-  AUTH_SESSION_CHANGED_EVENT,
-  AUTH_SESSION_STORAGE_KEY,
-  parseAuthSession,
-  setAuthSession,
-  type AuthSession,
-} from '../lib/auth-session';
+import { createContext, useContext, type ReactNode } from 'react';
 import type {
-  NewTransactionPayload,
-  TransactionResult,
   EditStatementEntryPayload,
+  NewTransactionPayload,
   StatementEntry,
+  TransactionResult,
 } from '../dashboard/_domain/transaction.types';
+import { StatementEntryType } from '../dashboard/_domain/transaction.types';
 import {
-  accountHydrated,
-  statementEntryDeleted,
-  statementEntryEdited,
-  transactionAppended,
-} from '../dashboard/_state/account.slice';
-import { useAppDispatch, useAppSelector } from '../dashboard/_state/hooks';
-import { getTransactionDateRange } from '../dashboard/_domain/transaction-date-policy';
-import { formatIsoDateToPtBr } from '../dashboard/_utils/date';
-import { toStatementDate, type TransactionStatementDate } from '../dashboard/_utils/statement-date';
+  type ApiTransaction,
+  useCreateTransactionMutation,
+  useDeleteTransactionMutation,
+  useEditTransactionMutation,
+  useGetAccountQuery,
+} from '../dashboard/_state/bank-api';
+import { formatIsoDateToPtBr, parseIsoDate } from '../dashboard/_utils/date';
 import {
-  getProjectedBalanceAfterEdit,
-  getSignedTransactionAmount,
-  hasSufficientBalance,
-  toStatementEntryType,
-} from '../dashboard/_domain/transaction-rules';
-import { StatementEntryType, TransactionType } from '../dashboard/_domain/transaction.types';
+  useAuthSession,
+  type AuthSessionStatus,
+  type ServerAuthSession,
+} from '../dashboard/_hooks/use-auth-session';
 
-export type AuthSessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
+export type { AuthSessionStatus };
 
 type AuthSessionContextValue = {
-  session: AuthSession | null;
+  session: ServerAuthSession | null;
   status: AuthSessionStatus;
   statementEntries: StatementEntry[];
   balanceInCents: number;
-  onSubmitTransaction: (payload: NewTransactionPayload) => TransactionResult;
-  onDeleteStatementEntry: (entryId: string) => void;
-  onEditStatementEntry: (payload: EditStatementEntryPayload) => TransactionResult;
+  onSubmitTransaction: (payload: NewTransactionPayload) => Promise<TransactionResult>;
+  onDeleteStatementEntry: (entryId: string) => Promise<TransactionResult>;
+  onEditStatementEntry: (payload: EditStatementEntryPayload) => Promise<TransactionResult>;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
 
-const SERVER_SNAPSHOT = '__server_snapshot__';
-const EMPTY_SNAPSHOT = '__empty_snapshot__';
-
-function createStatementEntry(
-  { type, amountInCents }: Omit<NewTransactionPayload, 'transactionDate'>,
-  statementDate: TransactionStatementDate
-): StatementEntry {
-  const id =
-    typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+function toStatementEntry(transaction: ApiTransaction): StatementEntry {
+  const parsedDate = parseIsoDate(transaction.date);
+  const referenceDate = parsedDate
+    ? new Date(Date.UTC(parsedDate.year, parsedDate.month - 1, parsedDate.day, 12))
+    : new Date();
+  const month = new Intl.DateTimeFormat('pt-BR', {
+    month: 'long',
+    timeZone: 'America/Sao_Paulo',
+  }).format(referenceDate);
 
   return {
-    id,
-    month: statementDate.monthLabel,
-    type: toStatementEntryType(type),
-    amountInCents: getSignedTransactionAmount(type, amountInCents),
-    date: statementDate.dateLabel,
+    id: transaction.id,
+    month: `${month.charAt(0).toUpperCase()}${month.slice(1)}`,
+    type: transaction.type === 'deposit' ? StatementEntryType.DEPOSIT : StatementEntryType.TRANSFER,
+    amountInCents: transaction.amountInCents,
+    date: formatIsoDateToPtBr(transaction.date),
   };
 }
 
-function subscribe(onStoreChange: () => void) {
-  const onStorageChange = (event: StorageEvent) => {
-    if (event.storageArea !== window.sessionStorage) {
-      return;
-    }
+export function AuthSessionProvider({ children }: { children: ReactNode }) {
+  const auth = useAuthSession();
+  const account = useGetAccountQuery(undefined, { skip: auth.status !== 'authenticated' });
+  const [createTransaction] = useCreateTransactionMutation();
+  const [editTransaction] = useEditTransactionMutation();
+  const [deleteTransaction] = useDeleteTransactionMutation();
 
-    if (event.key && event.key !== AUTH_SESSION_STORAGE_KEY) {
-      return;
+  const runMutation = async (mutation: {
+    unwrap: () => Promise<unknown>;
+  }): Promise<TransactionResult> => {
+    try {
+      await mutation.unwrap();
+      return { ok: true };
+    } catch (error) {
+      const data = typeof error === 'object' && error && 'data' in error ? error.data : null;
+      const message =
+        typeof data === 'object' && data && 'message' in data && typeof data.message === 'string'
+          ? data.message
+          : 'Não foi possível concluir a operação.';
+      return { ok: false, message };
     }
-
-    onStoreChange();
   };
-
-  const onSessionChangedEvent = () => onStoreChange();
-
-  window.addEventListener('storage', onStorageChange);
-  window.addEventListener(AUTH_SESSION_CHANGED_EVENT, onSessionChangedEvent);
-
-  return () => {
-    window.removeEventListener('storage', onStorageChange);
-    window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, onSessionChangedEvent);
-  };
-}
-
-function getServerSnapshot() {
-  return SERVER_SNAPSHOT;
-}
-
-function getClientSnapshot() {
-  return window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY) ?? EMPTY_SNAPSHOT;
-}
-
-type AuthSessionProviderProps = {
-  children: ReactNode;
-};
-
-export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
-  const dispatch = useAppDispatch();
-  const accountState = useAppSelector((state) => state.account);
-  const serializedSession = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
-
-  const session =
-    serializedSession === SERVER_SNAPSHOT || serializedSession === EMPTY_SNAPSHOT
-      ? null
-      : parseAuthSession(serializedSession);
-
-  useEffect(() => {
-    if (!session || serializedSession === SERVER_SNAPSHOT || serializedSession === EMPTY_SNAPSHOT) {
-      return;
-    }
-
-    const normalizedSerializedSession = JSON.stringify(session);
-
-    if (normalizedSerializedSession !== serializedSession) {
-      setAuthSession(session);
-    }
-  }, [serializedSession, session]);
 
   const status: AuthSessionStatus =
-    serializedSession === SERVER_SNAPSHOT
-      ? 'loading'
-      : session
-        ? 'authenticated'
-        : 'unauthenticated';
-
-  const transactionDateRange = getTransactionDateRange();
-  const lastHydratedSnapshotRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (
-      !session ||
-      serializedSession === SERVER_SNAPSHOT ||
-      serializedSession === EMPTY_SNAPSHOT ||
-      lastHydratedSnapshotRef.current === serializedSession
-    ) {
-      return;
-    }
-
-    lastHydratedSnapshotRef.current = serializedSession;
-    dispatch(
-      accountHydrated({
-        balanceInCents: session.user.accountBalanceInCents,
-        statementEntries: session.user.statementEntries ?? [],
-      })
-    );
-  }, [serializedSession, session, dispatch]);
-
-  const onSubmitTransaction = ({
-    type,
-    amountInCents,
-    transactionDate,
-  }: NewTransactionPayload): TransactionResult => {
-    const signedAmountInCents = getSignedTransactionAmount(type, amountInCents);
-    if (!hasSufficientBalance(accountState.currentBalanceInCents, signedAmountInCents)) {
-      return {
-        ok: false,
-        message: 'Saldo insuficiente para concluir a transferência.',
-      };
-    }
-
-    const statementDate = toStatementDate(transactionDate, transactionDateRange);
-    if (!statementDate) {
-      return {
-        ok: false,
-        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
-      };
-    }
-
-    const entry = createStatementEntry({ type, amountInCents }, statementDate);
-    dispatch(transactionAppended(entry));
-
-    return {
-      ok: true,
-    };
-  };
-
-  const onDeleteStatementEntry = (entryId: string) => {
-    dispatch(statementEntryDeleted(entryId));
-  };
-
-  const onEditStatementEntry = ({
-    entryId,
-    type,
-    amountInCents,
-    transactionDate,
-  }: EditStatementEntryPayload): TransactionResult => {
-    const entryToEdit = accountState.currentStatementEntries.find((entry) => entry.id === entryId);
-    if (!entryToEdit) {
-      return {
-        ok: false,
-        message: 'Lançamento não encontrado para edição.',
-      };
-    }
-
-    const statementDate = toStatementDate(transactionDate, transactionDateRange);
-    if (!statementDate) {
-      return {
-        ok: false,
-        message: `Data inválida. Selecione uma data entre ${formatIsoDateToPtBr(transactionDateRange.minDate)} e ${formatIsoDateToPtBr(transactionDateRange.maxDate)}.`,
-      };
-    }
-
-    const projectedBalanceInCents = getProjectedBalanceAfterEdit(
-      accountState.currentBalanceInCents,
-      entryToEdit.amountInCents,
-      type,
-      amountInCents
-    );
-
-    if (projectedBalanceInCents < 0) {
-      return {
-        ok: false,
-        message: 'Saldo insuficiente para concluir a transferência.',
-      };
-    }
-
-    dispatch(
-      statementEntryEdited({
-        entryId,
-        nextAmountInCents: amountInCents,
-        nextType:
-          type === TransactionType.DEPOSIT
-            ? StatementEntryType.DEPOSIT
-            : StatementEntryType.TRANSFER,
-        nextMonth: statementDate.monthLabel,
-        nextDate: statementDate.dateLabel,
-      })
-    );
-
-    return {
-      ok: true,
-    };
-  };
+    auth.status === 'authenticated' && account.isLoading ? 'loading' : auth.status;
+  const statementEntries = account.data?.transactions.map(toStatementEntry) ?? [];
 
   return (
     <AuthSessionContext.Provider
       value={{
-        session,
+        session: auth.session,
         status,
-        onSubmitTransaction,
-        onDeleteStatementEntry,
-        onEditStatementEntry,
-        statementEntries: accountState.currentStatementEntries,
-        balanceInCents: accountState.currentBalanceInCents,
+        statementEntries,
+        balanceInCents: account.data?.balanceInCents ?? 0,
+        onSubmitTransaction: (payload) => runMutation(createTransaction(payload)),
+        onDeleteStatementEntry: (entryId) => runMutation(deleteTransaction(entryId)),
+        onEditStatementEntry: (payload) => runMutation(editTransaction(payload)),
       }}
     >
       {children}
@@ -267,10 +101,8 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
 
 export function useAuthSessionContext(): AuthSessionContextValue {
   const context = useContext(AuthSessionContext);
-
   if (!context) {
     throw new Error('useAuthSessionContext must be used within an AuthSessionProvider');
   }
-
   return context;
 }
