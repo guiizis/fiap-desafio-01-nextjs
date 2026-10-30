@@ -14,7 +14,7 @@ Este repositório faz parte do **Tech Challenge** da pós-graduação em Fronten
 
 ### Disponíveis
 
-- Cadastro e login de usuário (mock)
+- Cadastro e login com sessão por cookie `HttpOnly`
 - Visualização de resumo da conta
 - Consulta de extrato bancário
 - Efetuar transação
@@ -33,6 +33,8 @@ Este repositório faz parte do **Tech Challenge** da pós-graduação em Fronten
 - **TypeScript**: 5
 - **Tailwind CSS**: 4
 - **Storybook**: 10.3.0
+- **Redux Toolkit**: 2.13
+- **Express**: 5.3
 
 ---
 
@@ -63,7 +65,8 @@ Para iniciar simultaneamente o Next.js e a API Express acadêmica:
 npm run dev:full
 ```
 
-A API utiliza a porta `3001` e é acessada pelo frontend através de `/backend/*`.
+A API utiliza a porta `3001`, persiste os dados acadêmicos em `server/db.json` e é acessada pelo
+frontend através de `/backend/*`.
 
 ### 4. Rodando o Storybook
 
@@ -93,7 +96,26 @@ npm run test
 
 - [Plano, matriz de requisitos e arquitetura proposta](docs/tech-challenge.md)
 - [Baseline e metodologia de performance](docs/performance/README.md)
+- [Comparativo de cache antes e depois do RTK Query](docs/cache-baseline.md)
 
 As regras financeiras ficam em `app/dashboard/_domain`, sem dependência de React ou Next.js. Os
-componentes permanecem responsáveis pela apresentação, enquanto `_services` e os Route Handlers
-concentram a comunicação e a infraestrutura mock da aplicação.
+componentes permanecem responsáveis pela apresentação, enquanto o RTK Query centraliza comunicação,
+cache e invalidação da API Express. A sessão é mantida no servidor e o navegador recebe somente um
+cookie `HttpOnly`.
+
+### Como funciona o cache do RTK Query
+
+O RTK Query armazena as respostas da API somente **em memória**, dentro da store Redux da aba atual.
+Ele não utiliza `IndexedDB`, `localStorage`, `sessionStorage` ou cookies para persistir saldo, extrato
+ou outros dados financeiros.
+
+- Consultas simultâneas iguais compartilham a mesma requisição e resposta.
+- Sessão e conta permanecem reutilizáveis por até 60 segundos depois que deixam de ter componentes
+  inscritos (`keepUnusedDataFor`).
+- Criar, editar ou excluir uma transação invalida a tag `Account` e atualiza saldo e extrato
+  automaticamente.
+- O logout executa `resetApiState`, removendo imediatamente do Redux todo o cache da API.
+- Recarregar ou fechar a página também elimina o cache, pois não existe persistência no dispositivo.
+
+Essa escolha reduz requisições duplicadas sem deixar informações financeiras armazenadas no navegador
+após o uso da aplicação.
