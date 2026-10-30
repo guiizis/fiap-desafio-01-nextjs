@@ -159,3 +159,16 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Saldo recalculado no servidor e transferências sem saldo rejeitadas.
 - Armazenamento em memória mantido intencionalmente para o escopo acadêmico.
 - Integração do frontend e cache RTK Query ainda pendentes antes da conclusão do épico.
+
+### Épico 5 — otimizações e medição final concluídos
+
+- Modais de edição de transação e de serviço em construção separados em chunks sob demanda com
+  `next/dynamic`.
+- Preload por intenção adicionado em `hover`, foco por teclado e toque.
+- Code splitting por rota e lazy loading de imagens mantidos sob responsabilidade das APIs nativas do
+  App Router e de `next/image`.
+- Seis auditorias finais executadas em build de produção, com três amostras para `/home` e três para
+  `/home/login`.
+- Comparativo por medianas e relatórios completos registrados em `docs/performance`.
+- Medição autenticada do dashboard permanece vinculada ao Épico 4B, quando o frontend passar a usar a
+  sessão por cookie do Express.

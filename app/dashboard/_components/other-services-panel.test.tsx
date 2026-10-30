@@ -17,7 +17,7 @@ describe('OtherServicesPanel', () => {
     ).toBeInTheDocument();
   });
 
-  it('abre e fecha o modal de serviço em construção', () => {
+  it('abre e fecha o modal de serviço em construção', async () => {
     render(<OtherServicesPanel />);
 
     const [openWarningButton] = screen.getAllByRole('button', {
@@ -26,7 +26,7 @@ describe('OtherServicesPanel', () => {
 
     fireEvent.click(openWarningButton);
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText(/ainda em constru/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /voltar para o painel/i }));

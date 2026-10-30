@@ -88,7 +88,7 @@ describe('StatementPanel', () => {
     expect(screen.queryByRole('button', { name: 'Excluir extrato' })).not.toBeInTheDocument();
   });
 
-  it('abre modal de edicao e envia payload completo de tipo, valor e data', () => {
+  it('abre modal de edicao e envia payload completo de tipo, valor e data', async () => {
     render(
       <StatementPanel
         entries={[
@@ -106,7 +106,7 @@ describe('StatementPanel', () => {
     fireEvent.click(getEntryByDate('18/11/2022'));
     fireEvent.click(screen.getByRole('button', { name: 'Editar extrato' }));
 
-    expect(screen.getByRole('heading', { name: /Editar trans/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Editar trans/i })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /Tipo de trans/i })).toHaveValue(
       TransactionType.DEPOSIT
     );
@@ -132,7 +132,7 @@ describe('StatementPanel', () => {
     expect(screen.queryByRole('heading', { name: /Editar trans/i })).not.toBeInTheDocument();
   });
 
-  it('mantem modal aberto e mostra alerta quando a edicao retorna erro', () => {
+  it('mantem modal aberto e mostra alerta quando a edicao retorna erro', async () => {
     onEditStatementEntryMock.mockReturnValue({
       ok: false as const,
       message: 'Saldo insuficiente para concluir a transferencia.',
@@ -154,6 +154,7 @@ describe('StatementPanel', () => {
 
     fireEvent.click(getEntryByDate('18/11/2022'));
     fireEvent.click(screen.getByRole('button', { name: 'Editar extrato' }));
+    await screen.findByRole('heading', { name: /Editar trans/i });
     fireEvent.change(screen.getByLabelText('Data'), {
       target: { value: '2026-04-21' },
     });
@@ -271,7 +272,7 @@ describe('StatementPanel', () => {
     expect(onDeleteStatementEntryMock).not.toHaveBeenCalled();
   });
 
-  it('fecha modal com Escape e exclui item selecionado', () => {
+  it('fecha modal com Escape e exclui item selecionado', async () => {
     render(
       <StatementPanel
         entries={[
@@ -288,7 +289,7 @@ describe('StatementPanel', () => {
 
     fireEvent.click(getEntryByDate('18/11/2022'));
     fireEvent.click(screen.getByRole('button', { name: 'Editar extrato' }));
-    expect(screen.getByRole('heading', { name: /Editar trans/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Editar trans/i })).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('heading', { name: /Editar trans/i })).not.toBeInTheDocument();

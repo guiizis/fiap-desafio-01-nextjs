@@ -1,7 +1,13 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { ServiceUnderConstructionModal } from './service-under-construction-modal';
+import dynamic from 'next/dynamic';
+
+const loadServiceUnderConstructionModal = () => import('./service-under-construction-modal');
+
+const ServiceUnderConstructionModal = dynamic(() =>
+  loadServiceUnderConstructionModal().then((module) => module.ServiceUnderConstructionModal)
+);
 
 type ServiceOption = {
   id: string;
@@ -38,6 +44,9 @@ export function OtherServicesPanel() {
               <button
                 type="button"
                 onClick={() => setSelectedServiceLabel(option.label)}
+                onMouseEnter={loadServiceUnderConstructionModal}
+                onFocus={loadServiceUnderConstructionModal}
+                onTouchStart={loadServiceUnderConstructionModal}
                 className="flex h-full w-full cursor-pointer items-center justify-center rounded-md p-4 text-center transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label={`Abrir aviso do serviço ${option.label}`}
               >
