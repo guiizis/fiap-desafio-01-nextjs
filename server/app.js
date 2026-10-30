@@ -10,6 +10,36 @@ const { rateLimit } = require('express-rate-limit');
 const scrypt = promisify(scryptCallback);
 const users = new Map();
 const databasePath = process.env.MCINTOSH_DB_PATH || join(__dirname, 'db.json');
+const developmentSessionSecret = 'development-only-change-me';
+const defaultAllowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
+function getSessionSecret() {
+  const secret = process.env.SESSION_SECRET;
+  if (process.env.NODE_ENV === 'production' && (!secret || secret.length < 32)) {
+    throw new Error('SESSION_SECRET deve possuir ao menos 32 caracteres em produção.');
+  }
+  return secret || developmentSessionSecret;
+}
+
+function getAllowedOrigins() {
+  const configuredOrigins = process.env.ALLOWED_ORIGINS?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  return new Set(configuredOrigins?.length ? configuredOrigins : defaultAllowedOrigins);
+}
+
+function protectUnsafeRequest(allowedOrigins) {
+  return (req, res, next) => {
+    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
+
+    const origin = req.get('origin');
+    const fetchSite = req.get('sec-fetch-site');
+    if (fetchSite === 'cross-site' || (origin && !allowedOrigins.has(origin))) {
+      return res.status(403).json({ message: 'Origem da requisição não autorizada.' });
+    }
+    return next();
+  };
+}
 
 function persistStore() {
   const temporaryPath = `${databasePath}.tmp`;
@@ -70,7 +100,7 @@ function validTransaction(body) {
   return (
     body &&
     (body.type === 'deposit' || body.type === 'transfer') &&
-    Number.isInteger(body.amountInCents) &&
+    Number.isSafeInteger(body.amountInCents) &&
     body.amountInCents > 0 &&
     typeof body.date === 'string' &&
     /^\d{4}-\d{2}-\d{2}$/.test(body.date)
@@ -80,19 +110,23 @@ function validTransaction(body) {
 function createApp() {
   loadStore();
   const app = express();
+  const isProduction = process.env.NODE_ENV === 'production';
+  const sessionSecret = getSessionSecret();
   app.disable('x-powered-by');
+  if (isProduction) app.set('trust proxy', 1);
   app.use(helmet());
+  app.use(protectUnsafeRequest(getAllowedOrigins()));
   app.use(express.json({ limit: '20kb' }));
   app.use(
     session({
       name: 'mcintosh.sid',
-      secret: process.env.SESSION_SECRET || 'development-only-change-me',
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         maxAge: 60 * 60 * 1000,
       },
     })
@@ -103,6 +137,7 @@ function createApp() {
     limit: 10,
     standardHeaders: true,
     legacyHeaders: false,
+    skipSuccessfulRequests: true,
   });
 
   app.post('/auth/register', async (req, res) => {
@@ -111,9 +146,12 @@ function createApp() {
     if (
       typeof name !== 'string' ||
       name.trim().length < 3 ||
+      name.trim().length > 100 ||
       !/^\S+@\S+\.\S+$/.test(normalizedEmail) ||
+      normalizedEmail.length > 254 ||
       typeof password !== 'string' ||
-      password.length < 8
+      password.length < 8 ||
+      password.length > 128
     ) {
       return res.status(400).json({ message: 'Dados de cadastro inválidos.' });
     }
@@ -145,14 +183,25 @@ function createApp() {
       return res.status(401).json({ message: 'Email ou senha inválidos.' });
     }
 
-    req.session.userId = user.id;
-    return res.json({ message: 'Login realizado com sucesso.', user: publicUser(user) });
+    return req.session.regenerate((regenerateError) => {
+      if (regenerateError) return res.status(500).json({ message: 'Erro interno do servidor.' });
+      req.session.userId = user.id;
+      return req.session.save((saveError) => {
+        if (saveError) return res.status(500).json({ message: 'Erro interno do servidor.' });
+        return res.json({ message: 'Login realizado com sucesso.', user: publicUser(user) });
+      });
+    });
   });
 
   app.post('/auth/logout', (req, res, next) => {
     req.session.destroy((error) => {
       if (error) return next(error);
-      res.clearCookie('mcintosh.sid');
+      res.clearCookie('mcintosh.sid', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: isProduction,
+        path: '/',
+      });
       return res.status(204).end();
     });
   });
@@ -214,9 +263,15 @@ function createApp() {
   });
 
   app.use((_req, res) => res.status(404).json({ message: 'Rota não encontrada.' }));
-  app.use((_error, _req, res, _next) =>
-    res.status(500).json({ message: 'Erro interno do servidor.' })
-  );
+  app.use((error, _req, res, _next) => {
+    if (error?.type === 'entity.too.large') {
+      return res.status(413).json({ message: 'Corpo da requisição excede o limite permitido.' });
+    }
+    if (error instanceof SyntaxError && error?.type === 'entity.parse.failed') {
+      return res.status(400).json({ message: 'JSON inválido.' });
+    }
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  });
 
   return app;
 }
