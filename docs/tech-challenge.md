@@ -147,13 +147,18 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Logout limpa todo o cache remoto para não reter dados financeiros privados.
 - Comparativo antes/depois e evidências automatizadas registrados em `docs/cache-baseline.md`.
 
-### Épico 4 — backend seguro em implementação
+### Épico 4 — backend seguro concluído
 
 - API Express criada fora da árvore do Next.js e encaminhada por `/backend/*` com `rewrites`.
 - Senhas protegidas com `scrypt` e salt aleatório de 16 bytes.
 - Sessões mantidas no servidor com cookie `HttpOnly`, `SameSite=Lax` e duração de uma hora.
 - Cookie marcado como `Secure` quando `NODE_ENV=production`.
 - Helmet, limite de payload e rate limit no login configurados.
+- Segredo de sessão com mínimo de 32 caracteres tornou-se obrigatório em produção.
+- ID de sessão regenerado no login para reduzir risco de session fixation.
+- Mutações protegidas contra origens não autorizadas e requisições `cross-site` do navegador.
+- Erros de parsing, excesso de payload e falhas internas retornam mensagens controladas.
+- Origens confiáveis configuráveis por `ALLOWED_ORIGINS`, preservando clientes sem header `Origin`.
 - Cadastro, login, logout e consulta de sessão implementados.
 - CRUD de transações protegido por sessão e autorização por usuário implementado.
 - Saldo recalculado no servidor e transferências sem saldo rejeitadas.
@@ -165,6 +170,9 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Consulta e mutações de transações agora usam RTK Query, com invalidação automática da conta.
 - Route Handlers `/api/mock`, token no `sessionStorage` e utilitários do mock antigo removidos para
   manter o Express como única fonte de autenticação e transações.
+- Testes automatizados cobrem headers do Helmet, cookie, origem, rate limit, payload e configuração de
+  produção.
+- `MemoryStore` e `server/db.json` documentados como limitações deliberadas do servidor acadêmico.
 
 ### Épico 5 — otimizações e medição final concluídos
 
@@ -176,5 +184,13 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Seis auditorias finais executadas em build de produção, com três amostras para `/home` e três para
   `/home/login`.
 - Comparativo por medianas e relatórios completos registrados em `docs/performance`.
-- Medição autenticada do dashboard permanece vinculada ao Épico 4B, quando o frontend passar a usar a
-  sessão por cookie do Express.
+- A integração autenticada do dashboard foi concluída no Épico 4; a medição principal permanece nas
+  rotas públicas para preservar comparação direta com a baseline registrada no início do projeto.
+
+### Épico 6 — material de entrega concluído; gravação pendente
+
+- README consolidado com tecnologias, execução, cache, segurança e limitações acadêmicas.
+- Matriz final de requisito, implementação e evidência registrada em `docs/delivery-guide.md`.
+- Roteiro cronometrado preparado para um vídeo com aproximadamente quatro minutos e meio.
+- Checklist final inclui instalação limpa, fluxo manual, qualidade, dados locais e acesso aos artefatos.
+- A gravação e publicação do vídeo permanecem como ações externas a serem feitas pelo grupo.

@@ -51,6 +51,9 @@ Este repositório faz parte do **Tech Challenge** da pós-graduação em Fronten
 npm install
 ```
 
+Copie `.env.example` para `.env` caso queira personalizar a execução. Em produção,
+`SESSION_SECRET` é obrigatório e deve possuir ao menos 32 caracteres.
+
 ### 3. Rodando a aplicação Next.js
 
 ```bash
@@ -97,6 +100,7 @@ npm run test
 - [Plano, matriz de requisitos e arquitetura proposta](docs/tech-challenge.md)
 - [Baseline e metodologia de performance](docs/performance/README.md)
 - [Comparativo de cache antes e depois do RTK Query](docs/cache-baseline.md)
+- [Matriz final, roteiro do vídeo e checklist de entrega](docs/delivery-guide.md)
 
 As regras financeiras ficam em `app/dashboard/_domain`, sem dependência de React ou Next.js. Os
 componentes permanecem responsáveis pela apresentação, enquanto o RTK Query centraliza comunicação,
@@ -119,3 +123,21 @@ ou outros dados financeiros.
 
 Essa escolha reduz requisições duplicadas sem deixar informações financeiras armazenadas no navegador
 após o uso da aplicação.
+
+### Segurança do servidor acadêmico
+
+- Senhas são derivadas com `scrypt` e salt aleatório; a senha original nunca é persistida.
+- A sessão fica no servidor e o navegador recebe um cookie `HttpOnly`, `SameSite=Lax`, com duração de
+  uma hora e `Secure` em produção.
+- O identificador da sessão é regenerado após o login para reduzir risco de session fixation.
+- Helmet adiciona headers defensivos e o endpoint de login possui rate limit de dez falhas por minuto
+  e por endereço.
+- Mutações com `Origin` não autorizada ou `Sec-Fetch-Site: cross-site` são rejeitadas. Clientes como
+  Postman continuam aceitos quando não enviam esses headers de navegador.
+- JSON inválido, payload acima de 20 KB e erros internos recebem respostas controladas, sem stack trace.
+- `ALLOWED_ORIGINS` permite configurar as origens confiáveis de produção.
+
+O `MemoryStore` do `express-session` e o arquivo `server/db.json` foram mantidos deliberadamente para
+o servidor acadêmico mockado. Eles não são adequados para produção ou múltiplas instâncias; uma versão
+real deveria usar armazenamento compartilhado de sessão e banco de dados com controle de concorrência,
+backup e criptografia em repouso.
