@@ -1,38 +1,38 @@
-﻿"use client";
+﻿'use client';
 
-import Image from "next/image";
-import type { FormEventHandler } from "react";
-import { useState } from "react";
+import Image from 'next/image';
+import type { FormEventHandler } from 'react';
+import { useState } from 'react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input, validateInputValue } from '@/components/ui/input';
-import { registerMockAccount } from "../../_services/auth-service";
+import { registerAccount } from '../../_services/auth-service';
 
-type RegisterFormLayout = "page" | "modal";
+type RegisterFormLayout = 'page' | 'modal';
 
 type RegisterFormProps = {
   layout?: RegisterFormLayout;
 };
 
-export function RegisterForm({ layout = "page" }: RegisterFormProps) {
-  const isModal = layout === "modal";
+export function RegisterForm({ layout = 'page' }: RegisterFormProps) {
+  const isModal = layout === 'modal';
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{
-    variant: "success" | "error";
+    variant: 'success' | 'error';
     message: string;
   } | null>(null);
 
   const isFormElementValid = (formElement: HTMLFormElement) => {
     const formData = new FormData(formElement);
-    const consentElement = formElement.elements.namedItem("consent");
+    const consentElement = formElement.elements.namedItem('consent');
     const isConsentChecked =
       consentElement instanceof HTMLInputElement ? consentElement.checked : false;
 
     return (
-      validateInputValue("name", String(formData.get("name") ?? "")) === null &&
-      validateInputValue("email", String(formData.get("email") ?? "")) === null &&
-      validateInputValue("password", String(formData.get("password") ?? "")) === null &&
+      validateInputValue('name', String(formData.get('name') ?? '')) === null &&
+      validateInputValue('email', String(formData.get('email') ?? '')) === null &&
+      validateInputValue('password', String(formData.get('password') ?? '')) === null &&
       isConsentChecked
     );
   };
@@ -47,12 +47,12 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
 
     const formData = new FormData(formElement);
     const payload = {
-      name: String(formData.get("name") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("password") ?? ""),
+      name: String(formData.get('name') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('password') ?? ''),
     };
 
-    const result = await registerMockAccount(payload);
+    const result = await registerAccount(payload);
 
     if (result.ok) {
       formElement.reset();
@@ -60,7 +60,7 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
     }
 
     setFeedback({
-      variant: result.ok ? "success" : "error",
+      variant: result.ok ? 'success' : 'error',
       message: result.message,
     });
     setIsSubmitting(false);
@@ -84,14 +84,14 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
   const handleAlertClose = () => setFeedback(null);
 
   return (
-    <div className={isModal ? "w-full" : "w-full rounded-lg bg-surface p-6 shadow-sm md:p-8"}>
+    <div className={isModal ? 'w-full' : 'w-full rounded-lg bg-surface p-6 shadow-sm md:p-8'}>
       <div className="mb-6 flex justify-center">
         <Image
           src="/home/login/new-account.svg"
           alt="Ilustração de abertura de conta"
           width={355}
           height={262}
-          className={isModal ? "h-auto w-full max-w-[280px]" : "h-auto w-full max-w-[320px]"}
+          className={isModal ? 'h-auto w-full max-w-[280px]' : 'h-auto w-full max-w-[320px]'}
           priority
         />
       </div>
@@ -132,7 +132,7 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
           type="password"
           validationKind="password"
           placeholder="Digite sua senha"
-          inputClassName={isModal ? "max-w-[165px] mobile:max-w-none" : undefined}
+          inputClassName={isModal ? 'max-w-[165px] mobile:max-w-none' : undefined}
         />
 
         <label className="flex items-start gap-2 pt-1 text-body-sm text-body">
@@ -143,7 +143,8 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
             className="mt-0.5 h-4 w-4 rounded border-border text-secondary focus:ring-secondary"
           />
           <span>
-            Li e estou ciente quanto às condições de tratamento dos meus dados conforme descrito na Política de Privacidade do banco.
+            Li e estou ciente quanto às condições de tratamento dos meus dados conforme descrito na
+            Política de Privacidade do banco.
           </span>
         </label>
 
@@ -159,7 +160,7 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
           </div>
         ) : null}
 
-        <div className={isModal ? "flex justify-center pt-2" : "pt-2"}>
+        <div className={isModal ? 'flex justify-center pt-2' : 'pt-2'}>
           <Button
             type="submit"
             variant="solid"
@@ -167,7 +168,7 @@ export function RegisterForm({ layout = "page" }: RegisterFormProps) {
             className="h-11 min-w-[124px] justify-center"
             disabled={!isFormValid || isSubmitting}
           >
-            {isSubmitting ? "Criando..." : "Criar conta"}
+            {isSubmitting ? 'Criando...' : 'Criar conta'}
           </Button>
         </div>
       </form>

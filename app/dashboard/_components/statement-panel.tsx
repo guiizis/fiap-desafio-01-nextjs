@@ -1,13 +1,19 @@
 ﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { EditStatementEntryModal } from './edit-statement-entry-modal';
 import type { StatementEntry } from '../_domain/transaction.types';
 import { formatStatementEntryTypeLabel } from '../_utils/transaction-label';
 import { formatCurrencyFromCents } from '@/app/lib/calc';
 import { useAuthSessionContext } from '@/app/context/auth-session-context';
+
+const loadEditStatementEntryModal = () => import('./edit-statement-entry-modal');
+
+const EditStatementEntryModal = dynamic(() =>
+  loadEditStatementEntryModal().then((module) => module.EditStatementEntryModal)
+);
 
 type StatementPanelProps = {
   title?: string;
@@ -65,7 +71,7 @@ export function StatementPanel({
       return;
     }
 
-    onDeleteStatementEntry(activeSelectedEntryId);
+    void onDeleteStatementEntry(activeSelectedEntryId);
     setEditingEntryId(null);
   };
 
@@ -93,6 +99,9 @@ export function StatementPanel({
                 className="h-12 w-12 !rounded-full p-0"
                 disabled={!areEntryActionsEnabled}
                 onClick={handleEditSelectedEntry}
+                onMouseEnter={loadEditStatementEntryModal}
+                onFocus={loadEditStatementEntryModal}
+                onTouchStart={loadEditStatementEntryModal}
               >
                 <Image
                   src="/icons/pencil-edit.svg"

@@ -1,4 +1,6 @@
 const { randomBytes, randomUUID, scrypt: scryptCallback, timingSafeEqual } = require('node:crypto');
+const { readFileSync, renameSync, writeFileSync } = require('node:fs');
+const { join } = require('node:path');
 const { promisify } = require('node:util');
 const express = require('express');
 const session = require('express-session');
@@ -7,6 +9,26 @@ const { rateLimit } = require('express-rate-limit');
 
 const scrypt = promisify(scryptCallback);
 const users = new Map();
+const databasePath = process.env.MCINTOSH_DB_PATH || join(__dirname, 'db.json');
+
+function persistStore() {
+  const temporaryPath = `${databasePath}.tmp`;
+  writeFileSync(temporaryPath, `${JSON.stringify({ users: [...users.values()] }, null, 2)}\n`);
+  renameSync(temporaryPath, databasePath);
+}
+
+function loadStore() {
+  try {
+    const database = JSON.parse(readFileSync(databasePath, 'utf8'));
+    users.clear();
+    for (const user of Array.isArray(database.users) ? database.users : []) {
+      users.set(user.id, user);
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    persistStore();
+  }
+}
 
 async function hashPassword(password) {
   const salt = randomBytes(16).toString('hex');
@@ -56,6 +78,7 @@ function validTransaction(body) {
 }
 
 function createApp() {
+  loadStore();
   const app = express();
   app.disable('x-powered-by');
   app.use(helmet());
@@ -108,6 +131,7 @@ function createApp() {
       transactions: [],
     };
     users.set(user.id, user);
+    persistStore();
     return res.status(201).json({ message: 'Usuário criado com sucesso.' });
   });
 
@@ -155,6 +179,7 @@ function createApp() {
     const transaction = { id: randomUUID(), ...req.body, amountInCents };
     req.authenticatedUser.transactions.unshift(transaction);
     req.authenticatedUser.accountBalanceInCents += amountInCents;
+    persistStore();
     return res.status(201).json({ transaction });
   });
 
@@ -175,6 +200,7 @@ function createApp() {
     }
     Object.assign(transaction, req.body, { amountInCents: nextAmount });
     req.authenticatedUser.accountBalanceInCents = nextBalance;
+    persistStore();
     return res.json({ transaction });
   });
 
@@ -183,6 +209,7 @@ function createApp() {
     if (index === -1) return res.status(404).json({ message: 'Transação não encontrada.' });
     const [transaction] = req.authenticatedUser.transactions.splice(index, 1);
     req.authenticatedUser.accountBalanceInCents -= transaction.amountInCents;
+    persistStore();
     return res.status(204).end();
   });
 
@@ -196,6 +223,7 @@ function createApp() {
 
 function resetStore() {
   users.clear();
+  persistStore();
 }
 
 module.exports = { createApp, resetStore };

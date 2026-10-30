@@ -7,8 +7,7 @@ import { useState } from 'react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { loginMockAccount } from '../../_services/auth-service';
-import { setAuthSession } from '@/app/lib/auth-session';
+import { loginAccount } from '../../_services/auth-service';
 
 type LoginFormLayout = 'page' | 'modal';
 
@@ -54,13 +53,9 @@ export function LoginForm({ layout = 'page' }: LoginFormProps) {
       password: String(formData.get('password') ?? ''),
     };
 
-    const result = await loginMockAccount(payload);
+    const result = await loginAccount(payload);
 
     if (result.ok) {
-      setAuthSession({
-        token: result.token,
-        user: result.user,
-      });
       setIsSubmitting(false);
       router.push('/dashboard/home');
       return;

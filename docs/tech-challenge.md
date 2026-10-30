@@ -134,18 +134,18 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Testes de domínio adicionados sem renderização ou DOM.
 - Suíte completa aprovada com cobertura global acima de 99%.
 
-### Épico 3 — estado global e reatividade concluídos; cache remoto pendente
+### Épico 3 — estado global, reatividade e cache remoto concluídos
 
 - Redux Toolkit e React-Redux adicionados seguindo o padrão oficial para App Router.
-- Store criado por instância do `DashboardStoreProvider`, sem singleton global compartilhado.
-- Provider limitado ao dashboard para não aumentar o JavaScript das rotas públicas.
-- Saldo e extrato migrados do `useReducer` para `accountSlice`.
-- Hidratação, criação, edição e exclusão modeladas como ações explícitas.
-- Componentes reagem às alterações por seletores tipados do React-Redux.
+- Store criado por instância do `AppStoreProvider`, sem singleton global compartilhado.
+- Provider posicionado na raiz porque home e dashboard compartilham a consulta de sessão.
+- RTK Query tornou-se a fonte única dos dados remotos de sessão, saldo e extrato.
+- Consultas simultâneas são deduplicadas e o cache permanece reutilizável por 60 segundos.
+- Criação, edição e exclusão invalidam a conta e disparam atualização automática.
 - Formulários, seleção de itens, menus e modais continuam como estado local.
-- Reducer manual anterior removido para evitar duas fontes de verdade.
-- RTK Query e cache remoto serão integrados junto aos endpoints de sessão e transações do Express no
-  Épico 4. Antes disso, não existe consulta remota de transações que justifique cache e invalidação.
+- Slice local e serviços de `fetch` de transações removidos para evitar duas fontes de verdade.
+- Logout limpa todo o cache remoto para não reter dados financeiros privados.
+- Comparativo antes/depois e evidências automatizadas registrados em `docs/cache-baseline.md`.
 
 ### Épico 4 — backend seguro em implementação
 
@@ -157,5 +157,24 @@ repositories, classes, injeção de dependência ou use cases sem necessidade re
 - Cadastro, login, logout e consulta de sessão implementados.
 - CRUD de transações protegido por sessão e autorização por usuário implementado.
 - Saldo recalculado no servidor e transferências sem saldo rejeitadas.
-- Armazenamento em memória mantido intencionalmente para o escopo acadêmico.
-- Integração do frontend e cache RTK Query ainda pendentes antes da conclusão do épico.
+- Usuários, hashes de senha e transações persistidos em `server/db.json` com escrita atômica.
+- Cadastro e login do frontend passaram a consumir o Express por `/backend/auth/*`.
+- A sessão do dashboard passou a ser validada pelo cookie `HttpOnly`, sem gravar token no
+  `sessionStorage`.
+- A implementação direta com `fetch` foi registrada como baseline antes da migração.
+- Consulta e mutações de transações agora usam RTK Query, com invalidação automática da conta.
+- Route Handlers `/api/mock`, token no `sessionStorage` e utilitários do mock antigo removidos para
+  manter o Express como única fonte de autenticação e transações.
+
+### Épico 5 — otimizações e medição final concluídos
+
+- Modais de edição de transação e de serviço em construção separados em chunks sob demanda com
+  `next/dynamic`.
+- Preload por intenção adicionado em `hover`, foco por teclado e toque.
+- Code splitting por rota e lazy loading de imagens mantidos sob responsabilidade das APIs nativas do
+  App Router e de `next/image`.
+- Seis auditorias finais executadas em build de produção, com três amostras para `/home` e três para
+  `/home/login`.
+- Comparativo por medianas e relatórios completos registrados em `docs/performance`.
+- Medição autenticada do dashboard permanece vinculada ao Épico 4B, quando o frontend passar a usar a
+  sessão por cookie do Express.

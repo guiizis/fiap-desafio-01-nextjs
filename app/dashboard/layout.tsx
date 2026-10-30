@@ -13,7 +13,9 @@ import {
 } from './_components/dashboard-sidebar-nav';
 import { StatementPanel } from './_components/statement-panel';
 import { ReactNode } from 'react';
-import { DashboardStoreProvider } from './_state/store-provider';
+import { logoutAccount } from '@/app/home/_services/auth-service';
+import { bankApi } from './_state/bank-api';
+import { useAppDispatch } from './_state/hooks';
 
 const sidebarItems: readonly DashboardSidebarItem[] = [
   { key: 'home', label: 'Início', link: '/dashboard' },
@@ -50,6 +52,8 @@ function formatCurrentDateLabel() {
 
 function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const { session, balanceInCents, statementEntries } = useAuthSessionContext();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<DashboardTabKey>('home');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const currentDateLabel = useMemo(() => formatCurrentDateLabel(), []);
@@ -86,9 +90,16 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const { name } = session.user;
   const userFirstName = getUserFirstName(name);
 
+  const handleLogout = async () => {
+    await logoutAccount();
+    dispatch(bankApi.util.resetApiState());
+    router.replace('/home/login');
+    router.refresh();
+  };
+
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-background">
-      <DashboardHeader userName={name} />
+      <DashboardHeader userName={name} onLogout={() => void handleLogout()} />
       <main className="flex-1">
         <div className="mx-auto w-full max-w-[688px] px-4 pb-10 pt-8 md:pb-10 md:pt-10 desktop:max-w-[1140px] desktop:px-0 desktop:pb-8 desktop:pt-4">
           <div className="grid gap-6 desktop:grid-cols-[142px_minmax(0,1fr)_240px] desktop:items-stretch desktop:gap-4">
@@ -142,10 +153,8 @@ function AuthGuard({ children }: { children: ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardStoreProvider>
-      <AuthSessionProvider>
-        <AuthGuard>{children}</AuthGuard>
-      </AuthSessionProvider>
-    </DashboardStoreProvider>
+    <AuthSessionProvider>
+      <AuthGuard>{children}</AuthGuard>
+    </AuthSessionProvider>
   );
 }

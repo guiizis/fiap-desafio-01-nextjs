@@ -1,58 +1,36 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { renderToString } from 'react-dom/server';
-import { useState } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  AuthSessionProvider,
-  useAuthSessionContext,
-  type AuthSessionStatus,
-} from './auth-session-context';
-import {
-  AUTH_SESSION_CHANGED_EVENT,
-  AUTH_SESSION_STORAGE_KEY,
-  type AuthSession,
-} from '../lib/auth-session';
-import { StatementEntryType, TransactionType } from '../dashboard/_domain/transaction.types';
-import { getTransactionDateRange } from '../dashboard/_domain/transaction-date-policy';
-import { DashboardStoreProvider } from '../dashboard/_state/store-provider';
+import { act, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TransactionType } from '../dashboard/_domain/transaction.types';
+import { AuthSessionProvider, useAuthSessionContext } from './auth-session-context';
 
+const mocks = vi.hoisted(() => ({
+  useAuthSession: vi.fn(),
+  useGetAccountQuery: vi.fn(),
+  createTrigger: vi.fn(),
+  editTrigger: vi.fn(),
+  deleteTrigger: vi.fn(),
+}));
+
+vi.mock('../dashboard/_hooks/use-auth-session', () => ({ useAuthSession: mocks.useAuthSession }));
+vi.mock('../dashboard/_state/bank-api', () => ({
+  useGetAccountQuery: mocks.useGetAccountQuery,
+  useCreateTransactionMutation: () => [mocks.createTrigger],
+  useEditTransactionMutation: () => [mocks.editTrigger],
+  useDeleteTransactionMutation: () => [mocks.deleteTrigger],
+}));
+
+const user = {
+  id: 'user-1',
+  name: 'Maria Silva',
+  email: 'maria@mail.com',
+  createdAt: '2026-10-29T10:00:00.000Z',
+  accountBalanceInCents: 8000,
+};
 type CapturedContext = ReturnType<typeof useAuthSessionContext>;
 
-const baseSession: AuthSession = {
-  token: 'token-123',
-  user: {
-    id: 'user-1',
-    name: 'Joana Silva',
-    email: 'joana@mcintoshbank.com.br',
-    createdAt: '2026-04-01T12:00:00.000Z',
-    accountBalanceInCents: 25000,
-    statementEntries: [
-      {
-        id: 'entry-1',
-        month: 'Abril',
-        type: StatementEntryType.DEPOSIT,
-        amountInCents: 12000,
-        date: '10/04/2026',
-      },
-      {
-        id: 'entry-2',
-        month: 'Abril',
-        type: StatementEntryType.TRANSFER,
-        amountInCents: -5000,
-        date: '11/04/2026',
-      },
-    ],
-  },
-};
-
-function storeSession(session: AuthSession | Record<string, unknown>) {
-  window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
-}
-
-function Consumer({ onValue }: { onValue: (value: CapturedContext) => void }) {
+function Consumer({ capture = vi.fn() }: { capture?: (value: CapturedContext) => void }) {
   const context = useAuthSessionContext();
-  onValue(context);
-
+  capture(context);
   return (
     <div>
       <span data-testid="status">{context.status}</span>
@@ -62,346 +40,130 @@ function Consumer({ onValue }: { onValue: (value: CapturedContext) => void }) {
   );
 }
 
-function renderProvider(onValue = vi.fn()) {
-  render(
-    <DashboardStoreProvider>
-      <AuthSessionProvider>
-        <Consumer onValue={onValue} />
-      </AuthSessionProvider>
-    </DashboardStoreProvider>
-  );
+const successfulMutation = () => ({ unwrap: vi.fn().mockResolvedValue(undefined) });
 
-  return onValue;
-}
-
-function RerenderingProvider({ onValue }: { onValue: (value: CapturedContext) => void }) {
-  const [renderCount, setRenderCount] = useState(0);
-
-  return (
-    <div>
-      <button type="button" onClick={() => setRenderCount((current) => current + 1)}>
-        Renderizar novamente {renderCount}
-      </button>
-      <DashboardStoreProvider>
-        <AuthSessionProvider>
-          <Consumer onValue={onValue} />
-        </AuthSessionProvider>
-      </DashboardStoreProvider>
-    </div>
-  );
-}
-
-describe('AuthSessionProvider', () => {
+describe('AuthSessionProvider com RTK Query', () => {
   beforeEach(() => {
-    window.sessionStorage.clear();
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('entry-random-id');
+    vi.clearAllMocks();
+    mocks.useGetAccountQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        balanceInCents: 8000,
+        transactions: [
+          { id: '1', type: 'deposit', amountInCents: 10000, date: '2026-10-28' },
+          { id: '2', type: 'transfer', amountInCents: -2000, date: 'data-inválida' },
+        ],
+      },
+    });
+    mocks.createTrigger.mockReturnValue(successfulMutation());
+    mocks.editTrigger.mockReturnValue(successfulMutation());
+    mocks.deleteTrigger.mockReturnValue(successfulMutation());
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-    window.sessionStorage.clear();
-  });
-
-  it('expoe estado unauthenticated quando nao existe sessao', () => {
-    renderProvider();
-
-    expect(screen.getByTestId('status')).toHaveTextContent('unauthenticated');
-    expect(screen.getByTestId('balance')).toHaveTextContent('0');
-    expect(screen.getByTestId('entries')).toHaveTextContent('0');
-  });
-
-  it('expoe loading durante renderizacao no servidor', () => {
-    const html = renderToString(
-      <DashboardStoreProvider>
-        <AuthSessionProvider>
-          <Consumer onValue={vi.fn()} />
-        </AuthSessionProvider>
-      </DashboardStoreProvider>
+  it('pula a consulta da conta enquanto não existe sessão autenticada', () => {
+    mocks.useAuthSession.mockReturnValue({ session: null, status: 'unauthenticated' });
+    render(
+      <AuthSessionProvider>
+        <Consumer />
+      </AuthSessionProvider>
     );
-
-    expect(html).toContain('loading');
-  });
-
-  it('hidrata sessao salva e atualiza extrato com mutacoes validas', () => {
-    storeSession(baseSession);
-    const onValue = renderProvider();
-
-    let context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    const validDate = getTransactionDateRange().minDate;
-
-    expect(context.status satisfies AuthSessionStatus).toBe('authenticated');
-    expect(context.session?.user.name).toBe('Joana Silva');
-    expect(context.balanceInCents).toBe(25000);
-    expect(context.statementEntries.length).toBeGreaterThanOrEqual(2);
-
-    act(() => {
-      expect(
-        context.onSubmitTransaction({
-          type: TransactionType.DEPOSIT,
-          amountInCents: 3000,
-          transactionDate: validDate,
-        })
-      ).toEqual({ ok: true });
-    });
-
-    context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.balanceInCents).toBe(28000);
-    expect(context.statementEntries[0]).toMatchObject({
-      id: 'entry-random-id',
-      type: StatementEntryType.DEPOSIT,
-      amountInCents: 3000,
-    });
-
-    act(() => {
-      expect(
-        context.onSubmitTransaction({
-          type: TransactionType.TRANSFER,
-          amountInCents: 1000,
-          transactionDate: validDate,
-        })
-      ).toEqual({ ok: true });
-    });
-
-    context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.statementEntries[0]).toMatchObject({
-      type: StatementEntryType.TRANSFER,
-      amountInCents: -1000,
-    });
-
-    act(() => {
-      context.onDeleteStatementEntry('entry-2');
-    });
-
-    context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.balanceInCents).toBe(32000);
-    expect(context.statementEntries.some((entry) => entry.id === 'entry-2')).toBe(false);
-
-    act(() => {
-      expect(
-        context.onEditStatementEntry({
-          entryId: 'entry-1',
-          type: TransactionType.TRANSFER,
-          amountInCents: 4000,
-          transactionDate: validDate,
-        })
-      ).toEqual({ ok: true });
-    });
-
-    context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.statementEntries.find((entry) => entry.id === 'entry-1')).toMatchObject({
-      type: StatementEntryType.TRANSFER,
-      amountInCents: -4000,
-    });
-
-    act(() => {
-      expect(
-        context.onEditStatementEntry({
-          entryId: 'entry-1',
-          type: TransactionType.DEPOSIT,
-          amountInCents: 4000,
-          transactionDate: validDate,
-        })
-      ).toEqual({ ok: true });
-    });
-
-    context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.statementEntries.find((entry) => entry.id === 'entry-1')).toMatchObject({
-      type: StatementEntryType.DEPOSIT,
-      amountInCents: 4000,
-    });
-  });
-
-  it('hidrata sessao sem lancamentos usando lista vazia como fallback', () => {
-    const sessionWithoutEntries = {
-      ...baseSession,
-      user: {
-        ...baseSession.user,
-        statementEntries: undefined,
-      },
-    };
-    storeSession(sessionWithoutEntries);
-
-    renderProvider();
-
-    expect(screen.getByTestId('status')).toHaveTextContent('authenticated');
-    expect(screen.getByTestId('entries')).toHaveTextContent('8');
-  });
-
-  it('cria lancamento com fallback quando randomUUID nao esta disponivel', () => {
-    storeSession(baseSession);
-    vi.spyOn(Date, 'now').mockReturnValue(123456);
-    vi.spyOn(Math, 'random').mockReturnValue(0.5);
-    Object.defineProperty(crypto, 'randomUUID', {
-      value: undefined,
-      configurable: true,
-    });
-
-    const onValue = renderProvider();
-    const context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-
-    act(() => {
-      expect(
-        context.onSubmitTransaction({
-          type: TransactionType.DEPOSIT,
-          amountInCents: 1000,
-          transactionDate: getTransactionDateRange().minDate,
-        })
-      ).toEqual({ ok: true });
-    });
-
-    const updatedContext = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(updatedContext.statementEntries[0].id).toContain('entry-123456-');
-  });
-
-  it('retorna mensagens de erro para mutacoes invalidas', () => {
-    storeSession(baseSession);
-    const onValue = renderProvider();
-    const context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    const validDate = getTransactionDateRange().minDate;
-
-    expect(
-      context.onSubmitTransaction({
-        type: TransactionType.TRANSFER,
-        amountInCents: 999999,
-        transactionDate: validDate,
-      })
-    ).toMatchObject({ ok: false, message: expect.stringContaining('Saldo insuficiente') });
-
-    expect(
-      context.onSubmitTransaction({
-        type: TransactionType.DEPOSIT,
-        amountInCents: 100,
-        transactionDate: '1900-01-01',
-      })
-    ).toMatchObject({ ok: false, message: expect.stringContaining('Data') });
-
-    expect(
-      context.onEditStatementEntry({
-        entryId: 'inexistente',
-        type: TransactionType.DEPOSIT,
-        amountInCents: 100,
-        transactionDate: validDate,
-      })
-    ).toMatchObject({ ok: false, message: expect.stringContaining('não encontrado') });
-
-    expect(
-      context.onEditStatementEntry({
-        entryId: 'entry-1',
-        type: TransactionType.DEPOSIT,
-        amountInCents: 100,
-        transactionDate: '1900-01-01',
-      })
-    ).toMatchObject({ ok: false, message: expect.stringContaining('Data') });
-
-    expect(
-      context.onEditStatementEntry({
-        entryId: 'entry-1',
-        type: TransactionType.TRANSFER,
-        amountInCents: 999999,
-        transactionDate: validDate,
-      })
-    ).toMatchObject({ ok: false, message: expect.stringContaining('Saldo insuficiente') });
-  });
-
-  it('reage ao evento de mudanca da sessao', () => {
-    const onValue = renderProvider();
-
     expect(screen.getByTestId('status')).toHaveTextContent('unauthenticated');
-
-    act(() => {
-      storeSession(baseSession);
-      window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
-    });
-
-    const context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.status).toBe('authenticated');
-    expect(screen.getByTestId('balance')).toHaveTextContent('25000');
+    expect(mocks.useGetAccountQuery).toHaveBeenCalledWith(undefined, { skip: true });
   });
 
-  it('reage apenas a storage events da sessao autenticada', () => {
-    const onValue = renderProvider();
-    const initialCallCount = onValue.mock.calls.length;
-
-    act(() => {
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: 'outra-chave',
-          storageArea: window.sessionStorage,
-        })
-      );
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: AUTH_SESSION_STORAGE_KEY,
-          storageArea: window.localStorage,
-        })
-      );
-    });
-
-    expect(onValue).toHaveBeenCalledTimes(initialCallCount);
-
-    act(() => {
-      storeSession(baseSession);
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: AUTH_SESSION_STORAGE_KEY,
-          storageArea: window.sessionStorage,
-        })
-      );
-    });
-
-    const context = onValue.mock.calls.at(-1)?.[0] as CapturedContext;
-    expect(context.status).toBe('authenticated');
-  });
-
-  it('ignora hidratacao repetida do mesmo snapshot', () => {
-    storeSession(baseSession);
-    const onValue = vi.fn();
-    render(<RerenderingProvider onValue={onValue} />);
-    const callCountAfterHydration = onValue.mock.calls.length;
-
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: /renderizar novamente/i }));
-    });
-
-    expect(onValue.mock.calls.length).toBeGreaterThan(callCountAfterHydration);
+  it('expõe saldo e converte as transações armazenadas no cache', () => {
+    mocks.useAuthSession.mockReturnValue({ session: { user }, status: 'authenticated' });
+    render(
+      <AuthSessionProvider>
+        <Consumer />
+      </AuthSessionProvider>
+    );
     expect(screen.getByTestId('status')).toHaveTextContent('authenticated');
+    expect(screen.getByTestId('balance')).toHaveTextContent('8000');
+    expect(screen.getByTestId('entries')).toHaveTextContent('2');
   });
 
-  it('normaliza sessao persistida quando snapshot esta em formato legado', () => {
-    storeSession({
-      token: 'token-legado',
-      user: {
-        id: 'user-2',
-        name: 'Maria Lima',
-        email: 'maria@mcintoshbank.com.br',
-        createdAt: '2026-04-01T12:00:00.000Z',
-        accountBalance: 'R$ 1.234,56',
-        statementEntries: [],
-      },
+  it('mantém loading durante a primeira consulta da conta', () => {
+    mocks.useAuthSession.mockReturnValue({ session: { user }, status: 'authenticated' });
+    mocks.useGetAccountQuery.mockReturnValue({ isLoading: true });
+    render(
+      <AuthSessionProvider>
+        <Consumer />
+      </AuthSessionProvider>
+    );
+    expect(screen.getByTestId('status')).toHaveTextContent('loading');
+  });
+
+  it('dispara as três mutações pelo RTK Query', async () => {
+    mocks.useAuthSession.mockReturnValue({ session: { user }, status: 'authenticated' });
+    const capture = vi.fn();
+    render(
+      <AuthSessionProvider>
+        <Consumer capture={capture} />
+      </AuthSessionProvider>
+    );
+    const context = capture.mock.calls.at(-1)?.[0] as CapturedContext;
+    const transaction = {
+      type: TransactionType.DEPOSIT,
+      amountInCents: 1000,
+      transactionDate: '2026-10-29',
+    };
+    await act(async () => {
+      await expect(context.onSubmitTransaction(transaction)).resolves.toEqual({ ok: true });
+      await expect(context.onEditStatementEntry({ ...transaction, entryId: '1' })).resolves.toEqual(
+        { ok: true }
+      );
+      await expect(context.onDeleteStatementEntry('1')).resolves.toEqual({ ok: true });
     });
-
-    renderProvider();
-
-    const stored = JSON.parse(
-      window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY) ?? '{}'
-    ) as AuthSession;
-    expect(stored.user.accountBalanceInCents).toBe(123456);
-    expect(stored.user.statementEntries.length).toBeGreaterThan(0);
+    expect(mocks.createTrigger).toHaveBeenCalledWith(transaction);
+    expect(mocks.editTrigger).toHaveBeenCalledWith({ ...transaction, entryId: '1' });
+    expect(mocks.deleteTrigger).toHaveBeenCalledWith('1');
   });
-});
 
-describe('useAuthSessionContext', () => {
-  it('falha quando usado fora do AuthSessionProvider', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  it('preserva a mensagem retornada por uma mutação rejeitada', async () => {
+    mocks.useAuthSession.mockReturnValue({ session: { user }, status: 'authenticated' });
+    mocks.createTrigger.mockReturnValue({
+      unwrap: vi.fn().mockRejectedValue({ data: { message: 'Saldo insuficiente.' } }),
+    });
+    const capture = vi.fn();
+    render(
+      <AuthSessionProvider>
+        <Consumer capture={capture} />
+      </AuthSessionProvider>
+    );
+    const context = capture.mock.calls.at(-1)?.[0] as CapturedContext;
+    await expect(
+      context.onSubmitTransaction({
+        type: TransactionType.TRANSFER,
+        amountInCents: 999999,
+        transactionDate: '2026-10-29',
+      })
+    ).resolves.toEqual({ ok: false, message: 'Saldo insuficiente.' });
+  });
 
-    function InvalidConsumer() {
-      useAuthSessionContext();
-      return null;
-    }
+  it('usa mensagem segura quando a falha não traz resposta da API', async () => {
+    mocks.useAuthSession.mockReturnValue({ session: { user }, status: 'authenticated' });
+    mocks.deleteTrigger.mockReturnValue({
+      unwrap: vi.fn().mockRejectedValue(new Error('offline')),
+    });
+    const capture = vi.fn();
+    render(
+      <AuthSessionProvider>
+        <Consumer capture={capture} />
+      </AuthSessionProvider>
+    );
+    const context = capture.mock.calls.at(-1)?.[0] as CapturedContext;
+    await expect(context.onDeleteStatementEntry('1')).resolves.toEqual({
+      ok: false,
+      message: 'Não foi possível concluir a operação.',
+    });
+  });
 
-    expect(() => render(<InvalidConsumer />)).toThrow(
+  it('falha claramente quando o hook é usado fora do provider', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(() => render(<Consumer />)).toThrow(
       'useAuthSessionContext must be used within an AuthSessionProvider'
     );
-    consoleErrorSpy.mockRestore();
+    consoleError.mockRestore();
   });
 });

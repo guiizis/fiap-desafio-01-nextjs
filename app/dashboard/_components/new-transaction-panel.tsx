@@ -49,7 +49,7 @@ export function NewTransactionPanel() {
   const isDateValid = isTransactionDateWithinRange(transactionDate, calendarRange);
   const isFormValid = transactionType !== '' && isAmountValid && isDateValid;
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
     setFeedback(null);
 
@@ -68,7 +68,7 @@ export function NewTransactionPanel() {
       return;
     }
 
-    const result = onSubmitTransaction({
+    const result = await onSubmitTransaction({
       type: transactionType,
       amountInCents,
       transactionDate,

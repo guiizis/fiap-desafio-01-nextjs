@@ -1,19 +1,9 @@
-import { createEvent, fireEvent, render, screen } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NewTransactionPanel } from './new-transaction-panel';
-import {
-  TransactionType,
-  type TransactionResult as NewTransactionResult,
-} from '../_domain/transaction.types';
+import { TransactionType } from '../_domain/transaction.types';
 
-const onSubmitTransactionMock =
-  vi.fn<
-    (payload: {
-      type: TransactionType;
-      amountInCents: number;
-      transactionDate: string;
-    }) => NewTransactionResult
-  >();
+const onSubmitTransactionMock = vi.fn();
 
 vi.mock('@/app/context/auth-session-context', () => ({
   useAuthSessionContext: () => ({
@@ -138,7 +128,7 @@ describe('NewTransactionPanel', () => {
     expect(typeSelect).toHaveValue(TransactionType.DEPOSIT);
   });
 
-  it('envia o valor em centavos e reseta o formulario no submit valido', () => {
+  it('envia o valor em centavos e reseta o formulario no submit valido', async () => {
     render(<NewTransactionPanel />);
 
     const submitButton = screen.getByRole('button', { name: 'Concluir transa\u00e7\u00e3o' });
@@ -156,11 +146,11 @@ describe('NewTransactionPanel', () => {
       amountInCents: 123456,
       transactionDate: '2026-04-19',
     });
-    expect(typeSelect).toHaveValue('');
+    await waitFor(() => expect(typeSelect).toHaveValue(''));
     expect(amountInput).toHaveValue('00,00');
   });
 
-  it('mostra alerta de erro e mantem os dados quando transacao e bloqueada', () => {
+  it('mostra alerta de erro e mantem os dados quando transacao e bloqueada', async () => {
     onSubmitTransactionMock.mockReturnValue({
       ok: false,
       message: 'Saldo insuficiente para concluir a transfer\u00eancia.',
@@ -176,7 +166,7 @@ describe('NewTransactionPanel', () => {
     fireEvent.change(amountInput, { target: { value: '300000' } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByRole('alert')).toHaveTextContent(
+    expect(await screen.findByRole('alert')).toHaveTextContent(
       'Saldo insuficiente para concluir a transfer\u00eancia.'
     );
     expect(typeSelect).toHaveValue(TransactionType.TRANSFER);
