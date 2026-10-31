@@ -24,12 +24,32 @@ describe('bankApi', () => {
       'fetch',
       vi.fn().mockImplementation((request: Request) => {
         if (request.url.endsWith('/auth/session')) return Promise.resolve(jsonResponse({ user }));
+        if (request.url.endsWith('/auth/login')) {
+          return Promise.resolve(jsonResponse({ message: 'Login realizado com sucesso.', user }));
+        }
         return Promise.resolve(jsonResponse({ balanceInCents: 8000, transactions: [] }));
       })
     );
   });
 
   afterEach(() => vi.unstubAllGlobals());
+
+  it('autentica usando a mesma camada de dados da sessão', async () => {
+    const store = makeStore();
+    const result = await store
+      .dispatch(
+        bankApi.endpoints.login.initiate({
+          email: 'maria@mail.com',
+          password: 'senha-segura',
+        })
+      )
+      .unwrap();
+
+    expect(result).toEqual({ message: 'Login realizado com sucesso.', user });
+    const request = vi.mocked(fetch).mock.calls[0]?.[0] as Request;
+    expect(request.url).toMatch(/\/backend\/auth\/login$/);
+    expect(request.method).toBe('POST');
+  });
 
   it('deduplica consultas simultâneas da mesma sessão', async () => {
     const store = makeStore();

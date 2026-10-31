@@ -1,13 +1,22 @@
 import { createRequire } from 'node:module';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+const testDirectory = mkdtempSync(join(tmpdir(), 'mcintosh-bank-tests-'));
+process.env.MCINTOSH_DB_PATH = join(testDirectory, 'db.json');
 const require = createRequire(import.meta.url);
 const { createApp, resetStore } = require('./app');
 
 describe('Express API', () => {
   beforeEach(() => resetStore());
   afterEach(() => resetStore());
+  afterAll(() => {
+    delete process.env.MCINTOSH_DB_PATH;
+    rmSync(testDirectory, { recursive: true, force: true });
+  });
 
   it('protege rotas privadas sem sessao', async () => {
     const response = await request(createApp()).get('/transactions');
@@ -58,6 +67,13 @@ describe('Express API', () => {
   it('valida dados de cadastro e rotas desconhecidas', async () => {
     const app = createApp();
     expect((await request(app).post('/auth/register').send({})).status).toBe(400);
+    const shortPassword = await request(app)
+      .post('/auth/register')
+      .send({ name: 'Ana Silva', email: 'ana@mail.com', password: '123456' });
+    expect(shortPassword.status).toBe(400);
+    expect(shortPassword.body).toEqual({
+      message: 'A senha deve ter entre 8 e 128 caracteres.',
+    });
     expect(
       (
         await request(app)

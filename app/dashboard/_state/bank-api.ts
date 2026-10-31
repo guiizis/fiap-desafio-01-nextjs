@@ -21,6 +21,15 @@ type SessionResponse = {
   user: AuthenticatedUser;
 };
 
+type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+type LoginResponse = SessionResponse & {
+  message: string;
+};
+
 /* v8 ignore next -- fallback usado apenas durante a geração do bundle do servidor */
 const apiOrigin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
 
@@ -31,6 +40,13 @@ export const bankApi = createApi({
   }),
   tagTypes: ['Session', 'Account'],
   endpoints: (builder) => ({
+    login: builder.mutation<LoginResponse, LoginPayload>({
+      query: (body) => ({
+        url: '/auth/login',
+        method: 'POST',
+        body,
+      }),
+    }),
     getSession: builder.query<SessionResponse, void>({
       query: () => '/auth/session',
       providesTags: ['Session'],
@@ -76,6 +92,7 @@ export const bankApi = createApi({
 });
 
 export const {
+  useLoginMutation,
   useGetSessionQuery,
   useGetAccountQuery,
   useCreateTransactionMutation,

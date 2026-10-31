@@ -23,7 +23,8 @@ describe('input validators', () => {
     expect(getInputValidationConstraints('name')).toMatchObject({ required: true, minLength: 3 });
     expect(getInputValidationConstraints('password')).toMatchObject({
       required: true,
-      minLength: 6,
+      minLength: 8,
+      maxLength: 128,
     });
   });
 
@@ -42,7 +43,9 @@ describe('input validators', () => {
     expect(validateInputValue('name', 'Maria Silva')).toBeNull();
 
     expect(validateInputValue('password', '')).toBe('Campo obrigatório.');
-    expect(validateInputValue('password', '123')).toBe('A senha deve ter no mínimo 6 caracteres.');
-    expect(validateInputValue('password', '123456')).toBeNull();
+    expect(validateInputValue('password', '123456')).toBe(
+      'A senha deve ter entre 8 e 128 caracteres.'
+    );
+    expect(validateInputValue('password', '12345678')).toBeNull();
   });
 });
