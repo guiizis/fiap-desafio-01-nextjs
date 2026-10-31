@@ -111,7 +111,7 @@ describe('Input', () => {
 
     const input = screen.getByLabelText('Senha');
     fireEvent.blur(input, { target: { value: '123' } });
-    fireEvent.change(input, { target: { value: '123456' } });
+    fireEvent.change(input, { target: { value: '12345678' } });
     fireEvent.invalid(input, { target: { value: '' } });
 
     expect(onBlur).toHaveBeenCalledTimes(1);

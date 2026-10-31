@@ -1,6 +1,5 @@
 type ServiceResponse = {
   message?: unknown;
-  user?: unknown;
 };
 
 type ServiceResult = {
@@ -22,25 +21,7 @@ type RegisterAccountPayload = {
   password: string;
 };
 
-type LoginAccountPayload = {
-  email: string;
-  password: string;
-};
-
-function isAuthenticatedUser(value: unknown): value is AuthenticatedUser {
-  if (!value || typeof value !== 'object') return false;
-  const user = value as Record<string, unknown>;
-
-  return (
-    typeof user.id === 'string' &&
-    typeof user.name === 'string' &&
-    typeof user.email === 'string' &&
-    typeof user.createdAt === 'string' &&
-    typeof user.accountBalanceInCents === 'number'
-  );
-}
-
-async function postJson(path: string, payload?: RegisterAccountPayload | LoginAccountPayload) {
+async function postJson(path: string, payload?: RegisterAccountPayload) {
   try {
     const response = await fetch(path, {
       method: 'POST',
@@ -73,35 +54,10 @@ export async function registerAccount(payload: RegisterAccountPayload): Promise<
   return { ok: result.response?.ok === true, message: result.message };
 }
 
-export async function loginAccount(payload: LoginAccountPayload) {
-  const result = await postJson('/backend/auth/login', payload);
-
-  if (result.response?.ok && isAuthenticatedUser(result.body?.user)) {
-    return { ok: true as const, message: result.message, user: result.body.user };
-  }
-
-  return { ok: false as const, message: result.message };
-}
-
 export async function logoutAccount(): Promise<ServiceResult> {
   const result = await postJson('/backend/auth/logout');
   return {
     ok: result.response?.ok === true,
     message: result.response?.ok ? 'Sessão encerrada.' : result.message,
   };
-}
-
-export async function getAuthSession() {
-  try {
-    const response = await fetch('/backend/auth/session', { cache: 'no-store' });
-    const body = (await response.json().catch(() => null)) as ServiceResponse | null;
-
-    if (response.ok && isAuthenticatedUser(body?.user)) {
-      return { ok: true as const, user: body.user };
-    }
-
-    return { ok: false as const };
-  } catch {
-    return { ok: false as const };
-  }
 }

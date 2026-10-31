@@ -7,7 +7,8 @@ import { useState } from 'react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { loginAccount } from '../../_services/auth-service';
+import { bankApi, useLoginMutation } from '@/app/dashboard/_state/bank-api';
+import { useAppDispatch } from '@/app/dashboard/_state/hooks';
 
 type LoginFormLayout = 'page' | 'modal';
 
@@ -17,6 +18,8 @@ type LoginFormProps = {
 
 export function LoginForm({ layout = 'page' }: LoginFormProps) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [login] = useLoginMutation();
   const isModal = layout === 'modal';
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,19 +56,20 @@ export function LoginForm({ layout = 'page' }: LoginFormProps) {
       password: String(formData.get('password') ?? ''),
     };
 
-    const result = await loginAccount(payload);
-
-    if (result.ok) {
-      setIsSubmitting(false);
+    try {
+      const result = await login(payload).unwrap();
+      await dispatch(bankApi.util.upsertQueryData('getSession', undefined, { user: result.user }));
       router.push('/dashboard/home');
-      return;
+    } catch (error) {
+      const data = typeof error === 'object' && error && 'data' in error ? error.data : null;
+      const message =
+        typeof data === 'object' && data && 'message' in data && typeof data.message === 'string'
+          ? data.message
+          : 'Não foi possível realizar o login. Tente novamente.';
+      setFeedback({ variant: 'error', message });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setFeedback({
-      variant: 'error',
-      message: result.message,
-    });
-    setIsSubmitting(false);
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {

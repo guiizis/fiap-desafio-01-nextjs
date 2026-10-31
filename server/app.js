@@ -42,7 +42,7 @@ function protectUnsafeRequest(allowedOrigins) {
 }
 
 function persistStore() {
-  const temporaryPath = `${databasePath}.tmp`;
+  const temporaryPath = `${databasePath}.${process.pid}.${randomUUID()}.tmp`;
   writeFileSync(temporaryPath, `${JSON.stringify({ users: [...users.values()] }, null, 2)}\n`);
   renameSync(temporaryPath, databasePath);
 }
@@ -143,17 +143,14 @@ function createApp() {
   app.post('/auth/register', async (req, res) => {
     const { name, email, password } = req.body || {};
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-    if (
-      typeof name !== 'string' ||
-      name.trim().length < 3 ||
-      name.trim().length > 100 ||
-      !/^\S+@\S+\.\S+$/.test(normalizedEmail) ||
-      normalizedEmail.length > 254 ||
-      typeof password !== 'string' ||
-      password.length < 8 ||
-      password.length > 128
-    ) {
-      return res.status(400).json({ message: 'Dados de cadastro inválidos.' });
+    if (typeof name !== 'string' || name.trim().length < 3 || name.trim().length > 100) {
+      return res.status(400).json({ message: 'Informe um nome entre 3 e 100 caracteres.' });
+    }
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail) || normalizedEmail.length > 254) {
+      return res.status(400).json({ message: 'Informe um email válido.' });
+    }
+    if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
+      return res.status(400).json({ message: 'A senha deve ter entre 8 e 128 caracteres.' });
     }
     if ([...users.values()].some((user) => user.email === normalizedEmail)) {
       return res.status(409).json({ message: 'Não foi possível criar a conta com esses dados.' });

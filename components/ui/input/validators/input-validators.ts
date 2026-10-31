@@ -25,7 +25,7 @@ const validationRules: Record<InputValidationKind, ValidationRule> = {
     validate: () => null,
   },
   name: {
-    constraints: { required: true, minLength: 3 },
+    constraints: { required: true, minLength: 3, maxLength: 100 },
     validate: (value) => {
       const requiredError = requiredRule(value);
       if (requiredError) {
@@ -33,7 +33,7 @@ const validationRules: Record<InputValidationKind, ValidationRule> = {
       }
 
       const normalized = value.trim();
-      if (normalized.length < 3 || !NAME_REGEX.test(normalized)) {
+      if (normalized.length < 3 || normalized.length > 100 || !NAME_REGEX.test(normalized)) {
         return 'Digite seu nome completo.';
       }
 
@@ -41,25 +41,30 @@ const validationRules: Record<InputValidationKind, ValidationRule> = {
     },
   },
   email: {
-    constraints: { required: true },
+    constraints: { required: true, maxLength: 254 },
     validate: (value) => {
       const requiredError = requiredRule(value);
       if (requiredError) {
         return requiredError;
       }
 
-      return EMAIL_REGEX.test(value.trim()) ? null : 'Dado incorreto. Revise e digite novamente.';
+      const normalized = value.trim();
+      return normalized.length <= 254 && EMAIL_REGEX.test(normalized)
+        ? null
+        : 'Dado incorreto. Revise e digite novamente.';
     },
   },
   password: {
-    constraints: { required: true, minLength: 6 },
+    constraints: { required: true, minLength: 8, maxLength: 128 },
     validate: (value) => {
       const requiredError = requiredRule(value);
       if (requiredError) {
         return requiredError;
       }
 
-      return value.trim().length >= 6 ? null : 'A senha deve ter no mínimo 6 caracteres.';
+      return value.length >= 8 && value.length <= 128
+        ? null
+        : 'A senha deve ter entre 8 e 128 caracteres.';
     },
   },
 };

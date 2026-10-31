@@ -18,7 +18,7 @@ describe('RegisterForm', () => {
   const fillValidForm = () => {
     fireEvent.input(screen.getByLabelText('Nome'), { target: { value: 'Maria Silva' } });
     fireEvent.input(screen.getByLabelText('Email'), { target: { value: 'maria@mail.com' } });
-    fireEvent.input(screen.getByLabelText('Senha'), { target: { value: '123456' } });
+    fireEvent.input(screen.getByLabelText('Senha'), { target: { value: '12345678' } });
     fireEvent.click(screen.getByRole('checkbox'));
   };
 
@@ -87,7 +87,7 @@ describe('RegisterForm', () => {
 
     fireEvent.input(screen.getByLabelText('Nome'), { target: { value: 'Maria Silva' } });
     fireEvent.input(screen.getByLabelText('Email'), { target: { value: 'maria@mail.com' } });
-    fireEvent.input(screen.getByLabelText('Senha'), { target: { value: '123456' } });
+    fireEvent.input(screen.getByLabelText('Senha'), { target: { value: '12345678' } });
 
     expect(submitButton).toBeDisabled();
 
@@ -96,6 +96,20 @@ describe('RegisterForm', () => {
 
     fireEvent.input(screen.getByLabelText('Email'), { target: { value: 'email-invalido' } });
     expect(submitButton).toBeDisabled();
+  });
+
+  it('explica que uma senha de seis caracteres ainda é inválida', () => {
+    render(<RegisterForm layout="modal" />);
+
+    fireEvent.input(screen.getByLabelText('Nome'), { target: { value: 'Maria Silva' } });
+    fireEvent.input(screen.getByLabelText('Email'), { target: { value: 'maria@mail.com' } });
+    const password = screen.getByLabelText('Senha');
+    fireEvent.input(password, { target: { value: '123456' } });
+    fireEvent.blur(password);
+    fireEvent.click(screen.getByRole('checkbox'));
+
+    expect(screen.getByText('A senha deve ter entre 8 e 128 caracteres.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /criar conta/i })).toBeDisabled();
   });
 
   it('envia register e mostra feedback de sucesso da API', async () => {
@@ -114,7 +128,7 @@ describe('RegisterForm', () => {
       expect(registerMockAccountMock).toHaveBeenCalledWith({
         name: 'Maria Silva',
         email: 'maria@mail.com',
-        password: '123456',
+        password: '12345678',
       });
     });
 
@@ -146,7 +160,7 @@ describe('RegisterForm', () => {
 
     fireEvent.input(screen.getByLabelText('Nome'), { target: { value: 'Maria Silva' } });
     fireEvent.input(screen.getByLabelText('Email'), { target: { value: 'email-invalido' } });
-    fireEvent.input(screen.getByLabelText('Senha'), { target: { value: '123456' } });
+    fireEvent.input(screen.getByLabelText('Senha'), { target: { value: '12345678' } });
     fireEvent.click(screen.getByRole('checkbox'));
 
     let form = screen.getByRole('button', { name: /criar conta/i }).closest('form');
@@ -254,7 +268,7 @@ describe('RegisterForm', () => {
       .spyOn(FormData.prototype, 'get')
       .mockReturnValueOnce('Maria Silva')
       .mockReturnValueOnce('maria@mail.com')
-      .mockReturnValueOnce('123456')
+      .mockReturnValueOnce('12345678')
       .mockReturnValueOnce(null)
       .mockReturnValueOnce(null)
       .mockReturnValueOnce(null);
